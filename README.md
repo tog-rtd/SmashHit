@@ -1,4 +1,4 @@
-# SmashHIt
+# SmashHit
 Working repository for SmashHit project privacy and security technologies
 
 The SmashHit project received funding under the European Union's Horizon 2020
