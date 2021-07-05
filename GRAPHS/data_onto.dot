@@ -1,0 +1,47 @@
+strict digraph "data_onto" {
+  node [shape=none]
+  APC [label="",width=0,height=0];
+  node [shape=ellipse]
+
+
+  External -> PersonalDataCategory;
+  Identifying -> External;
+  Address -> Identifying;
+  PhysicalAddress -> Address;
+  ConventionalStreetAddress -> PhysicalAddress;
+  StreetAddress -> Address;
+  Name -> Identifying;
+  OfficialID -> Identifying;
+  UID -> Identifying;
+  Username -> Identifying;
+  BirthDate -> Identifying;
+  Financial -> PersonalDataCategory;
+  Ownership -> Financial;
+  Internal -> PersonalDataCategory;
+  Authenticating -> Internal;
+  Password -> Authenticating;
+  Preference -> Internal;
+  PrivacyPreference -> Preference;
+  Tracking -> PersonalDataCategory;
+  Contact -> Tracking;
+  TelephoneNumber -> Contact;
+  EmailAddress -> Contact;
+  Location -> Tracking;
+  { rank=same; }
+  { rank=same; }
+  { rank=same; }
+  subgraph user_dag {
+    subgraph ua_nodes {
+      
+    }
+  }
+  subgraph object_dag {
+    subgraph oa_nodes {
+      PersonalDataCategory; External; Identifying; Address; PhysicalAddress; ConventionalStreetAddress; StreetAddress; Name; OfficialID; UID; Username; BirthDate; Financial; Ownership; Internal; Authenticating; Password; Preference; PrivacyPreference; Tracking; Contact; TelephoneNumber; EmailAddress; Location; 
+    }
+  }
+  subgraph pc_nodes {
+  }
+  node [shape=none]
+  "<Object Attributes>"
+}

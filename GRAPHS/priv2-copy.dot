@@ -1,0 +1,57 @@
+strict digraph "priv2" {
+  node [shape=none]
+  APC [label="",width=0,height=0];
+  "<Users>"->"<User Attributes>" [arrowhead=none,style=invis];
+  "<User Attributes>"->APC [arrowhead=none,style=invis];
+  APC->"<Policy Classes>" [arrowhead=none,style=invis];
+  node [shape=ellipse];
+  s1 [peripheries=2];
+
+  s1 -> dc1;
+  priv_pol2 -> PM;
+  ds1 -> data_subjects;
+  data_subjects -> priv_pol2;
+  di1 -> ds1;
+  di2 -> ds1;
+  di3 -> ds1;
+  dc1 -> data_controllers;
+  data_controllers -> priv_pol2;
+  dpo1 -> all_operations;
+  dpo11 -> dpo1;
+  dpo12 -> dpo1;
+  dpo2 -> all_operations;
+  dpo21 -> dpo2;
+  dpo22 -> dpo2;
+  p1 -> all_purposes;
+  p11 -> p1;
+  p12 -> p1;
+  p111 -> p11;
+  p112 -> p11;
+  p2 -> all_purposes;
+  p21 -> p2;
+  p22 -> p2;
+  p221 -> p22;
+  dc1 -> ds1 [constraint=false,label="[dpo1]:p11",style=dashed,arrowhead=none];
+  { rank=same; u1 }
+  { rank=same; dc1 }
+  { rank=same; data_controllers data_subjects }
+  subgraph user_dag {
+    subgraph u_nodes {
+      u1; 
+      u1 [style=invis];
+    }
+    subgraph ua_nodes {
+      dc1; data_controllers; 
+    }
+  }
+  subgraph object_dag {
+    subgraph oa_nodes {
+      ds1; data_subjects; 
+    }
+  }
+  subgraph pc_nodes {
+    priv_pol2 [shape=polygon,sides=5];
+  }
+  node [shape=none]
+  "<Object Attributes>"
+}
