@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = ../EPP
+	branch = master
+	commit = c5bd109f0377d92aad70add11311ffd4593eb3ba
+	parent = e6829c136ff4b8faf63bbbccf49d5f07b726d33b
+	method = merge
+	cmdver = 0.4.3
