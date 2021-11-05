@@ -1,0 +1,111 @@
+set policy to priv1
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"priv1"
+}
+run test cases for priv1, expect grant grant deny deny grant deny
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"s1,r,pii1,p112"
+}
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"s1,r,pii1,p111"
+}
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"s1,r,pii1,p12"
+}
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"s1,w,pii1,p111"
+}
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"s1,r,pii1,p11"
+}
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"s1,r,pii1,p221"
+}
+set policy to Policy (ap)
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"Policy (ap)"
+}
+run test cases for Policy (ap), expect grant deny deny
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"u2,w,o3,p112"
+}
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"u2,w,o3,p21"
+}
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"u2,w,o3,p1"
+}
+policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dc1,ds1):[(p1,dpo22,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo1,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dc1,ds1):[(p1,dpo22,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dc1,ds1):[(p111,dpo12,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo21,dt1),(p111,dpo12,dt1)]"
+}
+end of dplp tests

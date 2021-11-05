@@ -1,0 +1,18 @@
+#!/bin/sh
+# use -json as arg1 to make expected-json files ; note needed ngac server setting
+01-servercurltest.sh >01-expected$1
+02-serverCombinedtest.sh >02-expected$1
+03-loaditest2.sh >03-expected$1
+04-server-grantdeny-test.sh >04-expected$1
+05-add-delete-multiple-test.sh >05-expected$1
+06-server-new-feature-test.sh >06-expected$1
+07-context-change-test.sh >07-expected$1
+08-event-triggered-response-test.sh >08-expected$1
+09-cme-context-reg-test.sh >09-expected$1
+10-servercurltest-accessm.sh >10-expected$1
+11-servercurltest-accessmc.sh >11-expected$1
+12-users.sh >12-expected$1
+13-market-policy.sh >13-expected$1
+14-market-policy.sh >14-expected$1
+14c-market-policy.sh >14c-expected$1
+17-dplp-query.sh >17-expected$1
