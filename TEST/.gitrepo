@@ -6,7 +6,7 @@
 [subrepo]
 	remote = ../TEST
 	branch = master
-	commit = 82a78939599fd3724a75eb1ce722557c5c55349e
-	parent = 10fa3e4370381d59bc554ce8fd06a4554c766eb4
+	commit = 7d58c1d34689296c549ad72aa24b69bf3db7e978
+	parent = 6659f9e0eeef86dbb0b30c3993dcec41c1d505d0
 	method = merge
 	cmdver = 0.4.3
