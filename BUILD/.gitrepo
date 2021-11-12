@@ -6,7 +6,7 @@
 [subrepo]
 	remote = ../BUILD
 	branch = master
-	commit = 1ae27bb6657341b09a9423147d423a5d263506a2
-	parent = a1d51d537d9c159919fef03ef2df2de2113342a2
+	commit = 4fbe06918e1f19232d84b43384478255e3966598
+	parent = b9db8df01e5531a4ac769d7606c6de20c2940e93
 	method = merge
 	cmdver = 0.4.3
