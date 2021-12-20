@@ -1,2 +1,0 @@
-swipl -v -o ngac -g ngac -c ngac.pl
-swipl -v -o ngac-server -g ngac_server -c ngac.pl 

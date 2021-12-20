@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = ../PRIV
+	branch = master
+	commit = ae5b7380048c31bfc28c886547f72c30563ee7ea
+	parent = b7c2cf6c78307e52def276c7bc8a372fd0e6ec01
+	method = merge
+	cmdver = 0.4.3

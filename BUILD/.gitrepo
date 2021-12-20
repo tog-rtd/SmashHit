@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = ../BUILD
+	branch = master
+	commit = 4fbe06918e1f19232d84b43384478255e3966598
+	parent = b9db8df01e5531a4ac769d7606c6de20c2940e93
+	method = merge
+	cmdver = 0.4.3

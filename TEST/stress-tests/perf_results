@@ -1,0 +1,205 @@
+COMPILED VERSION MacBook Pro 15"
+
+Next Generation Access Control - TOG version 0.4.6
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,860,010 inferences, 0.323 CPU in 0.333 seconds (97% CPU, 5751849 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 7,830,008 inferences, 0.716 CPU in 0.724 seconds (99% CPU, 10930560 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,860,008 inferences, 0.368 CPU in 0.377 seconds (98% CPU, 5051885 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 5,730,014 inferences, 0.710 CPU in 0.719 seconds (99% CPU, 8070977 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,860,008 inferences, 0.296 CPU in 0.304 seconds (97% CPU, 6287634 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 7,830,008 inferences, 0.739 CPU in 0.748 seconds (99% CPU, 10594665 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,860,008 inferences, 0.344 CPU in 0.352 seconds (98% CPU, 5401583 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 5,730,008 inferences, 0.697 CPU in 0.706 seconds (99% CPU, 8217421 Lips)
+
+
+
+INTERACTIVELY LOADED VERSION MacBook Pro 15"
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,890,008 inferences, 0.304 CPU in 0.313 seconds (97% CPU, 6221081 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 7,850,008 inferences, 0.759 CPU in 0.771 seconds (99% CPU, 10336778 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,890,008 inferences, 0.356 CPU in 0.365 seconds (98% CPU, 5315551 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 7,850,008 inferences, 0.793 CPU in 0.802 seconds (99% CPU, 9894174 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,890,008 inferences, 0.305 CPU in 0.314 seconds (97% CPU, 6200285 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 7,850,008 inferences, 0.721 CPU in 0.730 seconds (99% CPU, 10884406 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,890,008 inferences, 0.347 CPU in 0.355 seconds (98% CPU, 5445861 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 7,850,008 inferences, 0.783 CPU in 0.791 seconds (99% CPU, 10030126 Lips)
+
+ngac> make.
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,910,008 inferences, 0.313 CPU in 0.322 seconds (97% CPU, 6102613 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 7,930,008 inferences, 0.726 CPU in 0.735 seconds (99% CPU, 10919011 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,910,008 inferences, 0.366 CPU in 0.375 seconds (97% CPU, 5222240 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 5,850,008 inferences, 0.732 CPU in 0.741 seconds (99% CPU, 7993955 Lips)
+
+
+INTERACTIVELY LOADED VERSION MacBook Pro 13"
+
+Next Generation Access Control - TOG version 0.4.6
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,500,201 inferences, 0.265 CPU in 0.313 seconds (85% CPU, 5662867 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 5,430,008 inferences, 0.672 CPU in 0.753 seconds (89% CPU, 8080622 Lips)
+
+ngac>  time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.277 CPU in 0.308 seconds (90% CPU, 5424376 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 4,149,222 inferences, 0.711 CPU in 0.750 seconds (95% CPU, 5837726 Lips)
+
+
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.174 CPU in 0.183 seconds (95% CPU, 8611036 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 5,430,008 inferences, 0.452 CPU in 0.470 seconds (96% CPU, 12011804 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.184 CPU in 0.194 seconds (95% CPU, 8137932 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 4,120,008 inferences, 0.457 CPU in 0.474 seconds (96% CPU, 9016992 Lips)
+
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.289 CPU in 0.335 seconds (86% CPU, 5183846 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 5,430,008 inferences, 0.570 CPU in 0.653 seconds (87% CPU, 9524609 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.197 CPU in 0.208 seconds (95% CPU, 7624781 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 4,120,008 inferences, 0.547 CPU in 0.571 seconds (96% CPU, 7531897 Lips)
+
+
+
+ngac> time( access('Policy (a)', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.286 CPU in 0.310 seconds (92% CPU, 5240935 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2)), 10000 ).
+% 5,430,008 inferences, 0.718 CPU in 0.821 seconds (87% CPU, 7559590 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1)), 10000 ).
+% 1,500,008 inferences, 0.310 CPU in 0.400 seconds (77% CPU, 4841031 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2)), 10000 ).
+% 4,120,008 inferences, 0.643 CPU in 0.677 seconds (95% CPU, 6407517 Lips)
+
+
+
+
+
+ngac> 
+|: 
+|: 
+|: 
+|: 
+|: time( access('Policy (a)', (u1,w,o1), true), 10000 ).
+% 1,530,009 inferences, 0.279 CPU in 0.324 seconds (86% CPU, 5489708 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2), true), 10000 ).
+% 5,460,008 inferences, 0.422 CPU in 0.434 seconds (97% CPU, 12942180 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1), true), 10000 ).
+% 1,530,008 inferences, 0.186 CPU in 0.194 seconds (96% CPU, 8237941 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2), true), 10000 ).
+% 4,150,008 inferences, 0.708 CPU in 0.741 seconds (96% CPU, 5862968 Lips)
+
+
+
+
+ngac> time( access('Policy (a)', (u1,w,o1), true), 10000 ).
+% 1,530,008 inferences, 0.179 CPU in 0.189 seconds (95% CPU, 8563893 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2), true), 10000 ).
+% 5,460,008 inferences, 0.424 CPU in 0.438 seconds (97% CPU, 12884944 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1), true), 10000 ).
+% 1,530,008 inferences, 0.185 CPU in 0.194 seconds (95% CPU, 8283119 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2), true), 10000 ).
+% 4,150,008 inferences, 0.461 CPU in 0.477 seconds (96% CPU, 9009124 Lips)
+
+
+
+ngac> time( access('Policy (a)', (u1,w,o1), isTrue(true)), 10000 ).
+% 1,520,008 inferences, 0.183 CPU in 0.194 seconds (94% CPU, 8323794 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2), isTrue(true)), 10000 ).
+% 5,450,008 inferences, 0.452 CPU in 0.467 seconds (97% CPU, 12055539 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1), isTrue(true)), 10000 ).
+% 1,520,008 inferences, 0.182 CPU in 0.190 seconds (96% CPU, 8352748 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2), isTrue(true)), 10000 ).
+% 4,190,009 inferences, 0.480 CPU in 0.505 seconds (95% CPU, 8722861 Lips)
+
+
+
+ngac> time( access('Policy (a)', (u1,w,o1), true), 10000 ).
+% 1,530,008 inferences, 0.319 CPU in 0.364 seconds (88% CPU, 4796203 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2), true), 10000 ).
+% 5,460,008 inferences, 0.434 CPU in 0.446 seconds (97% CPU, 12592879 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1), true), 10000 ).
+% 1,530,008 inferences, 0.197 CPU in 0.212 seconds (93% CPU, 7748563 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2), true), 10000 ).
+% 4,150,008 inferences, 0.491 CPU in 0.509 seconds (96% CPU, 8448266 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o1), isTrue(true)), 10000 ).
+% 1,520,008 inferences, 0.174 CPU in 0.182 seconds (96% CPU, 8760298 Lips)
+
+ngac> time( access('Policy (a)', (u1,w,o2), isTrue(true)), 10000 ).
+% 5,450,008 inferences, 0.429 CPU in 0.444 seconds (97% CPU, 12710470 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o1), isTrue(true)), 10000 ).
+% 1,520,008 inferences, 0.179 CPU in 0.186 seconds (96% CPU, 8508444 Lips)
+
+ngac> time( access('CondPolicy1', (u1,w,o2), isTrue(true)), 10000 ).
+% 4,190,008 inferences, 0.788 CPU in 0.922 seconds (86% CPU, 5314228 Lips)
+
+
