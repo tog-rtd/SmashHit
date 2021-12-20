@@ -3,7 +3,7 @@
 
 :- use_module(audit).
 :- use_module('COM/param').
-:- use_module('COM/jsonresp').
+:- use_module('COM/apiresp').
 %:- use_module(sessions).
 
 :- use_module(library(http/thread_httpd)).
@@ -40,7 +40,7 @@ auditapi_control(Request) :-
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
-	(   authenticate(Token)
+	(   authenticate(audit,Token)
 	->  control(Operation), !
 	;   true
 	).
@@ -65,7 +65,7 @@ auditapi_select(Request) :-
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
-	(   authenticate(Token)
+	(   authenticate(audit,Token)
 	->  select(Events), !
 	;   true
 	).
@@ -89,7 +89,7 @@ auditapi_logfile(Request) :-
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
-	(   authenticate(Token)
+	(   authenticate(audit,Token)
 	->  logfile(File), !
 	;   true
 	).
@@ -115,7 +115,7 @@ auditapi_gen(Request) :-
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
-	(   authenticate(Token)
+	(   authenticate(audit,Token)
 	->  gen(Source,Event,Data), !
 	;   true
 	).
@@ -131,87 +131,7 @@ gen(_S,X,_Y) :-
 
 
 
-
-
-
-
-
-
-
-%
-%
-%
-
-api_unimpl(_) :-
-	std_resp_prefix,
-	format('Unimplemented API~n').
-
-root_apis(Kind,_) :- std_resp_prefix, list_apis(Kind), !.
-root_apis(_,_).
-
-list_apis(Kind) :-
-	format('Valid ~a paths:~n',[Kind]),
-	G=..[Kind,APIs], call(G),
-	foreach( member(A,APIs), writeln(A)).
-
-%use_valid_api(_) :-
-%	format('Use (g)paapi for policy admin, (g)pqapi for policy
-%	query~n').
-
-% JSON response structure
-% {
-%     "respStatus" : "statusType",
-%     "respMessage" : "statusDesc",
-%     "respBody" : "statusBody"
-% }
-%
-% json_resp(RespStatus,RespMessage,RespBody)
-%
-
-std_resp_prefix :-
-	(   param:jsonresp(on)
-	->  format('Content-type: application/json~n~n')
-	;   format('Content-type: text/plain~n~n')
-	).
-
-std_resp_MS(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(M), writeln(Status)
-	).
-
-std_resp_BS(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(B), writeln(Status)
-	).
-
-std_resp_M(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(M)
-	).
-
-std_resp_S(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(Status)
-	).
-
-
-authenticate(Token) :-
-	(   authenticate_token(Token)
-	->  true
-	;   std_resp_M(failure,'authentication error',''),
-	    audit_gen(policy_admin, 'authentication error'),
-	    !, fail
-	).
-
-authenticate_token(Token) :- atom(Token), param:audit_token(Token), !.
-
-
 read_term_from_atom_in_list([],[]).
 read_term_from_atom_in_list([Elt|Elts],[TElt|TElts]) :-
 	read_term_from_atom(Elt,TElt,[]),
 	read_term_from_atom_in_list(Elts,TElts).
-
