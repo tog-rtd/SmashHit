@@ -6,7 +6,7 @@
 [subrepo]
 	remote = ../NGAC
 	branch = master
-	commit = 32ac1d4392d8e3a6db4247e4e2fe9af87c052519
-	parent = cb5610eb4ce8d9bd3e553dc7bf31ee922e9d01ce
+	commit = 9d61d40fae920b300b13a8f647007cbd22c02577
+	parent = 5c44589ea02a813822254a0a76f3e49017ab0923
 	method = merge
 	cmdver = 0.4.3
