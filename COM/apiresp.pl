@@ -1,7 +1,57 @@
-:- module(jsonresp,[json_resp/3,json_resp/5]).
+:- module(apiresp,[std_resp_prefix/0,
+		    std_resp_MS/3,
+		    std_resp_BS/3,
+		    std_resp_M/3,
+		    api_unimpl/1,root_apis/2,
+		    json_resp/3,json_resp/5,
+		    authenticate/2]).
 
 :- use_module(param).
+:- use_module('AUDIT/audit').
 :- use_module(library(http/json)).
+
+std_resp_prefix :-
+	(   param:jsonresp(on)
+	->  format('Content-type: application/json~n~n')
+	;   format('Content-type: text/plain~n~n')
+	).
+
+std_resp_MS(Status, M, B) :-
+	(   param:jsonresp(on)
+	->  json_resp(Status, M, B)
+	;   writeln(M), writeln(Status)
+	).
+
+std_resp_BS(Status, M, B) :-
+	(   param:jsonresp(on)
+	->  json_resp(Status, M, B)
+	;   writeln(B), writeln(Status)
+	).
+
+std_resp_M(Status, M, B) :-
+	(   param:jsonresp(on)
+	->  json_resp(Status, M, B)
+	;   writeln(M)
+	).
+
+use_valid_api(_) :-
+	format('Use valid endpoint~n').
+
+%
+%
+%
+
+api_unimpl(_) :-
+	std_resp_prefix,
+	format('Unimplemented API~n').
+
+root_apis(Kind,_) :- std_resp_prefix, list_apis(Kind), !.
+root_apis(_,_).
+
+list_apis(Kind) :-
+	format('Valid ~a paths:~n',[Kind]),
+	G=..[Kind,APIs], call(G),
+	foreach( member(A,APIs), writeln(A)).
 
 % JSON response structure
 % {
@@ -27,6 +77,11 @@ responseBody([null_status,
 	    deny
 	   ]).
 
+% json_resp(RespStatus,RespMessage,RespBody,JrespTerm,JrespAtom)
+%
+% assignments to the JSON response structure for each API are given in
+% the documentation
+
 % imperative
 json_resp(RespStatus,RespMessage,RespBody) :-
 	  atomify(RespMessage,MessageAtom,RespBody,BodyAtom),
@@ -34,7 +89,7 @@ json_resp(RespStatus,RespMessage,RespBody) :-
 	  writeln(RespAtom),
 	  true.
 
-% relation
+% relational
 json_resp(RespStatus,RespMessage,RespBody,JrespTerm,JrespAtom) :-
 	  JrespTerm =
 	  json([respStatus=RespStatus,respMessage=RespMessage,respBody=RespBody]),
@@ -51,17 +106,30 @@ response(RespStatus,RespMessage,RespBody) :-
 	    )
 	).
 
-epp_resp(_) :-
-	true.
-
-server_resp(_) :-
-	true.
-
 atomify(M,MA,B,BA) :- atomify(M,MA), atomify(B,BA).
 
 atomify(X,XA) :- compound(X), !,
 	term_to_atom(X,XA).
 atomify(X,X).
+
+% API authentication
+%   token for each admin interface is declared in module param
+%   in the form: param:<TokenKind>_token(<token string>)
+%   e.g. param:admin_token('admin_token') % default token
+
+authenticate(TokenKind,Token) :-
+	(   authenticate_token(TokenKind,Token)
+	->  true
+	;   std_resp_M(failure,'authentication error',''),
+	    atom_concat(TokenKind,'_admin',Where),
+	    audit_gen(Where, 'authentication error'),
+	    !, fail
+	).
+
+authenticate_token(TokenKind,Token) :- atom(TokenKind), atom(Token),
+	atomic_list_concat(['param:',TokenKind,'_token'],ParamToken),
+	compound_name_arguments(CheckStoredToken,ParamToken,[Token]),
+	call(CheckStoredToken), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TESTING
