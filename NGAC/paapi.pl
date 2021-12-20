@@ -5,9 +5,9 @@
 :- use_module('COM/param').
 :- use_module(dpl).
 %:- use_module(dpl_conditions).
-:- use_module(sessions).
+:- use_module('COM/sessions').
 :- use_module(pap).
-:- use_module('COM/jsonresp').
+:- use_module('COM/apiresp').
 
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
@@ -553,66 +553,6 @@ setgpol(GP) :-
 	    audit_gen(policy_admin, setgpol(GP,success))
 	;   std_resp_MS(failure,'unknown global policy',GP),
 	    audit_gen(policy_admin, setgpol(GP,failure))
-	).
-
-%
-%
-%
-
-api_unimpl(_) :-
-	std_resp_prefix,
-	format('Unimplemented API~n').
-
-root_apis(Kind,_) :- std_resp_prefix, list_apis(Kind), !.
-root_apis(_,_).
-
-list_apis(Kind) :-
-	format('Valid ~a paths:~n',[Kind]),
-	G=..[Kind,APIs], call(G),
-	foreach( member(A,APIs), writeln(A)).
-
-%use_valid_api(_) :-
-%	format('Use (g)paapi for policy admin, (g)pqapi for policy
-%	query~n').
-
-% JSON response structure
-% {
-%     "respStatus" : "statusType",
-%     "respMessage" : "statusDesc",
-%     "respBody" : "statusBody"
-% }
-%
-% json_resp(RespStatus,RespMessage,RespBody)
-%
-
-std_resp_prefix :-
-	(   param:jsonresp(on)
-	->  format('Content-type: application/json~n~n')
-	;   format('Content-type: text/plain~n~n')
-	).
-
-std_resp_MS(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(M), writeln(Status)
-	).
-
-std_resp_BS(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(B), writeln(Status)
-	).
-
-std_resp_M(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(M)
-	).
-
-std_resp_S(Status, M, B) :-
-	(   param:jsonresp(on)
-	->  json_resp(Status, M, B)
-	;   writeln(Status)
 	).
 
 

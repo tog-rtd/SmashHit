@@ -2,13 +2,13 @@
 
 :- module(ngac, [ngac/0,ngac/1,ngac/4,ngac_server/0,epp_server/0]).
 :- use_module([
-       'COM/param','COM/command','COM/test','COM/procs','COM/jsonresp',
+       'COM/param','COM/command','COM/test','COM/procs','COM/apiresp',
        'AUDIT/audit','AUDIT/auditapi',
        policyio,policies,
        pmcmd,
        pap,pdp,pqapi,paapi, %pip,
        dpl,dpl_conditions,server,
-       sessions,domains,
+       'COM/sessions',domains,
        'EPP/erl','EPP/epp','EPP/epp_cpa','EPP/epp_era','EPP/eppapi'
    ]).
 

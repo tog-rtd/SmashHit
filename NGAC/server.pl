@@ -5,7 +5,7 @@
 :- use_module('AUDIT/audit',[audit_gen/2]).
 :- use_module('COM/param').
 :- use_module(dpl).
-:- use_module(sessions).
+:- use_module('COM/sessions').
 
 
 :- use_module(library(http/thread_httpd)).

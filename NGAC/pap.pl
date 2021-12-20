@@ -16,7 +16,7 @@
 :- use_module('COM/param').
 :- use_module(dpl).
 :- use_module(dpl_conditions).
-:- use_module(sessions).
+:- use_module('COM/sessions').
 :- use_module('AUDIT/audit',[audit_gen/2]). % currently not used in this module
 
 permitted_add_delete_policy_elements([user,object,assign,associate]).
