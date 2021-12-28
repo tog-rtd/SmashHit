@@ -9,6 +9,7 @@ syntax(aoa(user),				    ngac).
 syntax(aua(object),				    ngac).
 syntax(combine(p1,p2,p3),			    ngac).
 syntax(decl2imp(decl_file,imp_file),		                                  obsolete).
+syntax(dpl_reinit,                                  ngac).
 syntax(dps(policy),                                                               obsolete).
 syntax(export_commands(imp_file),                                                 obsolete).
 syntax(getpol,				            ngac).
@@ -102,8 +103,10 @@ help(combine,	'Arg3 is name of a new policy spec that is the combination of the 
 help(decl2imp,	'Arg1 is name of input file containing declarative policy spec.').
 help(decl2imp,	'Arg2 is name of output file to contain imperative policy spec.').
 
+help(dpl_reinit,'Reinitialize declarative policy language module.').
+
 help(dps,       'Show derived privileges of the specified policy').
-help(dps,	'Arg is a policy name').
+Help(dps,	'Arg is a policy name').
 
 help(export,    'export a specified model(model_id), policy(type,attrs) or database(db_id)').
 
@@ -188,6 +191,7 @@ do(combine(P1,P2,Presult)) :- !,
 do(decl2imp(D,I)) :- !,
 	 % same as import_policy+export_commands w/o making current policy
 	dpl:decl2imp(D,I).
+do(dpl_reinit) :- !, dpl:reinit.
 do(dps(P)) :- !, %param:current_policy(P), % dpl:policy(P,PC),
 	pdp:policy_dps(P,DPS), ui:display_list(DPS).
 do(export(commands,CmdFile)) :- !,
