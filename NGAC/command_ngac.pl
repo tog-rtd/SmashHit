@@ -106,7 +106,7 @@ help(decl2imp,	'Arg2 is name of output file to contain imperative policy spec.')
 help(dpl_reinit,'Reinitialize declarative policy language module.').
 
 help(dps,       'Show derived privileges of the specified policy').
-Help(dps,	'Arg is a policy name').
+help(dps,	'Arg is a policy name').
 
 help(export,    'export a specified model(model_id), policy(type,attrs) or database(db_id)').
 
