@@ -300,5 +300,5 @@ do(users(O,M,C)) :- dpl_conditions:validate_condition_predicate(C,_), !,
 	writeln('condition predicate ignored'), % HERE more to do
 	pdp:aua_users(P,(M,O),Users), writeln(Users). %ui:display_list(Users).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% command procedures
+% command support procedures
 %

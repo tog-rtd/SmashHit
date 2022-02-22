@@ -15,7 +15,7 @@ curl -s 'http://127.0.0.1:8001/pqapi/access?user=u2&ar=w&object=o3&purpose=p112'
 curl -s 'http://127.0.0.1:8001/pqapi/access?user=u2&ar=w&object=o3&purpose=p21'
 curl -s 'http://127.0.0.1:8001/pqapi/access?user=u2&ar=w&object=o3&purpose=p1'
 
-echo 'policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat'
+echo 'policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat unsat'
 curl -s -G "http://127.0.0.1:8001/pqapi/policy_sat" --data-urlencode "env=testdefs" \
 	--data-urlencode "privpol=privacy_policy(dc1, [(p112,dpo22,dt1)])" \
 	--data-urlencode "privpref=privacy_preference(ds1, [(p11,dpo2,di1)])"

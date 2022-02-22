@@ -193,9 +193,9 @@ epp_report_event(Request) :-
 	), !,
 	(   authenticate_epp(Token)
 	->  read_term_from_atom(Ename,Eterm,[]),
-	    (   report_event(Eterm)
-	    ->  std_resp_BS(success,'event reported',Eterm),
-		epp_log_gen(event_processing, report_event(Eterm,success))
+	    (   report_event(Eterm,Reply)
+	    ->  std_resp_BS(success,'event reported',Reply),
+		epp_log_gen(event_processing, report_event(Reply,success))
 	    ;   std_resp_BS(failure,'event not reported',Eterm),
 		epp_log_gen(event_processing, report_event(Eterm,failure))
 	    ), !

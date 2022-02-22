@@ -57,7 +57,38 @@ policy_types([dpl,dplp,s4p]).
 %
 
 policy(Pname,Pclass) :- policy(Pname,Pclass,_).
+policy(Pname,Pclass) :- policy(Pname,Pclass,_,_). /* DPLP */
 
+% Policy templates
+%
+% consent(DC,DP,DPO,Purpose,DS,PDitem,PDcategory,Constraint,ConsentElements,ConditionElements) :-
+%     ConsentElements = [
+%	  user(DPO),
+%         user_attribute(DP),
+%         user_attribute(DC), user_attribute(data_controllers),
+%
+%         οbject_attribute(PDitem),
+%         object_attribute(PDcategory),
+%         object_attribute(DS),
+%         object_attribute(data_subjects),
+%
+%         assign(DPO,DP),
+%         assign(DP,DC),
+%         assign(DC,data_controllers),
+%
+%         assign(PDitem,PDcategory),
+%         assign(PDitem,DS),
+%         assign(DS,data_subjects),
+%
+%         associate(DP,[DPO],Purpose,Constraint,DS)
+%     ],
+%     ConditionElements = [
+%         condition_pred(Predicate)
+%     ],
+%     Opts = [
+%         constraint(Constraint)
+%     ],
+%     .
 
 policy_elements([user,user_attribute,object,data_type,object_class,object_attribute,policy_class,
 		 operation,opset,composed_policy,assign,associate,connector,
