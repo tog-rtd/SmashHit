@@ -6,6 +6,7 @@
 [subrepo]
 	remote = ../AUDIT
 	branch = master
-	commit = 
+	commit = ae8aef176a30d69a4194864b1ef34352e3cfaa5e
 	method = merge
 	cmdver = 0.4.3
+	parent = 8e3b182741ab30538308594f12c870ad5c16f0b7
