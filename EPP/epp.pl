@@ -62,19 +62,27 @@ init :-
 
 epp(Port) :-
 	setparam(epp_status,standalone),
+	epp_with_opts([jsonresp(true),eppportnumber(Port)]).
+	/*
 	init, % create_epp_log,
 	http_server(http_dispatch, [port(Port)]),
 	format('EPP listening on port ~d~n',[Port]),
 	epp_log_gen(epp_start, success),
 	param:server_sleeptime(S), my_sleep(S).
+	*/
 
 epp(Port,Token) :-
 	param:setparam(epp_token,Token),
 	epp(Port).
 
 epp_with_server :-
-	% already set: setparam(epp_status,policy_server),
-	epp_with_opts([]).
+	param:eppapi_port(Port),
+	epp_with_opts([jsonresp(true),eppportnumber(Port)]).
+
+epp_with_rmv :-
+	param:rmv_port(Rport), param:rmv_token(Rtoken),
+	param:setparam(eppapi_port,Rport),
+	epp_with_opts([eppportnumber(Rport),jsonresp(true),token(Rtoken)]).
 
 epp_with_args(Argv) :-
 	% format('EPP Argv: ~q~n',[Argv]),
@@ -126,14 +134,15 @@ epp_with_opts(Opts) :-
 	;   true
 	),
 	init, % create_epp_log,
-	(   \+ param:epp_status(policy_server)
+	param:epp_status(EPP_status),
+	(   \+ ( EPP_status == policy_server ; EPP_status == rmv_server )
 	->  param:setparam(epp_status,standalone),
 	    format('EPP server starting on port ~d~n',[EPort]),
 	    http_server(http_dispatch, [port(EPort)]),
 	    format('Epp server started~n'),
 	    epp_log_gen(epp_started, standalone)
 	;   format('EPP listening on port ~d~n',[EPort]),
-	    epp_log_gen(epp_started, policy_server)
+		epp_log_gen(epp_started, EPP_status)
 	),
 
 	% run self-test here if turned on in param or command line
@@ -169,7 +178,7 @@ periodic_goals :-
 	true.
 
 create_epp_log :- param:epp_logging(file), !,
-	audit:gen_time_stamp(TS),
+	audit:gen_time_stamp(TS), % TODO - add leading zeros to single digit quantities
 	param:log_directory_name(LogD),
 	atomic_list_concat([LogD,'/epp_log','_',TS],LogFile),
 	format('EPP log file: ~w~n',LogFile),

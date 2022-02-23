@@ -7,8 +7,8 @@
 :- use_module('NGAC/dpl').
 :- use_module(epp).
 :- use_module('NGAC/pap').
-:- use_module('/Users/rancedelong/dropbox/dev-repos/tog-rtd/smashHit/EPP/epp').
-:- use_module('/Users/rancedelong/dropbox/dev-repos/tog-rtd/smashHit/EPP/erl').
+:- use_module('EPP/epp').
+:- use_module('EPP/erl').
 :- use_module(library(lists)).
 :- use_module(library(http/json)).
 :- use_module(library(http/json_convert)).
@@ -65,9 +65,17 @@ deactivate_erp(ERpackageName) :-
         true.
 
 % ------------------------------------------------------------------------
+:- multifile(report_event/2).
+:- discontiguous(report_event/2).
+:- multifile(report_event/3).
+:- discontiguous(report_event/3).
+:- multifile(event_name/1).
+:- discontiguous(event_name/1).
+:- multifile(name_event_map/2).
+:- discontiguous(name_event_map/2).
+
+
 % EVENT NAME DEFINITION
-%   common events that don’t require explicit arguments
-%
 %   TODO: must be reconciled with event definition below
 %
 :- multifile(epp_era:event_name/1).
@@ -80,11 +88,14 @@ event_name(epp_shutdown).
 event_name(context_change).
 event_name(test_event).
 % ...
+event_name(test_ms_event).
+event_name(ms_event).
 
 % pre-defined event names and corresponding event structure
 :- multifile(epp_era:name_event_map/2).
 :- discontiguous(epp_era:name_event_map/2).
 
+name_event_map(test_ms_event,  ms_event('MS event data')).
 name_event_map(Name,event(Name,x,x,x,x)) :- !, event_name(Name).
 
 name_event_map(server_startup, event(x,x,x,x)).
@@ -101,6 +112,7 @@ name_event_map(test_event,     event(x,x,x,x)).
 % An event can be reported as an event structure or
 % as a name mapped to an event structure by name_event_map.
 
+%event(ms_event(_)).
 event(event(Name,Uspec,PCspec,OPspec,Ospec)) :- % check whether valid event
     atom(Name), uspec(Uspec), pcspec(PCspec), opspec(OPspec), ospec(Ospec), !.
 event(event(_,_,_,_,_)). % allow any event/5 for now
@@ -129,23 +141,72 @@ event_data([]). % stash last context change list here for context-change event r
 :- multifile(epp_era:report_event/3).
 :- discontiguous(epp_era:report_event/3).
 
+/*
+report_event(Event, EventData) :-
+    % if this is used for more than context change events, will need mutex
+    retractall(event_data(_)),
+    assert(event_data(EventData)),
+    report_event(Event).
+*/
+
 report_event(Event, EventData, Reply) :-
     % if this is used for more than context change events, will need mutex
     retractall(event_data(_)),
     assert(event_data(EventData)),
     report_event(Event,Reply).
 
-report_event(Event, _Reply) :- event(Event), !,
+report_event(Event, Reply) :- event(Event), !,
     epp_log_gen(report_event,Event),
     search_event_pattern_cache(Event,Matches), % !,
     epp_log_gen('matched patterns in report_event',Matches),
-    execute_event_responses(Matches). % TODO - add Reply to execute_event_responses
-report_event(EventName, Reply) :- atom(EventName), name_event_map(EventName,Event), !,
+    execute_event_responses(Matches), % TODO - should contribute to Reply
+    Reply = normal.
+report_event(Event, Reply) :- ms_event(Event), !,
+    Event = ms_event(MSmessage), \+ var(MSmessage), !,
+    epp_log_gen(report_ms_event,Event),
+    term_to_atom(MSmessage,JTA),
+    atom_json_term(JTA,JT,[]), % TODO - this can fail if not valid JSON - handle?
+    handle_ms_event(JT,Reply),
+    true.
+report_event(EventName,Reply) :- atom(EventName), name_event_map(EventName,Event), !,
     report_event(Event,Reply).
+
+:- discontiguous handle_ms_event/2.
+
+handle_ms_event(PT,Reply) :-
+    epp_log_gen(handle_ms_event,PT),
+    Reply = normal,
+    true.
+
 % following won’t work with multifile/discontiguous b/c must be last clause - just fail
 %report_event(X, _Reply) :- % invalid
 %    ui:notify('Invalid event reported',X),
 %    fail.
+% ------------------------------------------------------------------------
+% Isolated RMV changes to be moved to RMV-specific module rmv_mf_mep
+% :- multifile(epp_era:report_event/2).
+% :- discontiguous(epp_era:report_event/2).
+% :- multifile(epp_era:report_event/3).
+% :- discontiguous(epp_era:report_event/3).
+% :- multifile(epp_era:event_name/1).
+% :- discontiguous(epp_era:event_name/1).
+% :- multifile(epp_era:name_event_map/2).
+% :- discontiguous(epp_era:name_event_map/2).
+
+% :- multifile(report_event/2).
+% :- discontiguous(report_event/2).
+% :- multifile(report_event/3).
+% :- discontiguous(report_event/3).
+% :- multifile(event_name/1).
+% :- discontiguous(event_name/1).
+% :- multifile(name_event_map/2).
+% :- discontiguous(name_event_map/2).
+
+
+%name_event_map(test_ms_event,  ms_event('MS event data')).
+
+% ------------------------------------------------------------------------
+
 
 % ------------------------------------------------------------------------
 % Isolated RMV changes to be moved to RMV-specific module rmv_mf_mep
@@ -269,7 +330,7 @@ match_obj(_P_PC, object(Oid), object(any)) :- atom(Oid), !.
 % EVENT RESPONSE EXECUTION
 %
 
-execute_event_responses([]).
+execute_event_responses([]) :- !.
 execute_event_responses([Rid_PC|ResponseID_PCs]) :-
     % the policy class in Rid_PC is the PC from the triggered event pattern
     % which may not be relevant to response execution

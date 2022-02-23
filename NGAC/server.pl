@@ -72,6 +72,9 @@ server(Port) :-
 	->  trace
 	;   true
 	),
+	server_with_opts([epp(true),jsonresp(true),pqportnumber(Port)]),
+	true.
+	/*
 	http_server(http_dispatch, [port(Port)]),
 	format('ngac-server listening on port ~d~n',[Port]),
 	audit_gen(ngac_start, success),
@@ -81,6 +84,7 @@ server(Port) :-
 	->  param:server_sleeptime(S), go_to_sleep(S)
 	;   true
 	).
+	*/
 
 server(Port,AToken) :-
 	param:setparam(admin_token,AToken),
@@ -191,8 +195,12 @@ server_with_opts(Opts) :-
 	;   true
 	),
 
-	param:server_sleeptime(S), go_to_sleep(S),
-	true.
+	(   param:sleep_after_server_start(on)
+	->  param:server_sleeptime(S), go_to_sleep(S)
+	;   true
+	).
+	%param:server_sleeptime(S), go_to_sleep(S),
+	%true.
 
 go_to_sleep(S) :-
 	sleep(S),

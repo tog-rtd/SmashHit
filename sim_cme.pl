@@ -32,7 +32,8 @@ cme(Port) :-
 notification_reg(Request) :-
 	std_resp_prefix,
 	catch(
-	     http_parameters(Request,[context_variables(VarsAtom,[atom]),
+	     http_parameters(Request,
+                [context_variables(VarsAtom,[atom]),
 				 epp_url(EPP,[atom]),
 				 epp_token(Token,[atom])
 				]),
@@ -70,7 +71,7 @@ context_notification_registration_sim(VarNames,URL,Etoken) :-
     true.
 
 gen_context_change_notification(VarsVals,EPP,Etoken) :-
-    %format('Change Notification from CME: ~q~n',[VarsVals]),
+    % format('Change Notification from CME: ~q~n',[VarsVals]),
     term_to_atom(VarsVals,ContextAtom),
     atomic_list_concat([EPP,'?context=',ContextAtom,'&token=',Etoken],Call),
     % make the call, first show the call
