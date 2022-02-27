@@ -62,12 +62,13 @@ server_options([]).
 % should check if server is already running
 %
 server :-
+	%epp_cpa:init_context_change_notifications([weekday:boolean,business:boolean]).
 	param:pqapi_port(Port), % use same port for pqapi and paapi
 	server(Port).
 
 server(Port) :-
-	param:build_version(ngac,Vnum), format('ngac-server version ~a starting~n',Vnum),
-	create_server_audit_log,
+	%param:build_version(ngac,Vnum), format('ngac-server version ~a starting~n',Vnum),
+	%create_server_audit_log,
 	(   param:guiserver(on)
 	->  trace
 	;   true
@@ -190,7 +191,7 @@ server_with_opts(Opts) :-
 	    )
 	),
 
-        (   param:epp_status(policy_server)
+    (   param:epp_status(policy_server)
 	->  epp:epp_with_server
 	;   true
 	),

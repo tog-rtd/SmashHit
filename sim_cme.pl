@@ -42,8 +42,9 @@ notification_reg(Request) :-
 	->  writeln(failure)
 	;
 	    read_term_from_atom(VarsAtom,Vars,[]),
-	    %format('Context notification registration:~n  ~q ~q ~q~n',[Vars,EPP,Token]),
-	    %flush_output,
+        get_time(T),format_time(atom(FT),'%a, %d %b %Y %T PST',T,posix),
+	    format(user_error,'Context notification registration (~w):~n  ~q ~q ~q~n',[FT,Vars,EPP,Token]),
+	    flush_output(user_error),
 	    notification_reg_response(Vars,EPP,Token),
 	    writeln(success)
 	).
@@ -75,11 +76,11 @@ gen_context_change_notification(VarsVals,EPP,Etoken) :-
     term_to_atom(VarsVals,ContextAtom),
     atomic_list_concat([EPP,'?context=',ContextAtom,'&token=',Etoken],Call),
     % make the call, first show the call
-    %format('making EPP call: ~q~n',[Call]),
+    format(user_error,'  EPP call: ~q~n',[Call]), flush_output(user_error),
     http_get(Call,CallResult,[]), % call the EPP
     % should check the call result for "success" but for now accept anything
     ( CallResult == success ; CallResult == 'context change notification accepted' ; true ),
-    % writeln(CallResult), %format('EPP call RESULT: ~q~n',[CallResult]), flush_output,
+    format(user_error,'  EPP call result:~n~w~n',CallResult), flush_output(user_error),
     true.
 
 context_variable_name_value(Name:Val,Name,Val).

@@ -59,11 +59,12 @@ policy_types([dpl,dplp,s4p]).
 policy(Pname,Pclass) :- policy(Pname,Pclass,_).
 policy(Pname,Pclass) :- policy(Pname,Pclass,_,_). /* DPLP */
 
-% Policy templates
-
+% Policy elements for privacy
+%
+% consent meta-element
+%
 % consent(DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,ConsentElements,ConditionElements) :-
 %     ConsentElements = [
-
 %         user(DP),
 %         user_attribute(DC),
 %         user_attribute(data_controllers),
@@ -88,7 +89,59 @@ policy(Pname,Pclass) :- policy(Pname,Pclass,_,_). /* DPLP */
 %     Options = [
 %         constraint(Constraint)
 %     ]
-% consent(DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,ConsentElements,ConditionElements)    .
+%
+% Consent Template (part of a DC/DP privacy policy)
+%     a set of PDCs and NPDCs (subset of PDC+NPDC from ontology)
+%     a Purpose (from ontology)
+%     a set of DPOs (from ontology) an Application?
+%
+% Instantiation of a Consent Template
+
+consent(ConsentID,DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,PE) :-
+
+	 PE = [
+        user(DP),
+        user_attribute(DC),
+        user_attribute(data_controllers),
+        assign(DP,DC),
+        assign(DC,data_controllers),
+        user_attribute(ConsentUA),
+        assign(DP,ConsentUA),
+        assign(ConsentUA,DC),
+        object(PDitem),
+        object_attribute(PDcategory),
+        assign(PDitem,PDcategory),
+        object_attribute(DS),
+        object_attribute(data_subjects),
+        assign(DS,data_subjects),
+        assign(PDitem,DS),
+        object_attribute(ConsentOA),
+        assign(PDitem,ConsentOA),
+        assign(ConsentOA,DS),
+        associate(DP,DPOs,Purpose,Constraint,DS)
+    ],
+    ConsentElts = [
+        user_attribute(ConsentUA),
+        object_attribute(ConsentOA),
+        assign(DP,ConsentUA),
+        assign(ConsentUA,DC),
+        assign(PDitem,ConsentOA),
+        assign(ConsentOA,DS),
+        associate(DP,DPOs,Purpose,Constraint,DS)
+    ],
+    %A=[1,2,3,4,5,6,7], B=[6,2,4], subtract(A,B,C),writeln(C),
+    subtract(PE,ConsentElts,PrerequisiteElts),
+    writeln(PrerequisiteElts),
+    atom_concat(cid_,IDnum,ConsentID),
+    atom_concat(consentUA_,IDnum,ConsentUA),
+    atom_concat(consentOA_,IDnum,ConsentOA),
+    atom_concat(consentPred_,IDnum,ConsentPred),
+    format('~w ~w ~w~n',[ConsentUA,ConsentOA,ConsentPred]),
+    format('~w~n',[ConsentElts]),
+    true.
+
+% consent(ConsentID,DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,PE) :- true.
+% :- consent(cid_123,dc_1,dp_11,[op1,op3],purp_21,ds_7,ds_7_street,dcat_addr,true,CE).
 
 policy_elements([user,user_attribute,object,data_type,object_class,object_attribute,policy_class,
 		 operation,opset,composed_policy,assign,associate,connector,

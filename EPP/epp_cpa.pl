@@ -6,7 +6,7 @@
 :- use_module(library(http/http_client)).
 
 %:- use_module(dpl_conditions).
-:- use_module(epp_era).
+:- use_module(epp_era). % TODO - can this be removed?
 :- use_module(epp).
 
 
@@ -144,8 +144,10 @@ register_for_context_change_notification(Names,NOTIF_URL,Token) :- param:context
     term_to_atom(Names,NA), % TODO why is the CME call failing when list non-empty?
     atomic_list_concat([CTX_URL,'context_notification_registration','?context_variables=',NA,
                         '&epp_url=',NOTIF_URL,'&epp_token=',Token],Call),
-    % for testing call the sim anyway after showing the call
-    format('Perform CME handshake: ~q~n',[Call]),
+    %Call1 = 'http://127.0.0.1:8002/cross-cpp/context_notification_registration?context_variables=[business,weekday]&epp_url=http://127.0.0.1:8001/epp/context_notify&epp_token=epp_token',
+    open('cme_call',write,FD), writeln(FD,Call), close(FD),
+    format('Perform CME handshake (Call): ~q~n',[Call]),
+    %format('Perform CME handshake (Call1): ~q~n',[Call1]),
     http_get(Call,CallResult,[]), % call the CME
     % format('CallResult=~w',[CallResult]),
     (   CallResult == 'success\n'
@@ -169,15 +171,15 @@ context_change_notification :- % only for testing
 % context_change_notification_atom(VV) :- atom(VV), !,
 %     true.
 % TODO - suspiciously short epp_log trace - not doing report_event?
-
+/*
 context_change_notification(VarsVals) :- is_list(VarsVals), !,
     format('context_change_notification VarsVals: ~q~n',[VarsVals]),
     ui:notify(context_change_notification,'variable_list_follows:'),
     ui:display_listq(VarsVals),
-    read_term_from_atom(VarsVals,VVterm,[]),
-    format('VarsVals term: ~q~n',VVterm),
+    %read_term_from_atom(VarsVals,VVterm,[]), % TODO - this is WRONG!
+    %format('VarsVals term: ~q~n',VVterm),
     true.
-
+*/
 context_change_notification(VarsVals) :- is_list(VarsVals), !,
     % format('context_change_notification VarsVals: ~q~n',[VarsVals]),
     epp_log_gen(epp_context_change, VarsVals),
