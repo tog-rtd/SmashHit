@@ -27,7 +27,6 @@ report events
   "respMessage":"event reported",
   "respBody":"test_event"
 }
-Invalid event reported: inval_event
 {
   "respStatus":"failure",
   "respMessage":"event not reported",

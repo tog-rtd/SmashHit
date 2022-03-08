@@ -57,7 +57,7 @@ run test cases for Policy (ap), expect grant deny deny
   "respMessage":"deny",
   "respBody":"u2,w,o3,p1"
 }
-policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat
+policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat unsat
 {
   "respStatus":"success",
   "respMessage":"policy_sat",

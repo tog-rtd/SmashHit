@@ -19,6 +19,53 @@
 % Do not modify the following policies down to the % test policies
 % marker
 
+policy(cons1,cpol1,[
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+  user_attribute('dc_[x]'),
+  assign('dc_[x]',data_controllers),
+  user_attribute('dp_[y][x]'),
+  assign('dp_[y][x]','dc_[x]'),
+  user('app_(a)[y][x]'),
+  assign('app_(a)[y][x]','dp_[y][x]'),
+  object_attribute('ds_[1]'),
+  assign('ds_[1]',data_subjects),
+  object('pdi_(1)[1]'),
+  object_attribute('pdc_{1}'),
+  assign('pdi_(1)[1]','pdc_{1}'),
+  assign('pdi_(1)[1]','ds_[1]'),
+  assign(data_controllers,cpol1),
+  assign(data_subjects,cpol1),
+  policy_class(cpol1),
+  assign(cpol1,'PM'),
+  connector('PM')
+], dplp).
+
+policy(consent1,cpol1,[
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+
+  user_attribute('dc_[x]'),
+  assign('dc_[x]',data_controllers),
+  user('dp_[y][x]'),
+  assign('dp_[y][x]','dc_[x]'),
+
+  object_attribute('ds_[1]'),
+  assign('ds_[1]',data_subjects),
+
+  object('pdi_(1)[1]'),
+  object_attribute('pdc_{1}'),
+  assign('pdc_{1}',cpol1),
+  assign('pdi_(1)[1]','pdc_{1}'),
+  assign('pdi_(1)[1]','ds_[1]'),
+
+  assign(data_controllers,cpol1),
+  assign(data_subjects,cpol1),
+  policy_class(cpol1),
+  assign(cpol1,'PM'),
+  connector('PM')
+], dplp).
+
 policy(priv1,priv_pol1,[
 	policy_class(priv_pol1),
 	assign(priv_pol1,'PM'),

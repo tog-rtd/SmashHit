@@ -169,10 +169,10 @@ jsonresp_server(off).
 jsonresp(off). % off / on / separate / same
 
 % NGAC service API ports
-pqapi_port(8003). % default pqapi server port
-paapi_port(8003). % default paapi server port, currently same as pqapi
-gpqapi_port(8003). % default gpqapi server port, currently same as pqapi
-eppapi_port(8003). % default epp port, currently same as pqapi
+pqapi_port(8001). % default pqapi server port
+paapi_port(8001). % default paapi server port, currently same as pqapi
+gpqapi_port(8001). % default gpqapi server port, currently same as pqapi
+eppapi_port(8001). % default epp port, currently same as pqapi
 
 % other service API ports
 context_port(8002). % local, see context_url below

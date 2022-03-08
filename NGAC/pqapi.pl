@@ -59,12 +59,13 @@ gpqapi([gaccess,ggetinfo]). % GLOBAL POLICY QUERY API
 pqapi_access(Request) :-
 	std_resp_prefix,
 	catch(
-	     http_parameters(Request,[user(User,[atom]),
-				 ar(AR,[atom]),
-				 object(Object,[atom]),
-				 purpose(Purpose,[atom,optional(true)]), % DPLP
-				 cond(CondAtom,[atom,optional(true)]),
-				 policy(Policy,[atom,optional(true)])
+	     http_parameters(Request,[
+			 	user(User,[atom]),
+				ar(AR,[atom]),
+				object(Object,[atom]),
+				purpose(Purpose,[atom,optional(true)]), % DPLP
+				cond(CondAtom,[atom,optional(true)]),
+				policy(Policy,[atom,optional(true)])
 				]),
 	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
@@ -133,6 +134,8 @@ access_deny(Policy,UserOrSession,AR,Object,Purpose) :- % DPLP
 	param:deny_resp(Deny),
 	std_resp_M(success,Deny,Status). % for backward compatibility respond w/deny only
 
+%access_status(U,A,O,P,status(U,A,O)) :- var(P), !.
+%access_status(U,A,O,P,status(U,A,O,P)).
 access_status(U,A,O,P,(U,A,O)) :- var(P), !.
 access_status(U,A,O,P,(U,A,O,P)).
 

@@ -2,6 +2,27 @@
 
 %%	NGAC Command Procs
 
+proc(consent, [
+		reset(policies,all),
+		setpol(consent1),
+		policy_spec,
+		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') ),
+		add_consent(consent1,
+			consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',
+			['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)),
+		policy_spec,
+		reset(policies,consent1),
+		policy_spec,
+		add_consent(consent1,
+			consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',
+			['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)),
+		policy_spec,
+		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') ),
+		delete_consent(cID_234),
+		policy_spec,
+		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') )
+	]).
+
 proc(guiserver, [
          set(guiserver,on),
          guitracer,

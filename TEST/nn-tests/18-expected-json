@@ -1,0 +1,73 @@
+set policy to consent1
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"consent1"
+}
+fetch the unmodified policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent1, cpol1, [\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  policy_class(cpol1),\n  connector('PM'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM')\n]).\n"
+}
+perform access check without consent
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+add consent meta-element to policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)"
+}
+fetch the modified policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent1, cpol1, [\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  user_attribute(cUA_234),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  object_attribute(cOA_234),\n  policy_class(cpol1),\n  connector('PM'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  assign('dp_[y][x]',cUA_234),\n  assign(cUA_234,'dc_[x]'),\n  assign('pdi_(1)[1]',cOA_234),\n  assign(cOA_234,'ds_[1]'),\n  associate(cUA_234,['dpo_(z)'],cOA_234, 'p_(v)')\n]).\n"
+}
+reset the policy
+{
+  "respStatus":"success",
+  "respMessage":"reset policies",
+  "respBody":"consent1"
+}
+fetch the reset policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent1, cpol1, [\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  policy_class(cpol1),\n  connector('PM'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM')\n]).\n"
+}
+add consent meta-element to policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)"
+}
+perform access check with consent
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+delete the consent meta-element
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"consent(cID_234)"
+}
+fetch the restored policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent1, cpol1, [\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  policy_class(cpol1),\n  connector('PM'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM')\n]).\n"
+}
+perform access check without consent
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+end of consent-meta test

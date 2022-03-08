@@ -5,10 +5,14 @@
 syntax(access(policy,(user,mode,object)),           ngac).
 syntax(access(policy,(user,mode,object),condition), ngac).
 syntax(access(policy,(user,mode,object,purpose)),   ngac). % DPLP
+syntax(add_consent(consent_meta_element),           ngac). % DPLP
+syntax(add_consent(policy,consent_meta_element),    ngac). % DPLP
 syntax(aoa(user),				    ngac).
 syntax(aua(object),				    ngac).
 syntax(combine(p1,p2,p3),			    ngac).
 syntax(decl2imp(decl_file,imp_file),		                                  obsolete).
+syntax(delete_consent(consent_id),                  ngac).
+syntax(delete_consent(policy,consent_id),           ngac).
 syntax(dpl_reinit,                                  ngac).
 syntax(dps(policy),                                                               obsolete).
 syntax(export_commands(imp_file),                                                 obsolete).
@@ -50,10 +54,14 @@ semantics(access(P,(U,M,O))) :- !, ground(P), ground(U), ground(M), ground(O).
 semantics(access(P,(U,M,O,Pur))) :- !, ground(P), ground(U), ground(M), ground(O), ground(Pur). % DPLP
 semantics(access(P,(U,M,O),C)) :- !, ground(P), ground(U), ground(M), ground(O),
 	(   C==true ; compound(C) ; is_list(C) ), !.
+semantics(add_consent(C)) :- !, ground(C), compound_name_arity(C,consent,10).
+semantics(add_consent(P,C)) :- !, ground(P), ground(C), compound_name_arity(C,consent,10).
 semantics(aoa(U)) :- !, ground(U).
 semantics(aua(O)) :- !, ground(O).
 semantics(combine(P1,P2,P3)) :- !, atom(P1), atom(P2), atom(P3).
 semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
+semantics(delete_consent(Cid)) :- !, atom(Cid).
+semantics(delete_consent(P,Cid)) :- !, ground(P), atom(Cid).
 semantics(dps(P)) :- !, ground(P).
 semantics(export_commands(C)) :- atom(C).
 semantics(import(FS)) :- !, functor(FS,F,1), (F==policy ; (F==model ; (F==pm ; F==database ; F==erp))).
@@ -91,6 +99,10 @@ help(access,    'Arg2 is and access triple, "(User, Mode, Object)".').
 help(access,    'Optionally, Arg2 is an access 4-tuple, "(User, Mode, Object, Purpose)".'). % DPLP
 help(access,    'Arg3 (opt) a condition predicate for conditional rules.').
 
+help(add_consent,'add consent meta-element').
+help(add_consent,'Arg1 (opt) is a policy name.').
+help(add_consent,'Arg2 is a consent meta-element.').
+
 help(aoa,	'all object attributes for user in current policy and policy class').
 help(aoa,       'Arg is user identifier.').
 
@@ -102,6 +114,10 @@ help(combine,	'Arg3 is name of a new policy spec that is the combination of the 
 
 help(decl2imp,	'Arg1 is name of input file containing declarative policy spec.').
 help(decl2imp,	'Arg2 is name of output file to contain imperative policy spec.').
+
+help(delete_consent,'delete consent meta-element').
+help(delete_consent,'Arg1 (opt) is a policy name.').
+help(delete_consent,'Arg2 is a consent ID.').
 
 help(dpl_reinit,'Reinitialize declarative policy language module.').
 
@@ -181,6 +197,8 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
+do(add_consent(C)) :- !, param:current_policy(P), pap:add_consent(P,C,Stat), writeln(Stat).
+do(add_consent(P,C)) :- !, pap:add_consent(P,C,Stat), writeln(Stat).
 do(aoa(U)) :- !, param:current_policy(P), dpl:policy(P,PC),
 	pdp:aoa(P,U,PC,AOA), ui:display_list(AOA).
 do(aua(O)) :- !, param:current_policy(P), dpl:policy(P,PC),
@@ -191,6 +209,8 @@ do(combine(P1,P2,Presult)) :- !,
 do(decl2imp(D,I)) :- !,
 	 % same as import_policy+export_commands w/o making current policy
 	dpl:decl2imp(D,I).
+do(delete_consent(Cid)) :- !, param:current_policy(P), pap:delete_consent(P,consent(Cid)).
+do(delete_consent(P,Cid)) :- !, pap:delete_consent(P,consent(Cid)).
 do(dpl_reinit) :- !, dpl:reinit.
 do(dps(P)) :- !, %param:current_policy(P), % dpl:policy(P,PC),
 	pdp:policy_dps(P,DPS), ui:display_list(DPS).
@@ -249,7 +269,11 @@ do(policy_graph(P,Fileroot,Gfiletype,Res)) :- !, dpl:policy(P,_), % must specify
 	param:local_open_file(_,OPEN),
 	atomic_list_concat([DOTcmd,' -T', Gfiletype, ' ', Gdpi_arg, DOTfile , ' >', DISPfile], DotCommand),
 	atomic_list_concat([OPEN,' ', DISPfile], OpenCommand),
-	shell(DotCommand,_), shell(OpenCommand,_),
+	shell(DotCommand,Stat1), 
+	(	Stat1 =\= 0
+	->	writeln(/*user_error,*/'error in dot file')
+	;	shell(OpenCommand,_)
+	),
 	(   param:graph_tmp_file(Fileroot)
 	->  sleep(2), delete_file(DOTfile), delete_file(DISPfile)
 	;   true
@@ -276,7 +300,7 @@ do(policy_spec(P,Fileroot,Silent)) :- !, dpl:policy(P,_),
 	    set_output(Old)
 	;   true
 	),
-	(   Silent \== silent
+	(   Silent == false
 	->  policyio:display_policy(P)
 	;   true
 	).

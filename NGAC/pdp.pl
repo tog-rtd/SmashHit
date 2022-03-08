@@ -120,31 +120,31 @@ policy_dpc(all:xpc_uo,(U,AR,O)) :- !,
 		(format('policy ~q, policy classes ~q~n',[P,PCs]),
 		 policy_dpc(P:Pr,(U,AR,O))) ).
 % the core test - policy_dpc/2
-policy_dpc(P:Pr,(U,AR,E,Pur)) :- atom(P), atom(Pur), % DPLP
+policy_dpc(P:Pr,(U,AR,E,Pur)) :- !, atom(P), atom(Pur), % DPLP CHANGED CUT
 	policy(P,Pr),
 	findall(PC, (policy_class(P:Pr,PC), is_contained_in_pc(P:Pr,E,PC)), PCs),
 	(   PCs == []
-	->  !, fail
+	->  fail % !, fail
 	;   foreach( member(Pc,PCs), policy_dpc_body(P:Pr,(U,AR,E,Pur),Pc) )
 	).
-policy_dpc(P:Pr,(U,AR,E)) :- atom(P),
+policy_dpc(P:Pr,(U,AR,E)) :- !, atom(P), % DPLP CHANGED CUT
 	% All of the policy classes within the specified policy that
 	% govern the entity E will be consulted.
 	policy(P,Pr),
 	findall(PC, (policy_class(P:Pr,PC), is_contained_in_pc(P:Pr,E,PC)), PCs),
 	(   PCs == []
-	->  !, fail
+	->  fail % !, fail
 	;   foreach( member(Pc,PCs), policy_dpc_body(P:Pr,(U,AR,E),Pc) )
 	).
 
 % core test conditional version - policy_dpc/3
-policy_dpc(P:Pr,(U,AR,E),CA) :- atom(P),
+policy_dpc(P:Pr,(U,AR,E),CA) :- !, atom(P), % DPLP CHANGED CUT
 	% All of the policy classes within the specified policy that
 	% govern the entity E will be consulted.
 	policy(P,Pr),
 	findall(PC, (policy_class(P:Pr,PC), is_contained_in_pc(P:Pr,E,PC)), PCs),
 	(   PCs == []
-	->  !, fail
+	->  fail % !, fail
 	;   foreach( member(Pc,PCs), policy_dpc_body(P:Pr,(U,AR,E),Pc,CA) )
 	).
 

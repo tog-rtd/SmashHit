@@ -66,3 +66,7 @@ diff 14c-expected$1 14c-result-tmp
 echo 17-dplp-queries
 17-dplp-query.sh >17-result-tmp
 diff 17-expected$1 17-result-tmp
+
+echo 18-consent-meta
+18-consent-meta.sh >18-result-tmp
+diff 18-expected$1 18-result-tmp

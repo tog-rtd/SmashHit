@@ -66,6 +66,13 @@ paapi_add(Request) :-
 	).
 paapi_add(_) :- audit_gen(policy_admin, add(failure)).
 
+add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
+	(   add_consent(Policy, Consent,_Status)
+	->  std_resp_MS(success,'consent added',Consent),
+	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
+	;   std_resp_MS(failure,'error adding consent', Consent),
+	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
+	).
 add(Policy,PElement) :-
 	(   add_policy_element(Policy,PElement)
 	->  std_resp_MS(success,'element added',PElement),
@@ -84,6 +91,13 @@ paapi_delete(Request) :-
 	).
 paapi_delete(_) :- audit_gen(policy_admin, delete(failure)).
 
+delete(Policy,Consent) :- compound_name_arity(Consent,consent,1), !,
+	(	delete_consent(Policy, Consent)
+	->	std_resp_MS(success,'consent deleted',Consent),
+		audit_gen(policy_admin, delete_consent(Policy, Consent, success))
+	;   std_resp_MS(failure,'error deleting consent',Consent),
+		audit_gen(policy_admin, delete_consent(Policy, Consent, failure))
+	).
 delete(Policy,PElement) :-
 	(   delete_policy_element(Policy,PElement)
 	->  std_resp_MS(success,'element deleted',PElement),
@@ -137,9 +151,9 @@ paapi_addm(Request) :-
 	).
 paapi_addm(_) :- audit_gen(policy_admin, addm(failure)).
 
-addm(Policy,EltListAtom,_Name) :-
+addm(Policy,EltListAtom,Name) :-
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      add_policy_elements(Policy,EltList) )
+	      add_policy_elements_named(Policy,EltList,Name) )
           ->  std_resp_MS(success,'elements added',EltList),
               audit_gen(policy_admin, addm(Policy, 'elements added'))
 	  ;   std_resp_MS(failure,'error adding elements',EltListAtom),
@@ -166,16 +180,21 @@ paapi_deletem(Request) :-
 paapi_deletem(_) :- audit_gen(policy_admin, deletem(failure)).
 
 deletem(_Policy,EltListAtom,Name) :- ground(EltListAtom), ground(Name), !, fail.
-deletem(Policy,EltListAtom,_Name) :- ground(EltListAtom), !,
+deletem(Policy,EltListAtom,Name) :- ground(EltListAtom), var(Name), !,
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      delete_policy_elements(Policy,EltList) )
+	      delete_policy_elements_named(Policy,EltList,Name) )
           ->  std_resp_MS(success,'elements deleted',EltList),
               audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
 	  ;   std_resp_MS(failure,'error deleting elements',EltListAtom),
               audit_gen(policy_admin, deletem(Policy, 'error deleting elements'))
 	).
-deletem(_Policy,_EltListAtom,Name) :- ground(Name), !,
-	fail. % named set deletem not yet implemented
+deletem(Policy,EltListAtom,Name) :- var(EltListAtom), ground(Name), !,
+	(   delete_policy_elements_named(Policy,_,Name)
+	->  std_resp_MS(success,'elements deleted',EltListAtom),
+		audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
+	;   std_resp_MS(failure,'error deleting elements',EltListAtom),
+		audit_gen(policy_admin, deletem(Policy, 'error deleting elements'))
+	).
 
 % getpol
 paapi_getpol(Request) :- % set current policy
@@ -306,7 +325,7 @@ paapi_readpol(_) :- audit_gen(policy_admin, readpol(failure)).
 
 readpol(P) :-
 	(   ( P==current_policy, param:current_policy(PN), PN\==none ; policy(P,_), PN=P )
-	->  policies:policy(PN,_PC,_PE), % PTerm = policy(PN,PC,PE),
+	->  policies:policy(PN,_PC,_PE,_PT), % PTerm = policy(PN,PC,PE,PT),
 	    with_output_to( atom(PAtom), policyio:display_policy(PN) ),
 	    std_resp_BS(success,'read policy',PAtom)
 	;   std_resp_MS(failure,'unknown policy',P),
@@ -420,9 +439,10 @@ readcond(CN) :-
 paapi_reset(Request) :-
 	std_resp_prefix,
 	catch(
-	    http_parameters(Request,[domain(Dom,[atom,default(conditions)]),
-				     name(Name,[atom,default(dynamic)]),
-				     token(Token,[atom])]),
+	    http_parameters(Request,[
+					domain(Dom,[atom,default(conditions)]),
+				    name(Name,[atom,default('dynamic')]),
+				    token(Token,[atom])]),
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
@@ -440,7 +460,13 @@ reset(conditions,CN) :- !, % conditions domain
 	;   std_resp_MS(failure,'unknown condition name',CN),
 	    audit_gen(policy_admin, reset(cond,CN,failure))
 	).
-reset(policies,_PN) :- !. % policies domain - noop for now
+reset(policies,PN) :- !, % policies domain
+	(   preset(policies,PN)
+	->	std_resp_BS(success,'reset policies',PN),
+		audit_gen(policy_admin, reset(policies,PN,success))
+	;   std_resp_MS(failure,'reset policies','unknown policy'),
+		audit_gen(policy_admin, reset(policies,'unknown policy',failure))
+	).
 reset(_,_). % ignore any other domain for now
 
 % resetcond - short-cut for conditions

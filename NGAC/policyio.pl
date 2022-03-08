@@ -186,7 +186,9 @@ display_policy(P) :- policy(P,PC), !,
 	forall(element(P:PC,connector(C)), format('  connector(~q)',C)),
 	forall(assign(P:PC,E1,E2), format(',~n  assign(~q,~q)',[E1,E2])),
 	forall(associate(P:PC,E1,Ops,E2), format(',~n  associate(~q,~q,~q)',[E1,Ops,E2])),
+	forall(associate(P:PC,E1,Ops,Purp,E2), format(',~n  associate(~q,~q,~q, ~q)',[E1,Ops,Purp,E2])),
 	forall(cond(P:PC,Cond,E), format(',~n  cond(~q, ~q)',[Cond,E])),
+	% TODO - add consent meta-elements
 	format('~n]).~n').
 
 % GRAPH POLICY
@@ -252,13 +254,15 @@ graph_policy(P) :-  policy(P,PC), !,
 
 	forall(associate(P:PC,E1,Ops,E2),
 	       % COME BACK AND TAKE CARE OF OPS <<<===
-	       (dq(E1,E1q), dq(E2,E2q), maplist(dq, Ops, Opsq),
+	       (dq(E1,E1q), dq(E2,E2q), Ops=Opsq, %maplist(dq, Ops, Opsq),
 		format('~n  ~w -> ~w [constraint=false,label="~w",style=dashed,arrowhead=none];',[E1q,E2q,Opsq]))),
+		%format('~n  ~w -> ~w [constraint=false,label=~w,style=dashed,arrowhead=none];',[E1q,E2q,Opsq]))),
 
-	forall(associate(P:PC,E1,Ops,E2,Purp), % DPLP
+	forall(associate(P:PC,E1,Ops,Purp, E2), % DPLP
 	       % COME BACK AND TAKE CARE OF OPS <<<===
-	       (dq(E1,E1q), dq(E2,E2q), maplist(dq, Ops, Opsq),
+	       (dq(E1,E1q), dq(E2,E2q), Ops=Opsq, %maplist(dq, Ops, Opsq),
 		format('~n  ~w -> ~w [constraint=false,label="~w:~w",style=dashed,arrowhead=none];',[E1q,E2q,Opsq,Purp]))),
+		%format('~n  ~w -> ~w [constraint=false,label=~w:~w,style=dashed,arrowhead=none];',[E1q,E2q,Opsq,Purp]))),
 
 	format('~n  { rank=same; '),
 	forall(( member(E,Users); member(E,Objects) ), (dq(E,Eq), format('~w ',Eq))),
@@ -322,7 +326,8 @@ graph_policy(P) :-  policy(P,PC), !,
 	    maplist(dq,Objects,Objectsq),
 	    atomic_list_concat(Objectsq,'->',Ochain),
 	    format('~n      '),
-	    format('~w [style=invis];',Ochain),
+	    format('~w ;',Ochain), % TODO - why was this here?
+	    %format('~w [style=invis];',Ochain), % TODO - why was this here?
 	    format('~n    }')
 	;   format('~n~w',
 	       [
@@ -371,6 +376,7 @@ last_level(P:PC,A) :-
 	( element(P:PC, user_attribute(A)) ; element(P:PC, object_attribute(A) ) ),
 	element(P:PC, policy_class(APC)), assign(P:PC, A, APC).
 
+% if there are special characters put double quotes around it
 dq(A,QA) :- % may be some other cases to take care of, e.g. 'f(x)'
 	write_length(A,Al,[]), write_length(A,Alq,[quoted(true)]),
 	%format('write_length ~d; write_length quoted ~d~n',[Al,Alq]),

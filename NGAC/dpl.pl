@@ -2,21 +2,22 @@
 
 :- module(dpl,[
 		policy/2,
-	        element/2, assign/3, associate/4,
-	        associate/5, % DPLP
-	        cond/3, conditions/2,
-	        gg_policy/1, gg_element/2, gg_associate/4, gg_gateway/2,
-	        cc_policy/1, cc_element/2, cc_associate/4, cc_assign/3,
-	        cc_external_attribute/2, cc_local_cloud_gateway/3,
+	    element/2, assign/3, associate/4,
+	    associate/5, % DPLP
+	    cond/3, conditions/2,
+	    gg_policy/1, gg_element/2, gg_associate/4, gg_gateway/2,
+	    cc_policy/1, cc_element/2, cc_associate/4, cc_assign/3,
+	    cc_external_attribute/2, cc_local_cloud_gateway/3,
 		policy_class/2,
 		load_decl_policy/2, load_decl_policy_immediate/2, save_decl_policy/2,
 		object_attribute/2, object_oattribute/2, object_oattribute_nd/2, object/2, object/8,
 		user_attribute/2, user_uattribute/2, user/2,
-	        purpose/2, operation/2, data_type/2, object_class/2, % DPLP
-	        decl2imp/2, imp2decl/3,
+	    purpose/2, operation/2, data_type/2, object_class/2, % DPLP
+	    decl2imp/2, imp2decl/3,
 		cmdTerms2policy/2,
-	        get_id_operation_set/3
-	       ]).
+	    get_id_operation_set/3,
+		consent/11, consent/13, policy_elements_named/3
+	    ]).
 
 :- use_module(dpl_conditions).
 :- use_module(policies).
@@ -44,26 +45,28 @@
 :- dynamic policy/2.
 :- dynamic element/2, assign/3, associate/4, cond/3, conditions/2.
 :- dynamic associate/5.  % DPLP
+:- dynamic consent/11.   % DPLP
 :- dynamic gg_policy/1, gg_element/2, gg_associate/4, gg_gateway/2.
 :- dynamic cc_policy/1, cc_element/2, cc_associate/4, cc_assign/3.
 :- dynamic cc_external_attribute/2, cc_local_cloud_gateway/3.
 
+:- dynamic policy_elements_named/3. % policy, elements, name
+
 % policy types
 %
-policy_types([dpl,dplp,s4p]).
+policy_types([dpl,dplp,s4p]). % DPLP
 
 % policy(PolicyName, PolicyClass)
-% policy(PolicyName, PolicyClass, PolicyType)
+% policy(PolicyName, PolicyClass, PolicyType) defined in module policies
 %
 
-policy(Pname,Pclass) :- policy(Pname,Pclass,_).
-policy(Pname,Pclass) :- policy(Pname,Pclass,_,_). /* DPLP */
-
+policy(Pname,Pclass) :- policy(Pname,Pclass,_). % get just the Policy:PolicyClass
+%
 % Policy elements for privacy
 %
 % consent meta-element
 %
-% consent(DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,ConsentElements,ConditionElements) :-
+% consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
 %     ConsentElements = [
 %         user(DP),
 %         user_attribute(DC),
@@ -90,58 +93,77 @@ policy(Pname,Pclass) :- policy(Pname,Pclass,_,_). /* DPLP */
 %         constraint(Constraint)
 %     ]
 %
-% Consent Template (part of a DC/DP privacy policy)
+% Consent Meta-element (add/delete a DC/DP privacy policy)
 %     a set of PDCs and NPDCs (subset of PDC+NPDC from ontology)
 %     a Purpose (from ontology)
 %     a set of DPOs (from ontology) an Application?
 %
-% Instantiation of a Consent Template
+%
+% consent/13 predicate returns: ConsentCore, ContextElts, PolicyElts
 
-consent(ConsentID,DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,PE) :-
-
-	 PE = [
-        user(DP),
-        user_attribute(DC),
+consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,
+	ConsentCore, ContextElts, PolicyElts) :-
+	( App = app(_AppID,_AppOps,_AppPurpose) ; true ),
+	ContextElts = [
         user_attribute(data_controllers),
-        assign(DP,DC),
+        object_attribute(data_subjects),
+
+        user_attribute(DC),
         assign(DC,data_controllers),
-        user_attribute(ConsentUA),
-        assign(DP,ConsentUA),
-        assign(ConsentUA,DC),
+        user(DP),
+        assign(DP,DC),
+
+        object_attribute(DS),
+        assign(DS,data_subjects),
+
         object(PDitem),
         object_attribute(PDcategory),
         assign(PDitem,PDcategory),
-        object_attribute(DS),
-        object_attribute(data_subjects),
-        assign(DS,data_subjects),
-        assign(PDitem,DS),
-        object_attribute(ConsentOA),
-        assign(PDitem,ConsentOA),
-        assign(ConsentOA,DS),
-        associate(DP,DPOs,Purpose,Constraint,DS)
+        assign(PDitem,DS)
+   ],
+    ConsentCore = [
+        user_attribute(CUA),
+        object_attribute(COA),
+        assign(DP,CUA),
+        assign(CUA,DC),
+        assign(PDitem,COA),
+        assign(COA,DS),
+        % cond( ConsentCond,
+            associate(CUA,ADPOs,COA,Purpose)
+        % )
     ],
-    ConsentElts = [
-        user_attribute(ConsentUA),
-        object_attribute(ConsentOA),
-        assign(DP,ConsentUA),
-        assign(ConsentUA,DC),
-        assign(PDitem,ConsentOA),
-        assign(ConsentOA,DS),
-        associate(DP,DPOs,Purpose,Constraint,DS)
-    ],
-    %A=[1,2,3,4,5,6,7], B=[6,2,4], subtract(A,B,C),writeln(C),
-    subtract(PE,ConsentElts,PrerequisiteElts),
-    writeln(PrerequisiteElts),
-    atom_concat(cid_,IDnum,ConsentID),
-    atom_concat(consentUA_,IDnum,ConsentUA),
-    atom_concat(consentOA_,IDnum,ConsentOA),
-    atom_concat(consentPred_,IDnum,ConsentPred),
-    format('~w ~w ~w~n',[ConsentUA,ConsentOA,ConsentPred]),
-    format('~w~n',[ConsentElts]),
-    true.
+	(	is_list(DPOs)
+	->	ADPOs = DPOs
+	;	ADPOs = [DPOs]
+	),
+    %context_elts(PolicyElts,ConsentCore,ContextElts),
+    append(ContextElts,ConsentCore,PolicyElts),
+    atom_concat(cID_,IDnum,ConsentID),
+    atom_concat(cUA_,IDnum,CUA),
+    atom_concat(cOA_,IDnum,COA),
+    atom_concat(cPred_,IDnum,CPred),
+	ConsentCond =.. [CPred,Constraint],
+	ConsentCond == ConsentCond,
+    %format('~nCUA=~w COA=~w ConsentCond=~w~n',[CUA,COA,ConsentCond]),
+    %format('~nConsentCore: ~w~n',[ConsentCore]),
+    %format('~nContextElts: ~q~n',[ContextElts]), nl,
+	!. 
+
+% context_elts(PolicyElts (PE),ConsentCore (CC), ContextElts (CX))
+% assumes that all members of ConsentCore are in PolicyElts
+context_elts([],_,[]) :- !.
+context_elts(PEs,[],PEs) :- !.
+context_elts([PE|PEs],CCs,CXs) :- elt_member(PE, CCs), !,
+	context_elts(PEs,CCs,CXs).
+context_elts([PE|PEs],CCs,[PE|CXs]) :-
+	context_elts(PEs,CCs,CXs), !.
+
+elt_member(_,[]) :- !, fail.
+elt_member(E,[Elt|_]) :- E == Elt, !. % check w/o unification!
+elt_member(E,[_|Elts]) :- elt_member(E,Elts).
 
 % consent(ConsentID,DC,DP,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,PE) :- true.
-% :- consent(cid_123,dc_1,dp_11,[op1,op3],purp_21,ds_7,ds_7_street,dcat_addr,true,CE).
+% e.g. consent(cid_123,dc_1,dp_11,[op1,op3],purp_21,ds_7,ds_7_street,dcat_addr,true,CE).
 
 policy_elements([user,user_attribute,object,data_type,object_class,object_attribute,policy_class,
 		 operation,opset,composed_policy,assign,associate,connector,
@@ -163,7 +185,7 @@ conditional_policy_elements_args([assign(_,_),associate(_,_,_),
 
 dpl_initialized(false).
 
-init:- param:initialized(true), !. % already initialized
+init:- param:initialized(true), !. % dpl_initialized(true), !. % already initialized
 init :-
 	%forall( policies:policy(Pn,Pr,Pg), unpack_policy( policy(Pn,Pr,Pg,dpl) ) ),
 	forall( policies:policy(Pn,Pr,Pg,Pt), unpack_policy( policy(Pn,Pr,Pg,Pt) ) ), % DPLP
@@ -212,7 +234,7 @@ save_as_cmds(PolicyName,CmdFile) :-
 	policyio:save_cmdstrs_to_file(CmdFile,CmdStrs).
 
 imp2decl(_Ifile,_Policy,_Dfile) :-
-	% TO DO
+	% TODO
 	true.
 
 load_decl_policy(Pfile,PolicyName) :-
@@ -283,8 +305,8 @@ unpack_policy_elements(PName,[assign(I,A)|PolElts]) :- !, % ASSIGN
 unpack_policy_elements(PName,[associate(I,M,A)|PolElts]) :- !, % ASSOCIATE/3
 	assertz( associate(PName,I,M,A) ),
 	unpack_policy_elements(PName,PolElts).
-unpack_policy_elements(PName,[associate(I,M,A,P)|PolElts]) :- !, % DPLP ASSOCIATE/4
-	assertz( associate(PName,I,M,A,P) ),
+unpack_policy_elements(PName,[associate(I,M,P,A)|PolElts]) :- !, % DPLP ASSOCIATE/4
+	assertz( associate(PName,I,M,P,A) ),
 	unpack_policy_elements(PName,PolElts).
 unpack_policy_elements(PName,[cond(Cond,Rules)|PolElts]) :- is_list(Rules), !, % COND
 	unpack_policy_elements_cond(PName,Rules,Cond),
@@ -352,10 +374,13 @@ unpack_cpolicy_elements(PName,[_,PolElts]) :- % skip unknown element
 
 
 purge_policy(PolicyName,PolicyType) :-
+	retractall( dpl:policy_elements_named(PolicyName:_,_,_) ),
+	retractall( consent(PolicyName:_,_,_,_,_,_,_,_,_,_,_)),
 	retractall(policy(PolicyName,_,PolicyType)),
 	retractall(element(PolicyName:_,_)),
 	retractall(assign(PolicyName:_,_,_)),
 	retractall(associate(PolicyName:_,_,_,_)),
+	retractall(associate(PolicyName:_,_,_,_,_)),
 	retractall(cond(PolicyName:_,_,_)),
 	retractall(conditions(PolicyName:_,_)).
 
