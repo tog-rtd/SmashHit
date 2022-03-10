@@ -34,7 +34,8 @@
                   rmv_port/1, rmv_mcapi_port/1, rmv_mfapi_port/1, rmv_eppapi_port/1,
                   rmv_auditapi_port/1, rmv_lnapi_port/1, rmv_start_nameserver_on_init/1,
                   rmv_run_with_http_server/1, rmv_monitor_id_prefix/1, rmv_model_id_prefix/1,
-                  rmv_atom_eval_mode/1, rmv_monitor_server_lang/1
+                  rmv_atom_eval_mode/1, rmv_monitor_server_lang/1,
+            display_consent_in_policy/1
 		 ]).
 
 % Versioning of various things
@@ -163,6 +164,8 @@ current_policy('none').
 current_gpolicy('none').
 current_cpolicy('none').
 current_erp('none').
+
+display_consent_in_policy(false).
 
 jsonresp_epp(off).
 jsonresp_server(off).

@@ -168,7 +168,7 @@ elt_member(E,[_|Elts]) :- elt_member(E,Elts).
 policy_elements([user,user_attribute,object,data_type,object_class,object_attribute,policy_class,
 		 operation,opset,composed_policy,assign,associate,connector,
 		 cond,conditions,external_attribute,
-/* DPLP */	 purpose,retention,privacy_policy,privacy_preference]).
+/* DPLP */	 purpose,retention,privacy_policy,privacy_preference,definitions]).
 
 policy_elements_args([user(_),user_attribute(_),
 		      object(_),object(_,_),object(_,_,_),object(_,_,_,_,_,_,_),object_class(_,_),data_type(_,_), % DPLP
@@ -176,7 +176,7 @@ policy_elements_args([user(_),user_attribute(_),
 		      opset(_,_),composed_policy(_,_,_),assign(_,_),associate(_,_,_),
 /* DPLP */	      associate(_,_,_,_),
 		      connector(_),cond(_,_),conditions(_),external_attribute(_),
-/* DPLP */	      purpose(_),retention(_,_),privacy_policy(_,_),privacy_preference(_,_)]).
+/* DPLP */	      purpose(_),retention(_,_),privacy_policy(_,_),privacy_preference(_,_),definitions(_)]).
 
 conditional_policy_elements_args([assign(_,_),associate(_,_,_),
 /* DPLP */	      associate(_,_,_,_)]).

@@ -37,11 +37,14 @@ policy(cons1,cpol1,[
   assign(data_controllers,cpol1),
   assign(data_subjects,cpol1),
   policy_class(cpol1),
-  assign(cpol1,'PM'),
-  connector('PM')
+  assign(cpol1,'PM')%,
+  %connector('PM')
 ], dplp).
 
 policy(consent1,cpol1,[
+  definitions(onto),
+  opset( 'dp_[y][x]_app1', ['dpo_(w)','dpo_(z)'] ),
+  
   user_attribute(data_controllers),
   object_attribute(data_subjects),
 

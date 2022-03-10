@@ -178,17 +178,29 @@ display_policy(P) :- policy(P,PC), !,
 	->  format('  conditions(~q),~n',Conditions)
 	;   true
 	),
+	% TODO - use definition of the policy elements to create these dynamically
+	forall(element(P:PC,definitions(Defs)), format('  definitions(~q),~n',Defs)),
+	forall(element(P:PC,operation(O)), format('  operation(~q),~n',O)),
+	forall(element(P:PC,opset(OS,Os)), format('  opset(~q,~q),~n',[OS,Os])),
 	forall(element(P:PC,user(U)), format('  user(~q),~n',U)),
 	forall(element(P:PC,user_attribute(UA)), format('  user_attribute(~q),~n',UA)),
 	forall(element(P:PC,object(O)), format('  object(~q),~n',O)),
 	forall(element(P:PC,object_attribute(OA)), format('  object_attribute(~q),~n',OA)),
+	forall(assign(P:PC,E1,E2), format('  assign(~q,~q),~n',[E1,E2])), % TODO - fix the extra comma
+	forall(associate(P:PC,E1,Ops,E2), format('  associate(~q,~q,~q),~n',[E1,Ops,E2])),
+	forall(associate(P:PC,E1,Ops,Purp,E2), format('  associate(~q,~q,~q, ~q),~n',[E1,Ops,Purp,E2])),
+	forall(cond(P:PC,Cond,E), format('  cond(~q, ~q),~n',[Cond,E])),
+	(	param:display_consent_in_policy(true)
+	->	forall(consent(P:PC,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
+			format('  consent(~q,~q,~q,~q,~q,~q,~q,~q,~q,~q),~n',
+				[ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint]))
+	;	true
+	),
 	forall(element(P:PC,policy_class(PC)), format('  policy_class(~q),~n',PC)),
-	forall(element(P:PC,connector(C)), format('  connector(~q)',C)),
-	forall(assign(P:PC,E1,E2), format(',~n  assign(~q,~q)',[E1,E2])),
-	forall(associate(P:PC,E1,Ops,E2), format(',~n  associate(~q,~q,~q)',[E1,Ops,E2])),
-	forall(associate(P:PC,E1,Ops,Purp,E2), format(',~n  associate(~q,~q,~q, ~q)',[E1,Ops,Purp,E2])),
-	forall(cond(P:PC,Cond,E), format(',~n  cond(~q, ~q)',[Cond,E])),
-	% TODO - add consent meta-elements
+	(	element(P:PC,connector(C))
+	->	format('  connector(~q)',C)
+	;	format('  connector(~q)','PM')
+	),
 	format('~n]).~n').
 
 % GRAPH POLICY

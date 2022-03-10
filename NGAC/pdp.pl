@@ -4,7 +4,8 @@
 	        privacy_sat/4 % DPLP
 	       ]).
 
-:- use_module([dpl,dpl_conditions]).
+:- use_module(dpl).
+:- use_module(dpl_conditions).
 
 :- include(pdp_test).
 
@@ -151,11 +152,11 @@ policy_dpc(P:Pr,(U,AR,E),CA) :- !, atom(P), % DPLP CHANGED CUT
 % body - policy_dpc_body/3
 policy_dpc_body(P:Pr,(U,AR,E,Pur),PC) :- !, % DPLP - note c_associatep/5
 	c_associatep(P:Pr,UA,ARs,AT,APur),
-        ar_check(P:Pr,AR,ARs),
+    ar_check(P:Pr,AR,ARs),
 	is_contained_in(P:Pr,UA,PC),
 	is_contained_in_pc(P:Pr,AT,PC),
 	is_contained_in_ua(P:Pr,U,UA),
-        is_contained_in_oa(P:Pr,E,AT),
+    is_contained_in_oa(P:Pr,E,AT),
 	% check purpose containment - purpose from query <= purpose from rule
 	is_contained_star(P:Pr,Pur,APur),
 	!.
@@ -179,10 +180,52 @@ policy_dpc_body(P:Pr,(U,AR,E),PC,CA) :- % note c_associate/5
         is_contained_in_oa(P:Pr,E,AT),
 	!.
 
-% ar_check/3 allow for access right partial orders
-ar_check(_,AR,ARs) :- memberchk(AR,ARs), !.
-ar_check(P,AR,ARs) :- c_assign(P,AR,_), !,
-	member(A1,ARs), is_contained_in(P,AR,A1).
+% this ar_check/3 allows for access right partial orders but not opsets
+%ar_check(_,AR,ARs) :- memberchk(AR,ARs), !.
+%ar_check(P,AR,ARs) :- c_assign(P,AR,_), !,
+%	member(A1,ARs), is_contained_in(P,AR,A1).
+
+% new ar_check/3 allowing opset ids (recursively expanded-config option)
+% AR may be a set containing opsets
+ar_check(P,AR,ARs) :- atom(AR), element(P, opset(AR,_)), !,
+	expand_ops(P,[AR],ARset,[]), expand_ops(P,ARs,EARs,[]),
+	forall( member(A,ARset), ar_check1(P,A,EARs)).
+
+ar_check(P,AR,ARs) :- is_list(AR), !,
+	expand_ops(P,AR,ARset,[]), expand_ops(P,ARs,EARs,[]),
+	forall( member(A,ARset), ar_check1(P,A,EARs)).
+
+ar_check(P,AR,ARs) :- expand_ops(P,ARs,EARs,[]), ar_check1(P,AR,EARs).
+
+ar_check1(_,AR,ARs) :- memberchk(AR,ARs), !.
+ar_check1(P,AR,ARs) :- c_assign(P,AR,_), !,
+	member(AR1,ARs), is_contained_in(P,AR,AR1).
+
+expand_ops(_,[],[],_) :- !.
+expand_ops(P,[OP|OPs],EOPs,SeenOpsets) :- element(P,opset(OP,OPset)), !,
+	%append(OPset,EOPs1,EOPs), expand_ops(P,OPs,EOPs1,SeenOpsets).
+	% use the previous line for non-recursive expansion, the following lines for recursive
+	% the recursive case has a check to overcome circularity (see example below)
+	% SeenOpsets keeps track of expanded opsets - don’t expand one previously expanded
+	% the opset name itself is not recognized as an operation (see example)
+	(	memberchk(OP,SeenOpsets)
+	->	expand_ops(P,OPs,EOPs,SeenOpsets)
+	;	append(OPset,OPs,EOPs1),
+		expand_ops(P,EOPs1,EOPs,[OP|SeenOpsets])
+	).
+expand_ops(P,[OP|OPs],[OP|EOPs],SeenOpsets) :- \+ element(P,opset(OP,_OPset)), !,
+	expand_ops(P,OPs,EOPs,SeenOpsets).
+expand_ops(_,OPs,OPs,_) :- !.
+
+% example opset declarations
+% element(p:pc, opset(opset1,[o2,o3])).
+% element(p:pc, opset(opset2,[o5,o6])).
+% element(p:pc, opset(opset3,[o8,o9])).
+% element(p:pc, opset(o6,[o6a,opset2,o6b])).
+
+% e.g ar_check(p:pc, o5, [o1,opset1,o4,opset2,o7,opset3]) succeeds
+%     ar_check(p:pc, o6, [o1,opset1,o4,opset2,o7,opset3]) fails
+%     ar_check(p:pc, o6b, [o1,opset1,o4,opset2,o7,opset3]) succeeds
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % all derived privileges of the policy
