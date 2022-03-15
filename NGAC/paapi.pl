@@ -67,6 +67,8 @@ paapi_add(Request) :-
 paapi_add(_) :- audit_gen(policy_admin, add(failure)).
 
 add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
+	% consent is intercepted here just to enable consent-specific returns
+	% consent is also accepted in addm
 	(   add_consent(Policy, Consent,_Status)
 	->  std_resp_MS(success,'consent added',Consent),
 	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
@@ -74,7 +76,8 @@ add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
 	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
 	).
 add(Policy,PElement) :-
-	(   add_policy_element(Policy,PElement)
+	(   %add_policy_element_restricted(Policy,PElement)
+		add_policy_element(Policy,PElement)
 	->  std_resp_MS(success,'element added',PElement),
 	    audit_gen(policy_admin, add(Policy, PElement, success))
 	;   std_resp_MS(failure,'error adding element',PElement),

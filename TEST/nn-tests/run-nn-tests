@@ -70,3 +70,7 @@ diff 17-expected$1 17-result-tmp
 echo 18-consent-meta
 18-consent-meta.sh >18-result-tmp
 diff 18-expected$1 18-result-tmp
+
+echo 19-consent-example-full
+19-consent-example-full.sh >19-result-tmp
+diff 19-expected$1 19-result-tmp

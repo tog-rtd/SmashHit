@@ -41,6 +41,34 @@ policy(cons1,cpol1,[
   %connector('PM')
 ], dplp).
 
+policy(consent_ex, cpol_ex, [
+  definitions(onto),
+  policy_class(cpol_ex),
+  assign(cpol_ex,'PM'),
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+  assign(data_controllers,cpol_ex),
+  assign(data_subjects,cpol_ex),
+
+  user_attribute('dc_[x]'),
+  assign('dc_[x]', data_controllers),
+
+  user('dp_[y][x]'),
+  assign('dp_[y][x]', 'dc_[x]'),
+
+  object_attribute('ds_[1]'),
+  assign('ds_[1]', data_subjects),  
+
+  object('pdi_(1)[1]'),
+  assign('pdi_(1)[1]', 'ds_[1]'),
+  assign('pdi_(1)[1]', 'pdc_{1}'),
+
+  object_attribute('pdc_{1}'), % should not need this if defined in definitions
+  assign('pdc_{1}',cpol_ex), % should not need this if defined in definitions
+
+  connector('PM')
+  ], dplp).
+
 policy(consent1,cpol1,[
   definitions(onto),
   opset( 'dp_[y][x]_app1', ['dpo_(w)','dpo_(z)'] ),

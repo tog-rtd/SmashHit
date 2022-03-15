@@ -64,9 +64,28 @@ policy(Pname,Pclass) :- policy(Pname,Pclass,_). % get just the Policy:PolicyClas
 %
 % Policy elements for privacy
 %
-% consent meta-element
+% DPLP meta-elements
+%	policy_root(PolicyName,PolicyClass,Defs,...)
+		% [
+		% 	definitions(onto),
+		% 	policy_class(cpol_ex),
+		% 	assign(cpol_ex,'PM'),
+		% 	user_attribute(data_controllers),
+		% 	object_attribute(data_subjects),
+		% 	assign(data_controllers,cpol_ex),
+		% 	assign(data_subjects,cpol_ex),
+		% 	connector('PM')
+		% ]
 %
-% consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
+%	data_controller(DC_ID, DC_POLICY)
+%		[ user_attribute(DC_ID), assign(DC_ID, data_controllers), privacy_policy(DC_ID, DC_POLICY) ]
+%	data_processor(DP_ID, DP_POLICY, DC_ID)
+%		[ user(DP_ID), assign(DP_ID, DC_ID), privacy_policy(DP_ID, DP_POLICY) ]
+%	data_subject(DS_ID, DS_PREFERENCE)
+%		[ object_attribute(DS_ID), assign(DS_ID, data_subjects), privacy_preference(DS_ID, DS_PREFERENCE) ]
+%	data_item(PDI_ID, PDC_ID, DS_ID)
+%		[ object(PDI_ID), assign(PDI_ID, DS_ID), assign(PDI_ID, PDC_ID) ]
+%	consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
 %     ConsentElements = [
 %         user(DP),
 %         user_attribute(DC),
@@ -128,9 +147,7 @@ consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,
         assign(CUA,DC),
         assign(PDitem,COA),
         assign(COA,DS),
-        % cond( ConsentCond,
-            associate(CUA,ADPOs,COA,Purpose)
-        % )
+		CAssoc
     ],
 	(	is_list(DPOs)
 	->	ADPOs = DPOs
@@ -142,8 +159,12 @@ consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,
     atom_concat(cUA_,IDnum,CUA),
     atom_concat(cOA_,IDnum,COA),
     atom_concat(cPred_,IDnum,CPred),
-	ConsentCond =.. [CPred,Constraint],
-	ConsentCond == ConsentCond,
+	CPred == CPred,
+	%ConsentCond =.. [CPred,Constraint],
+	%ConsentCond == ConsentCond,
+	ConsentCond = Constraint,
+	% TODO - can add here to emit associate without cond when Constraint == true
+	CAssoc = cond( ConsentCond,	associate(CUA,ADPOs,COA,Purpose) ),
     %format('~nCUA=~w COA=~w ConsentCond=~w~n',[CUA,COA,ConsentCond]),
     %format('~nConsentCore: ~w~n',[ConsentCore]),
     %format('~nContextElts: ~q~n',[ContextElts]), nl,

@@ -1,7 +1,8 @@
 % Context-dependent Policy Adaptation (CPA)
 
-:- module(epp_cpa, [condition_context_variable_map/2, read_context_cache/2,
-                   context_change_notification/1]).
+:- module(epp_cpa, [condition_context_variable_map/2,
+                    read_context_cache/2, read_all_context_cache/1,
+                    context_change_notification/1]).
 
 :- use_module(library(http/http_client)).
 
@@ -108,6 +109,11 @@ read_context_cache(CtxVar:Type,CtxVal) :- % read_context_cache with Type
     ctx_cache(CtxVar,Type,CtxVal).
 read_context_cache(_:_,undefined).
 
+read_all_context_cache(VarsVals) :-
+    findall(Name=Val, 
+        (context_variables(Vars), member(Name:_Type,Vars), read_context_cache(Name,Val)),
+        VarsVals).
+
 display_context_cache(M) :-
     findall(N:V, ctx_cache(N,_,V), NVs),
     ui:notify(context_cache,M),
@@ -179,6 +185,11 @@ context_change_notification(Var:Val) :- atom(Var), ground(Val), !,
     update_context_cache(Var,Val),
     epp_log_gen(epp_context_change, Var:Val),
     report_event(context_change,[Var:Val],_Result).
+context_change_notification(Var=Val) :- atom(Var), ground(Val), !,
+    % format('context_change_notification VarVal: ~q:~q~n',[Var,Val]),
+    update_context_cache(Var,Val),
+    epp_log_gen(epp_context_change, Var=Val),
+    report_event(context_change,[Var=Val],_Result).
 context_change_notification(_) :- !, fail.
 
 % update multiple variables in the context cache

@@ -28,8 +28,11 @@
 :- http_handler(root(epp/report_event), epp_report_event, [prefix]).
 %   context change notification API
 :- http_handler(root(epp/context_notify), epp_context_notify, [prefix]).
+%	get all current context variable values - currently an undocumented API
+:- http_handler(root(epp/context_values), epp_context_values, [prefix]).
 
-eppapi([load_erf, loadi_erp, unload_erp, activate_erp, deactivate_erp, current_erp, report_event, context_notify]).
+eppapi([load_erf, loadi_erp, unload_erp, activate_erp, deactivate_erp, current_erp, report_event,
+	context_notify, context_values]).
 
 %
 % EPP API
@@ -225,6 +228,29 @@ context_notify(ContextAtom) :-
 	    epp_log_gen(event_processing, context_notify(Context,success))
 	;   std_resp_BS(failure,'context change notification rejected',Context),
 	    epp_log_gen(event_processing, context_notify(failure))
+	).
+
+
+% context_values
+epp_context_values(Request) :-
+	std_resp_prefix,
+	catch(
+	    http_parameters(Request,[token(Token,[atom])]),
+	    _,
+	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	), !,
+	(   authenticate_epp(Token)
+	->  context_values, !
+	;   true
+	).
+epp_context_values(_) :- epp_log_gen(event_processing, context_values(failure)).
+
+context_values :-
+	(   read_all_context_cache(VarsVals)
+	->  std_resp_MS(success,'context values',VarsVals),
+	    epp_log_gen(event_processing, context_values(VarsVals,success))
+	;   std_resp_BS(failure,'context values',''),
+	    epp_log_gen(event_processing, context_values(failure))
 	).
 
 

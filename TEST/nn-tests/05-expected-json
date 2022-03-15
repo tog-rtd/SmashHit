@@ -15,7 +15,7 @@ read the policy (explicitly named as ipolicy)
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  policy_class(access),\n  connector('PM'),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1)\n]).\n"
+  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1),\n  policy_class(access),\n  connector('PM')\n]).\n"
 }
 try to add and delete assign when neither the user or attribute are defined - should fail
 {
@@ -49,7 +49,7 @@ read the policy (explicitly named as ipolicy)
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  policy_class(access),\n  connector('PM'),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1)\n]).\n"
+  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1),\n  policy_class(access),\n  connector('PM')\n]).\n"
 }
 try a legitimate sequence of add/delete operations
 {
@@ -66,7 +66,7 @@ read the policy (explicitly named as ipolicy)
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  policy_class(access),\n  connector('PM'),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1)\n]).\n"
+  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  assign(u1,ua1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1),\n  policy_class(access),\n  connector('PM')\n]).\n"
 }
 try legitimate add/delete multiple operations
 {
@@ -78,7 +78,7 @@ read the policy (two elements removed)
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(ipolicy, access, [\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  policy_class(access),\n  connector('PM'),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1)\n]).\n"
+  "respBody":"policy(ipolicy, access, [\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  associate(ua1,[r,w],oa1),\n  policy_class(access),\n  connector('PM')\n]).\n"
 }
 add two elements back
 {
@@ -90,6 +90,6 @@ read the policy (should be restored to original - except for order)
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  policy_class(access),\n  connector('PM'),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  assign(u1,ua1),\n  associate(ua1,[r,w],oa1)\n]).\n"
+  "respBody":"policy(ipolicy, access, [\n  user(u1),\n  user_attribute(ua1),\n  object(o1),\n  object_attribute(oa1),\n  assign(o1,oa1),\n  assign(ua1,access),\n  assign(oa1,access),\n  assign(access,'PM'),\n  assign(u1,ua1),\n  associate(ua1,[r,w],oa1),\n  policy_class(access),\n  connector('PM')\n]).\n"
 }
 end of add delete multiple tests

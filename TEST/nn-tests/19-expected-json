@@ -1,0 +1,205 @@
+demo extended consent policy with incremental policy/condition build
+reset conditions and policy before tests are run
+{
+  "respStatus":"success",
+  "respMessage":"reset conditions",
+  "respBody":"all"
+}
+{
+  "respStatus":"success",
+  "respMessage":"reset policies",
+  "respBody":"consent_ex"
+}
+set up the consent_ex policy root elements
+{
+  "respStatus":"success",
+  "respMessage":"policy loaded immediate",
+  "respBody":"consent_ex"
+}
+set current policy to consent_ex
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"consent_ex"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user_attribute(data_controllers),\n  object_attribute(data_subjects),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+add a Data Controller (DC)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[user_attribute('dc_[x]'),assign('dc_[x]',data_controllers)]"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object_attribute(data_subjects),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+add a Data Processor (DP)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[user('dp_[y][x]'),assign('dp_[y][x]','dc_[x]')]"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object_attribute(data_subjects),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+add a Data Subject (DS)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[object_attribute('ds_[1]'),assign('ds_[1]',data_subjects)]"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+add a personal data item (PDI)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[object('pdi_(1)[1]'),object_attribute('pdc_{1}'),assign('pdc_{1}',cpol_ex),assign('pdi_(1)[1]','ds_[1]'),assign('pdi_(1)[1]','pdc_{1}')]"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+now add the first consent to the policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)"
+}
+read the policy (explicitly named as consent_ex)
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  user_attribute(cUA_234),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  object_attribute(cOA_234),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('dp_[y][x]',cUA_234),\n  assign(cUA_234,'dc_[x]'),\n  assign('pdi_(1)[1]',cOA_234),\n  assign(cOA_234,'ds_[1]'),\n  associate(cUA_234,['dpo_(z)'],cOA_234, 'p_(v)'),\n  cond(true, associate(cUA_234,['dpo_(z)'],cOA_234,'p_(v)')),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+read the conditions
+{
+  "respStatus":"success",
+  "respMessage":"read conditions",
+  "respBody":"conditions(dynamic):\n"
+}
+query the policy for an access
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+delete the consent meta-element
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"consent(cID_234)"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+query the policy for an access
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+end demo extended consent policy with incremental policy/condition build
+now add back the first consent to the policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)"
+}
+add a second Data Subject (DS)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[object_attribute('ds_[2]'),assign('ds_[2]',data_subjects)]"
+}
+add a personal data item to second subject(PDI)
+{
+  "respStatus":"success",
+  "respMessage":"elements added",
+  "respBody":"[object('pdi_(1)[2]'),object_attribute('pdc_{1}'),assign('pdc_{1}',cpol_ex),assign('pdi_(1)[2]','ds_[2]'),assign('pdi_(1)[2]','pdc_{1}')]"
+}
+add consent for second DS and data item
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_567,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[2]','pdi_(1)[2]','pdc_{1}',true)"
+}
+read the policy (explicitly named as consent_ex)
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  user_attribute(cUA_234),\n  user_attribute(cUA_567),\n  object('pdi_(1)[1]'),\n  object('pdi_(1)[2]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  object_attribute(cOA_234),\n  object_attribute('ds_[2]'),\n  object_attribute('pdc_{1}'),\n  object_attribute(cOA_567),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('dp_[y][x]',cUA_234),\n  assign(cUA_234,'dc_[x]'),\n  assign('pdi_(1)[1]',cOA_234),\n  assign(cOA_234,'ds_[1]'),\n  assign('ds_[2]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[2]','ds_[2]'),\n  assign('pdi_(1)[2]','pdc_{1}'),\n  assign('dp_[y][x]',cUA_567),\n  assign(cUA_567,'dc_[x]'),\n  assign('pdi_(1)[2]',cOA_567),\n  assign(cOA_567,'ds_[2]'),\n  associate(cUA_234,['dpo_(z)'],cOA_234, 'p_(v)'),\n  associate(cUA_567,['dpo_(z)'],cOA_567, 'p_(v)'),\n  cond(true, associate(cUA_234,['dpo_(z)'],cOA_234,'p_(v)')),\n  cond(true, associate(cUA_567,['dpo_(z)'],cOA_567,'p_(v)')),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}
+query the policy for an access for DS 1
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+query the policy for an access for DS 2
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[2]','p_(v)'"
+}
+delete the consent meta-element for DS 1
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"consent(cID_234)"
+}
+query the policy for an access for DS 1
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+query the policy for an access for DS 2
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[2]','p_(v)'"
+}
+delete the consent meta-element for DS 2
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"consent(cID_567)"
+}
+query the policy for an access for DS 1
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+}
+query the policy for an access for DS 2
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[2]','p_(v)'"
+}
+read the policy (explicitly named as consent_ex)
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(consent_ex, cpol_ex, [\n  definitions(onto),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object('pdi_(1)[2]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  object_attribute('ds_[2]'),\n  object_attribute('pdc_{1}'),\n  assign(cpol_ex,'PM'),\n  assign(data_controllers,cpol_ex),\n  assign(data_subjects,cpol_ex),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('ds_[2]',data_subjects),\n  assign('pdc_{1}',cpol_ex),\n  assign('pdi_(1)[2]','ds_[2]'),\n  assign('pdi_(1)[2]','pdc_{1}'),\n  policy_class(cpol_ex),\n  connector('PM')\n]).\n"
+}

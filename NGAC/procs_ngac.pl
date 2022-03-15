@@ -1,6 +1,8 @@
 % stored "built-in" procedures
 
 %%	NGAC Command Procs
+proc(consent_ex, [
+	]).
 
 proc(consent, [
 		reset(policies,all),

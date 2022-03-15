@@ -2,6 +2,7 @@
 
 :- module(pap, [
 		permitted_add_delete_policy_elements/1,
+		add_policy_element_restricted/2,
 		add_policy_element/2, add_policy_element/3,
 		add_consent/3, add_consent/4,
 		delete_consent/2, delete_consent/3,
@@ -36,9 +37,22 @@ permitted_add_delete_policy_elements([user,user_attribute,object,object_attribut
 %
 % IN THE FOLLOWING NEED TO CHECK FOR EFFECTS OF CONDITIONAL RULES
 
+%
+% CURRENTLY ALL ADD REQUESTS USE DPL:UNPACK_POLICY_ELEMENTS
+% NONE USE PAP:ADD_POLICY_ELEMENTS/3 or ADD_POLICY_ELEMENT/2,3
+%
+
 % add_policy_element/2
 add_policy_element(P:PC,Element) :- !, atom(P), atom(PC), add_policy_element(P,PC,Element).
-add_policy_element(P,Element) :- atom(P), policy(P,PC), add_policy_element(P,PC,Element).
+add_policy_element(P,Element) :- atom(P), policy(P,PC), !, add_policy_element(P,PC,Element).
+
+% add_policy_element_restricted/2
+add_policy_element_restricted(P:PC,Element) :- !, atom(P), atom(PC),
+	permitted_add_delete_policy_elements(ADE), functor(Element,E,_), memberchk(E,ADE),
+	unpack_policy_elements(P:PC,[Element]).
+add_policy_element_restricted(P,Element) :- atom(P), policy(P,PC), !,
+	permitted_add_delete_policy_elements(ADE), functor(Element,E,_), memberchk(E,ADE),
+	unpack_policy_elements(P:PC,[Element]).
 
 % From dpl.pl for reference:
 %
@@ -53,30 +67,6 @@ add_policy_element(P,Element) :- atom(P), policy(P,PC), add_policy_element(P,PC,
 %		      connector(_),cond(_,_),conditions(_),external_attribute(_)]).
 %
 % conditional_policy_elements_args([assign(_,_),associate(_,_,_)]).
-
-% add_policy_element/3
-add_policy_element(P,PC,user(U)) :- \+element(P:PC,user(U)), !, passert( element(P:PC,user(U)) ).
-add_policy_element(P,PC,object(O)) :- \+element(P:PC,object(O)), !, passert( element(P:PC,object(O)) ).
-add_policy_element(P,PC,user_attribute(UA)) :- \+element(P:PC,uuser_attribute(UA)), !, passert( element(P:PC,user_attribute(UA)) ).
-add_policy_element(P,PC,object_attribute(OA)) :- \+element(P:PC,object_attribute(OA)), !, passert( element(P:PC,object_attribute(OA)) ).
-add_policy_element(P,PC,assign(E,Attr)) :-
-	( ( element(P:PC,user(E)), element(P:PC,user_attribute(Attr)) ) % must be user to user_attribute
-	;
-	  ( element(P:PC,object(E)), element(P:PC,object_attribute(Attr)) ) % or object to object_attribute
-	),
-	\+assign(P:PC,E,Attr), % must be no current assignment
-	!,
-	passert( assign(P:PC,E,Attr) ).
-add_policy_element(P,PC,associate(A,R,B)) :- atom(A), atom(B), ground(R), is_list(R),
-	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
-	\+associate(P:PC,A,R,B),
-	!,
-	passert( associate(P:PC,A,R,B) ).
-add_policy_element(P,PC,associate(A,R,P,B)) :- atom(A), atom(B), ground(R), is_list(R), atom(P),
-	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
-	\+associate(P:PC,A,R,P,B),
-	!,
-	passert( associate(P:PC,A,R,P,B) ).
 
 % experimental consent meta-element - see initial handling in paapi and add_consent in this module
 %add_policy_element(P,PC,Consent) :- compound_name_arity(Consent,consent,10), !,
@@ -99,9 +89,10 @@ add_policy_element(P,PC,associate(A,R,P,B)) :- atom(A), atom(B), ground(R), is_l
 % add_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC), add_policy_elements(P,PC,Elements).
 % add_policy_elements(P,Elements) :- atom(P), policy(P,PC), add_policy_elements(P,PC,Elements).
 % ----------
-% but now we have:
-add_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC), dpl:unpack_policy_elements(P:PC,Elements).
-add_policy_elements(P,Elements) :- atom(P), policy(P,PC), dpl:unpack_policy_elements(P:PC,Elements).
+% for now we use dpl:unpack_policy_elements
+
+% ADD
+%
 
 add_policy_elements_named(Policy,Elements,Name) :- var(Name), !,
 	add_policy_elements(Policy,Elements).
@@ -110,14 +101,56 @@ add_policy_elements_named(Policy,Elements,Name) :- ground(Name), \+ policy_eleme
 	add_policy_elements(Policy,Elements),
 	true.
 
+% add_policy_elements/2
+add_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC),
+	%add_policy_elements(P,PC,Elements).
+	dpl:upack_policy_elements(P:PC,Elements).
+add_policy_elements(P,Elements) :- atom(P), policy(P,PC),
+	%add_policy_elements(P,PC,Elements).
+	dpl:unpack_policy_elements(P:PC,Elements).
+
 % add_policy_elements/3
 add_policy_elements(_,_,[]).
 add_policy_elements(P,PC,[Element|Elements]) :-
 	( add_policy_element(P,PC,Element) ; true ), % silently ignore add failure (only add multiple)
 	add_policy_elements(P,PC,Elements).
 
+% add_policy_element/3
+add_policy_element(P,PC,user(U)) :- \+element(P:PC,user(U)), !, passert( element(P:PC,user(U)) ).
+add_policy_element(P,PC,object(O)) :- \+element(P:PC,object(O)), !, passert( element(P:PC,object(O)) ).
+add_policy_element(P,PC,user_attribute(UA)) :- \+element(P:PC,user_attribute(UA)), !, passert( element(P:PC,user_attribute(UA)) ).
+add_policy_element(P,PC,object_attribute(OA)) :- \+element(P:PC,object_attribute(OA)), !, passert( element(P:PC,object_attribute(OA)) ).
+add_policy_element(P,PC,assign(E,Attr)) :-
+	( ( element(P:PC,user(E)), element(P:PC,user_attribute(Attr)) ) % must be user to user_attribute
+	;
+	  ( element(P:PC,object(E)), element(P:PC,object_attribute(Attr)) ) % or object to object_attribute
+	),
+	\+assign(P:PC,E,Attr), % must be no current assignment
+	!,
+	passert( assign(P:PC,E,Attr) ).
+add_policy_element(P,PC,associate(A,R,B)) :- atom(A), atom(B), ground(R), is_list(R),
+	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
+	\+associate(P:PC,A,R,B),
+	!,
+	passert( associate(P:PC,A,R,B) ).
+add_policy_element(P,PC,associate(A,R,P,B)) :- atom(A), atom(B), ground(R), is_list(R), atom(P),
+	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
+	\+associate(P:PC,A,R,P,B),
+	!,
+	passert( associate(P:PC,A,R,P,B) ).
 
-% delete_policy_element/2
+% DELETE
+%
+
+delete_policy_elements_named(Policy,Elements,Name) :- var(Name), !,
+	delete_policy_elements_no_chk(Policy,Elements).
+delete_policy_elements_named(Policy,Elements,Name) :- atom(Name), !,
+	policy_elements_named(Policy,Elements,Name), !,
+	retractall( policy_elements_named(Policy,_,Name) ),
+	delete_policy_elements_no_chk(Policy,Elements),
+	true.
+
+% delete_policy_element/2 - normalize policy to P:PC
 delete_policy_element(P:PC,Element) :- !, atom(P), atom(PC), delete_policy_element(P,PC,Element).
 delete_policy_element(P,Element) :- atom(P), !, policy(P,PC), delete_policy_element(P,PC,Element).
 
@@ -143,25 +176,48 @@ delete_policy_element(P,PC,Element) :- dpl:policy_elements_args(EltsArgs), membe
 delete_policy_element(_,_,_). % silently ignore if conditions not met
 % (see delete_policy_elements)
 
-delete_policy_elements_named(Policy,Elements,Name) :- var(Name), !,
-	delete_policy_elements(Policy,Elements).
-delete_policy_elements_named(Policy,Elements,Name) :- atom(Name), !,
-	policy_elements_named(Policy,Elements,Name), !,
-	retractall( policy_elements_named(Policy,_,Name) ),
-	delete_policy_elements(Policy,Elements),
+delete_policy_element_no_chk(P,PC,assign(E,A)) :- !, pretract(assign(P:PC,E,A)).
+delete_policy_element_no_chk(P,PC,associate(A,R,B)) :- !, pretract(associate(P:PC,A,R,B)).
+delete_policy_element_no_chk(P,PC,associate(A,R,Pur,B)) :- !, pretract(associate(P:PC,A,R,Pur,B)).
+%delete_policy_element_no_chk(P,PC,cond(C,Es)) :- is_list(Es), !,
+%	retractall( dpl:cond(P:PC,C,Es) ),
+%	delete_policy_element_cond_no_chk(P,PC,Es,C).
+delete_policy_element_no_chk(P,PC,cond(C,E)) :- !,
+	retractall( dpl:cond(P:PC,C,E) ),
+	delete_policy_element_cond_no_chk(P,PC,E,C).
+delete_policy_element_no_chk(P,PC,Element) :- !, pretract( element(P:PC, Element) ).
+delete_policy_element_no_chk(_,_,_). % silently ignore if conditions not met
+
+delete_policy_element_cond_no_chk(_,_,[],_) :- !.
+delete_policy_element_cond_no_chk(P,PC,[E|Es],C) :- !,
+	delete_policy_element_no_chk(P,PC,E,C),
+	delete_policy_element_cond_no_chk(P,PC,Es,C).
+delete_policy_element_cond_no_chk(P,PC,E,_) :- !,
+	delete_policy_element_no_chk(P,PC,E),
 	true.
 
-
+% delete_policy_elements/2
 delete_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC), delete_policy_elements(P,PC,Elements).
 delete_policy_elements(P,Elements) :- atom(P), policy(P,PC), delete_policy_elements(P,PC,Elements).
 
+% delete_policy_elements/3
 delete_policy_elements(_,_,[]).
 delete_policy_elements(P,PC,[Element|Elements]) :-
 	( delete_policy_element(P,PC,Element) ; true ), % silently ignore delete failure (only delete multiple)
 	delete_policy_elements(P,PC,Elements).
 
+% delete_policy_elements_no_chk/2
+delete_policy_elements_no_chk(P:PC,Elements) :- !, atom(P), atom(PC), delete_policy_elements_no_chk(P,PC,Elements).
+delete_policy_elements_no_chk(P,Elements) :- atom(P), policy(P,PC), delete_policy_elements_no_chk(P,PC,Elements).
+
+% delete_policy_elements_no_chk/3
+delete_policy_elements_no_chk(_,_,[]).
+delete_policy_elements_no_chk(P,PC,[Element|Elements]) :-
+	( delete_policy_element_no_chk(P,PC,Element) ; true ), % silently ignore delete failure (only delete multiple)
+	delete_policy_elements_no_chk(P,PC,Elements).
+
 passert(PI) :-	%format('asserting ~q~n',[PI]),
-	assert(dpl:PI).
+	assertz(dpl:PI).
 pretract(PI) :- %format('retracting ~q~n',[PI]),
 	retractall(dpl:PI).
 
