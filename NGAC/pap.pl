@@ -317,7 +317,8 @@ add_consent(P,Consent,Status) :- atom(P), policy(P,PC), add_consent(P,PC,Consent
 %
 add_consent(P,PC,ConsentME,Status) :-
 	% compound_name_arity(ConsentME,consent,10), % already tested
-	ConsentME = consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
+	% ConsentME = consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
+	ConsentME = consent(ConsentID,_,_,_,_,_,_,_,_,_),
 	StoredC = element(P:PC, ConsentME),
 	(	call(dpl:StoredC)
 	->	true
@@ -354,13 +355,15 @@ delete_data_controller(P:PC, DC_ID) :-
 	%	delete_consent(PPC,consent(ConsentID))
 	% )
 	forall(element(P:PC, consent(Cid,DC_ID,_,_,_,_,_,_,_,_)), delete_consent(P:PC,Cid)),
-	(	named_policy_elements(DC_ID,P,DCEs)
-	->	true
+	(	named_policy_elements(DC_ID,P,_DCEs)
+	->	delete_named_policy_elements(DC_ID,P,_)
 	;	true
 	),
-	forall( (assign(P:PC, DP_ID, DC_ID), user(DP_ID)), delete_data_processor(P:PC,DP_ID) ),
-	element(PPC, data_controller(DC_ID, DC_POLICY)),
-	delete_named_policy_elements(DC_ID,P,_).
+	% following assumes that a data processor is only assigned to one data controller
+	% if this assumption ever is no longer valid then reference counts will need to be added
+	forall( (assign(P:PC, DP_ID, DC_ID), user(DP_ID)), delete_data_processor(P:PC, DP_ID) ),
+	element(P:PC, data_controller(DC_ID, _DC_POLICY)),
+	true.
 
 delete_data_processor(P:PC, DP_ID) :-
 	% forall(

@@ -629,7 +629,7 @@ unpack_policy_elements(PName,[PolElt|PolElts]) :-
 	memberchk(PolElt,PolEltsArgs), !,
 	p_assert( element(PName,PolElt) ),
 	unpack_policy_elements(PName,PolElts).
-unpack_policy_elements(Pname,[PolElt|PolElts]) :- !,
+unpack_policy_elements(PName,[PolElt|PolElts]) :- !,
 	format('error: unpack-policy_elements, unknown: ~q~n',PolElt), % TODO - unknown element temporary for testing
 	unpack_policy_elements(PName,PolElts).
 unpack_policy_elements(PName,[_|PolElts]) :- % skip unknown element
