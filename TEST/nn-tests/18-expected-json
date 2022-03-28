@@ -8,31 +8,31 @@ fetch the unmodified policy
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(consent1, cpol1, [\n  definitions(onto),\n  opset('dp_[y][x]_app1',['dpo_(w)','dpo_(z)']),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  policy_class(cpol1),\n  connector('PM')\n]).\n"
+  "respBody":"policy(consent1, cpol1, [\n  definitions(core_ontology),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute('pdc{1}'),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdc{1}',cpol1),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(1)[1]','ds[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  policy_class(cpol1),\n  connector('PM')\n], dplp).\n"
 }
-perform access check without consent
+perform access check without consent - expect deny
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
 }
 add consent meta-element to policy
 {
   "respStatus":"success",
-  "respMessage":"consent added",
-  "respBody":"consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)"
+  "respMessage":"meta-element added",
+  "respBody":"consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)"
 }
 fetch the modified policy
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(consent1, cpol1, [\n  definitions(onto),\n  opset('dp_[y][x]_app1',['dpo_(w)','dpo_(z)']),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  user_attribute(cUA_234),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  object_attribute(cOA_234),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  assign('dp_[y][x]',cUA_234),\n  assign(cUA_234,'dc_[x]'),\n  assign('pdi_(1)[1]',cOA_234),\n  assign(cOA_234,'ds_[1]'),\n  associate(cUA_234,['dpo_(z)'],cOA_234, 'p_(v)'),\n  cond(true, associate(cUA_234,['dpo_(z)'],cOA_234,'p_(v)')),\n  policy_class(cpol1),\n  connector('PM')\n]).\n"
+  "respBody":"policy(consent1, cpol1, [\n  definitions(core_ontology),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  user_attribute(cUA_234),\n  object('pdi(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute('pdc{1}'),\n  object_attribute(cOA_234),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdc{1}',cpol1),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(1)[1]','ds[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  assign('dp[y][x]',cUA_234),\n  assign(cUA_234,'dc[x]'),\n  assign('pdi(1)[1]',cOA_234),\n  assign(cOA_234,'ds[1]'),\n  associate(cUA_234,['dpo(z)'],'p(v)',cOA_234),\n  cond(true,associate(cUA_234,['dpo(z)'],'p(v)',cOA_234)),\n  policy_class(cpol1),\n  connector('PM')\n], dplp).\n"
 }
-perform access check with consent
+perform access check with consent - expect grant
 {
   "respStatus":"success",
   "respMessage":"grant",
-  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
 }
 delete the consent meta-element
 {
@@ -44,12 +44,12 @@ fetch the restored policy
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(consent1, cpol1, [\n  definitions(onto),\n  opset('dp_[y][x]_app1',['dpo_(w)','dpo_(z)']),\n  user('dp_[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc_[x]'),\n  object('pdi_(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds_[1]'),\n  object_attribute('pdc_{1}'),\n  assign('dc_[x]',data_controllers),\n  assign('dp_[y][x]','dc_[x]'),\n  assign('ds_[1]',data_subjects),\n  assign('pdc_{1}',cpol1),\n  assign('pdi_(1)[1]','pdc_{1}'),\n  assign('pdi_(1)[1]','ds_[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  policy_class(cpol1),\n  connector('PM')\n]).\n"
+  "respBody":"policy(consent1, cpol1, [\n  definitions(core_ontology),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute('pdc{1}'),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdc{1}',cpol1),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(1)[1]','ds[1]'),\n  assign(data_controllers,cpol1),\n  assign(data_subjects,cpol1),\n  assign(cpol1,'PM'),\n  policy_class(cpol1),\n  connector('PM')\n], dplp).\n"
 }
-perform access check without consent
+perform access check without consent - expect deny
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"'dp_[y][x]','dpo_(z)','pdi_(1)[1]','p_(v)'"
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
 }
 end of consent-meta test

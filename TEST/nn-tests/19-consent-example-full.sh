@@ -15,7 +15,6 @@ curl -s -G "http://127.0.0.1:8001/paapi/reset" --data-urlencode "token=admin_tok
 #
 echo 'set up the consent_ex policy root elements'
 curl -s -G "http://127.0.0.1:8001/paapi/loadi" --data-urlencode "policyspec=policy(consent_ex,cpol_ex,[
-    definitions(onto),
     policy_class(cpol_ex),
     assign(cpol_ex,'PM'),
     user_attribute(data_controllers),
@@ -122,7 +121,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=consen
 echo 'read the conditions'
 curl -s -G "http://127.0.0.1:8001/paapi/readcond" --data-urlencode "token=admin_token"
 
-echo 'query the policy for an access'
+echo 'query the policy for an access - expect grant'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[1]"
 
 echo 'delete the consent meta-element'
@@ -131,7 +130,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/delete" --data-urlencode "policy=consent
 echo 'fetch the policy'
 curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=consent_ex" --data-urlencode "token=admin_token"
 
-echo 'query the policy for an access'
+echo 'query the policy for an access - expect deny'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[1]"
 
 echo 'end demo extended consent policy with incremental policy/condition build'
@@ -167,28 +166,28 @@ curl -s -G "http://127.0.0.1:8001/paapi/add" --data-urlencode "policy=consent_ex
 echo 'read the policy (explicitly named as consent_ex)'
 curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=consent_ex" --data-urlencode "token=admin_token"
 
-echo 'query the policy for an access for DS 1'
+echo 'query the policy for an access for DS 1 - expect grant'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[1]"
 
-echo 'query the policy for an access for DS 2'
+echo 'query the policy for an access for DS 2 - expect grant'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[2]"
 
 echo 'delete the consent meta-element for DS 1'
 curl -s -G "http://127.0.0.1:8001/paapi/delete" --data-urlencode "policy=consent_ex" --data-urlencode "token=admin_token" --data-urlencode "policy_element=consent(cID_234)"
 
-echo 'query the policy for an access for DS 1'
+echo 'query the policy for an access for DS 1 - expect deny'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[1]"
 
-echo 'query the policy for an access for DS 2'
+echo 'query the policy for an access for DS 2 - expect grant'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[2]"
 
 echo 'delete the consent meta-element for DS 2'
 curl -s -G "http://127.0.0.1:8001/paapi/delete" --data-urlencode "policy=consent_ex" --data-urlencode "token=admin_token" --data-urlencode "policy_element=consent(cID_567)"
 
-echo 'query the policy for an access for DS 1'
+echo 'query the policy for an access for DS 1 - expect deny'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[1]"
 
-echo 'query the policy for an access for DS 2'
+echo 'query the policy for an access for DS 2 - expect deny'
 curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=consent_ex" --data-urlencode "user=dp_[y][x]" --data-urlencode "ar=dpo_(z)" --data-urlencode "purpose=p_(v)" --data-urlencode "object=pdi_(1)[2]"
 
 # read-out the policy

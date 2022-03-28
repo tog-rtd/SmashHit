@@ -1,6 +1,6 @@
 :- module(policyio,[policy_cmdstrs/2,
 	       save_cmdstrs_to_file/2,
-	       display_policy/1, graph_policy/1,
+	       display_policy/1, canonical_policy/2, graph_policy/1,
 	       display_conditions/0, display_conditions/1
 	      ]).
 % Input / Output of various policy representations
@@ -171,15 +171,52 @@ display_conditions(Cname) :- dpl_conditions:is_cond_name(Cname), !,
 		listing(dpl_conditions:Pname) ).
 display_conditions(_). % silently succeeds if argument is unknown
 
+% cononical_policy/2 puts the named policy from the policy database into canonical form
+% which is used for display and policy comparisons
+canonical_policy(P,Pstruct) :- policies:policy(P,PC,PT), !,
+	Pstruct = policy(P,PC,PE,PT),
+	findall(conditions(Conditions), conditions(P:PC,Conditions), CondDEs),
+	findall(definitions(DefsPol), element(P:PC,definitions(DefsPol)), DefsEs),
+	findall(include(InclPol), element(P:PC,include(InclPol)), InclEs),
+	findall(purpose(Pur), element(P:PC,purpose(Pur)), PurEs),
+	findall(data_type(Type), element(P:PC,data_type(Type)), DTEs),
+	findall(operation(O), element(P:PC,operation(O)), OpEs),
+	findall(opset(OS,Os), element(P:PC,opset(OS,Os)), OpSEs),
+	findall(user(U), element(P:PC,user(U)), UEs),
+	findall(user_attribute(UA), element(P:PC,user_attribute(UA)), UAEs),
+	findall(object(O), element(P:PC,object(O)), OEs),
+	findall(object_attribute(OA), element(P:PC,object_attribute(OA)), OAEs),
+	findall(assign(E1,E2), assign(P:PC,E1,E2), As),
+	findall(associate(E1,Ops,E2), associate(P:PC,E1,Ops,E2), A3s),
+	findall(associate(E1,Ops,Purp,E2), associate(P:PC,E1,Ops,Purp,E2), A4s),
+	findall(cond(Cond,E), cond(P:PC,Cond,E), CondEs),
+	findall(privacy_policy(DC_DP_ID,DC_DP_POLICY), element(P:PC,privacy_policy(DC_DP_ID,DC_DP_POLICY)), PPls),
+	findall(privacy_preference(DS_ID,DS_PREFERENCE), element(P:PC,privacy_preference(DS_ID,DS_PREFERENCE)), PPrs),
+	findall(policy_class(Pclass), element(P:PC,policy_class(Pclass)), PCs),
+	append([CondDEs,DefsEs,InclEs,PurEs,DTEs,OpEs,OpSEs,UEs,UAEs,OEs,OAEs,
+		As,A3s,A4s,CondEs,PPls,PPrs,PCs,[connector('PM')]],PE),
+	true.
+
+% new display_policy/1 uses canonical_policy which has other uses too
+display_policy(P) :- canonical_policy(P,Pstruct), !,
+	Pstruct = policy(P,PC,PE,PT),
+	format('policy(~q, ~q, [~n', [P,PC]),
+	forall( member(E,PE), (E=connector(_) -> format('  ~q',E) ; format('  ~q,~n',E)) ),
+	format('~n], ~q).~n',PT).
+
+
 % DISPLAY POLICY
-display_policy(P) :- policy(P,PC), !,
+display_policy_old(P) :- policy(P,PC), !,
 	format('policy(~q, ~q, [~n', [P,PC]),
 	(   conditions(P:PC,Conditions)
-	->  format('  conditions(~q),~n',Conditions)
+	->  format('  conditions(~q),~n',[Conditions])
 	;   true
 	),
 	% TODO - use definition of the policy elements to create these dynamically
-	forall(element(P:PC,definitions(Defs)), format('  definitions(~q),~n',Defs)),
+	forall(element(P:PC,definitions(DefsPol)), format('  definitions(~q),~n',DefsPol)),
+	forall(element(P:PC,include(InclPol)), format('  include(~q),~n',InclPol)),
+	forall(element(P:PC,purpose(Pur)), format('  purpose(~q),~n',Pur)),
+	forall(element(P:PC,data_type(Type)), format('  data_type(~q),~n',Type)),
 	forall(element(P:PC,operation(O)), format('  operation(~q),~n',O)),
 	forall(element(P:PC,opset(OS,Os)), format('  opset(~q,~q),~n',[OS,Os])),
 	forall(element(P:PC,user(U)), format('  user(~q),~n',U)),
@@ -190,12 +227,28 @@ display_policy(P) :- policy(P,PC), !,
 	forall(associate(P:PC,E1,Ops,E2), format('  associate(~q,~q,~q),~n',[E1,Ops,E2])),
 	forall(associate(P:PC,E1,Ops,Purp,E2), format('  associate(~q,~q,~q, ~q),~n',[E1,Ops,Purp,E2])),
 	forall(cond(P:PC,Cond,E), format('  cond(~q, ~q),~n',[Cond,E])),
-	(	param:display_consent_in_policy(true)
-	->	forall(consent(P:PC,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
-			format('  consent(~q,~q,~q,~q,~q,~q,~q,~q,~q,~q),~n',
-				[ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint]))
-	;	true
-	),
+	% display privacy policies and preferences
+	forall(element(P:PC,privacy_policy(DC_DP_ID,DC_DP_POLICY)),
+		format('  privacy_policy(~q,~q),~n',[DC_DP_ID,DC_DP_POLICY])),
+	forall(element(P:PC,privacy_preference(DS_ID,DS_PREFERENCE)),
+		format('  privacy_preference(~q,~q),~n',[DS_ID,DS_PREFERENCE])),
+	% display meta-elements
+	%nl,
+	forall(element(P:PC,dplp_policy_base(PC, REFS)),
+		format('  dplp_policy_base(~q,~q),~n',[PC, REFS])),
+	forall(element(P:PC,data_controller(DC_ID,DC_POLICY)),
+		format('  data_controller(~q,~q),~n',[DC_ID,DC_POLICY])),
+	forall(element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID)),
+		format('  data_processor(~q,~q,~q),~n',[DP_ID,DP_POLICY,DC_ID])),
+	forall(element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)),
+		format('  data_subject(~q,~q,~q),~n',[DS_ID,DS_PDIs,DS_PREFERENCE])),
+	forall(element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID)),
+		format('  data_item(~q,~q,~q),~n',[PDI_ID,PDC_ID,DS_ID])),
+	forall(element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)),
+		format('  consent(~q,~q,~q,~q,~q,~q,~q,~q,~q,~q),~n',
+				[ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint])),
+	% display the root
+	%nl,
 	forall(element(P:PC,policy_class(PC)), format('  policy_class(~q),~n',PC)),
 	(	element(P:PC,connector(C))
 	->	format('  connector(~q)',C)
@@ -338,8 +391,8 @@ graph_policy(P) :-  policy(P,PC), !,
 	    maplist(dq,Objects,Objectsq),
 	    atomic_list_concat(Objectsq,'->',Ochain),
 	    format('~n      '),
-	    format('~w ;',Ochain), % TODO - why was this here?
-	    %format('~w [style=invis];',Ochain), % TODO - why was this here?
+	    %format('~w ;',Ochain), % TODO - why was this here? To get objects to line up
+	    format('~w [style=invis];',Ochain), % TODO - why was this here? so arrows betw objects are invis
 	    format('~n    }')
 	;   format('~n~w',
 	       [

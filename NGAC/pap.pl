@@ -11,15 +11,15 @@
 		add_policy_elements/2, add_policy_elements/3,
 		delete_policy_elements/2, delete_policy_elements/3,
 
-		add_policy_elements_named/3,
-		delete_policy_elements_named/3,
+		add_named_policy_elements/3,
+		delete_named_policy_elements/3,
 
 		compose_policies/3,
 		get_current_policy/1, set_current_policy/1,
 		get_current_gpolicy/1, set_current_gpolicy/1,
 		load_policy/2, load_policy_immediate/2, unload_policy/1,
 	    dynamic_add_cond_elements/2, dynamic_delete_cond_elements/2,
-		preset/2]
+		preset/2, isa_meta_element/1]
 	 ).
 
 :- use_module('COM/param').
@@ -29,6 +29,12 @@
 :- use_module('AUDIT/audit',[audit_gen/2]). % currently not used in this module
 
 permitted_add_delete_policy_elements([user,user_attribute,object,object_attribute,assign,associate,consent]).
+
+policy_meta_elements([data_controller,data_processor,data_subject,data_item,consent]).
+policy_meta_elements_args([data_controller(_,_),data_processor(_,_,_),data_subject(_,_,_),
+	data_item(_,_,_),consent(_,_,_,_,_,_,_,_,_,_)]).
+
+isa_meta_element(E) :- policy_meta_elements_args(PME), memberchk(E,PME).
 
 %
 % Policy Administration Point commands
@@ -94,20 +100,20 @@ add_policy_element_restricted(P,Element) :- atom(P), policy(P,PC), !,
 % ADD
 %
 
-add_policy_elements_named(Policy,Elements,Name) :- var(Name), !,
+add_named_policy_elements(Name,Policy,Elements) :- var(Name), !,
 	add_policy_elements(Policy,Elements).
-add_policy_elements_named(Policy,Elements,Name) :- ground(Name), \+ policy_elements_named(Policy,_,Name), !,
-	assert( policy_elements_named(Policy,Elements,Name) ),
+add_named_policy_elements(Name,Policy,Elements) :- ground(Name), \+ named_policy_elements(Name,Policy,_), !,
+	assert( named_policy_elements(Name,Policy,Elements) ),
 	add_policy_elements(Policy,Elements),
 	true.
 
 % add_policy_elements/2
 add_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC),
 	%add_policy_elements(P,PC,Elements).
-	dpl:upack_policy_elements(P:PC,Elements).
+	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements).
 add_policy_elements(P,Elements) :- atom(P), policy(P,PC),
 	%add_policy_elements(P,PC,Elements).
-	dpl:unpack_policy_elements(P:PC,Elements).
+	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements).
 
 % add_policy_elements/3
 add_policy_elements(_,_,[]).
@@ -116,10 +122,10 @@ add_policy_elements(P,PC,[Element|Elements]) :-
 	add_policy_elements(P,PC,Elements).
 
 % add_policy_element/3
-add_policy_element(P,PC,user(U)) :- \+element(P:PC,user(U)), !, passert( element(P:PC,user(U)) ).
-add_policy_element(P,PC,object(O)) :- \+element(P:PC,object(O)), !, passert( element(P:PC,object(O)) ).
-add_policy_element(P,PC,user_attribute(UA)) :- \+element(P:PC,user_attribute(UA)), !, passert( element(P:PC,user_attribute(UA)) ).
-add_policy_element(P,PC,object_attribute(OA)) :- \+element(P:PC,object_attribute(OA)), !, passert( element(P:PC,object_attribute(OA)) ).
+add_policy_element(P,PC,user(U)) :- \+element(P:PC,user(U)), !, p_assert( element(P:PC,user(U)) ).
+add_policy_element(P,PC,object(O)) :- \+element(P:PC,object(O)), !, p_assert( element(P:PC,object(O)) ).
+add_policy_element(P,PC,user_attribute(UA)) :- \+element(P:PC,user_attribute(UA)), !, p_assert( element(P:PC,user_attribute(UA)) ).
+add_policy_element(P,PC,object_attribute(OA)) :- \+element(P:PC,object_attribute(OA)), !, p_assert( element(P:PC,object_attribute(OA)) ).
 add_policy_element(P,PC,assign(E,Attr)) :-
 	( ( element(P:PC,user(E)), element(P:PC,user_attribute(Attr)) ) % must be user to user_attribute
 	;
@@ -127,27 +133,28 @@ add_policy_element(P,PC,assign(E,Attr)) :-
 	),
 	\+assign(P:PC,E,Attr), % must be no current assignment
 	!,
-	passert( assign(P:PC,E,Attr) ).
+	p_assert( assign(P:PC,E,Attr) ).
 add_policy_element(P,PC,associate(A,R,B)) :- atom(A), atom(B), ground(R), is_list(R),
 	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
 	\+associate(P:PC,A,R,B),
 	!,
-	passert( associate(P:PC,A,R,B) ).
+	p_assert( associate(P:PC,A,R,B) ).
 add_policy_element(P,PC,associate(A,R,P,B)) :- atom(A), atom(B), ground(R), is_list(R), atom(P),
 	element(P:PC,user_attribute(A)), element(P:PC,object_attribute(B)),
 	\+associate(P:PC,A,R,P,B),
 	!,
-	passert( associate(P:PC,A,R,P,B) ).
+	p_assert( associate(P:PC,A,R,P,B) ).
 
 % DELETE
 %
 
-delete_policy_elements_named(Policy,Elements,Name) :- var(Name), !,
+% delete_named_policy_elements/3
+delete_named_policy_elements(Name,Policy,Elements) :- var(Name), !, ground(Elements),
 	delete_policy_elements_no_chk(Policy,Elements).
-delete_policy_elements_named(Policy,Elements,Name) :- atom(Name), !,
-	policy_elements_named(Policy,Elements,Name), !,
-	retractall( policy_elements_named(Policy,_,Name) ),
-	delete_policy_elements_no_chk(Policy,Elements),
+delete_named_policy_elements(Name,Policy,Elements) :- atom(Name), atom(Policy), var(Elements), !,
+	named_policy_elements(Name,Policy,NamedElements), !,
+	retractall( named_policy_elements(Name,Policy,_) ),
+	delete_policy_elements_no_chk(Policy,NamedElements),
 	true.
 
 % delete_policy_element/2 - normalize policy to P:PC
@@ -157,37 +164,39 @@ delete_policy_element(P,Element) :- atom(P), !, policy(P,PC), delete_policy_elem
 % delete_policy_element/3
 delete_policy_element(P,PC,user(U)) :- !, element(P:PC,user(U)),
 	% there must be no current assignment of the user
-	\+assign(P:PC,U,_), !,	pretract( element(P:PC,user(U)) ).
+	\+assign(P:PC,U,_), !,	p_retract( element(P:PC,user(U)) ).
 delete_policy_element(P,PC,object(O)) :- !, element(P:PC,object(O)),
 	% there must be no current assignment of the object
-	\+assign(P:PC,O,_), !,	pretract( element(P:PC,object(O)) ).
-delete_policy_element(P,PC,assign(E,Attr)) :-  !, assign(P:PC,E,Attr), !, pretract( assign(P:PC,E,Attr) ).
+	\+assign(P:PC,O,_), !,	p_retract( element(P:PC,object(O)) ).
+delete_policy_element(P,PC,assign(E,Attr)) :-  !, assign(P:PC,E,Attr), !, p_retract( assign(P:PC,E,Attr) ).
 delete_policy_element(P,PC,associate(A,R,B)) :- !, atom(A), ground(R), is_list(R), atom(B),
 	dpl:associate(P:PC,A,R,B),
-	pretract( associate(P:PC,A,R,B) ).
+	p_retract( associate(P:PC,A,R,B) ).
 delete_policy_element(P,PC,associate(A,R,Pur,B)) :- !, atom(A), ground(R), is_list(R), atom(Pur), atom(B),
 	dpl:associate(P:PC,A,R,Pur,B),
-	pretract( associate(P:PC,A,R,Pur,B) ).
+	p_retract( associate(P:PC,A,R,Pur,B) ).
 % experimental consent meta-element
 delete_policy_element(P,PC,consent(ConsentID)) :- !,
-	consent_delete(P,PC,consent(ConsentID)).
+	delete_consent(P,PC,consent(ConsentID)).
 delete_policy_element(P,PC,Element) :- dpl:policy_elements_args(EltsArgs), memberchk(Element,EltsArgs), !,
 	retractall( dpl:element(P:PC, Element) ).
 delete_policy_element(_,_,_). % silently ignore if conditions not met
 % (see delete_policy_elements)
 
-delete_policy_element_no_chk(P,PC,assign(E,A)) :- !, pretract(assign(P:PC,E,A)).
-delete_policy_element_no_chk(P,PC,associate(A,R,B)) :- !, pretract(associate(P:PC,A,R,B)).
-delete_policy_element_no_chk(P,PC,associate(A,R,Pur,B)) :- !, pretract(associate(P:PC,A,R,Pur,B)).
+% delete_policy_element_no_chk/3
+delete_policy_element_no_chk(P,PC,assign(E,A)) :- !, p_retract(assign(P:PC,E,A)).
+delete_policy_element_no_chk(P,PC,associate(A,R,B)) :- !, p_retract(associate(P:PC,A,R,B)).
+delete_policy_element_no_chk(P,PC,associate(A,R,Pur,B)) :- !, p_retract(associate(P:PC,A,R,Pur,B)).
 %delete_policy_element_no_chk(P,PC,cond(C,Es)) :- is_list(Es), !,
 %	retractall( dpl:cond(P:PC,C,Es) ),
 %	delete_policy_element_cond_no_chk(P,PC,Es,C).
 delete_policy_element_no_chk(P,PC,cond(C,E)) :- !,
 	retractall( dpl:cond(P:PC,C,E) ),
 	delete_policy_element_cond_no_chk(P,PC,E,C).
-delete_policy_element_no_chk(P,PC,Element) :- !, pretract( element(P:PC, Element) ).
+delete_policy_element_no_chk(P,PC,Element) :- !, p_retract( element(P:PC, Element) ).
 delete_policy_element_no_chk(_,_,_). % silently ignore if conditions not met
 
+% delete_policy_element_cond_no_chk/4 
 delete_policy_element_cond_no_chk(_,_,[],_) :- !.
 delete_policy_element_cond_no_chk(P,PC,[E|Es],C) :- !,
 	delete_policy_element_no_chk(P,PC,E,C),
@@ -215,11 +224,6 @@ delete_policy_elements_no_chk(_,_,[]).
 delete_policy_elements_no_chk(P,PC,[Element|Elements]) :-
 	( delete_policy_element_no_chk(P,PC,Element) ; true ), % silently ignore delete failure (only delete multiple)
 	delete_policy_elements_no_chk(P,PC,Elements).
-
-passert(PI) :-	%format('asserting ~q~n',[PI]),
-	assertz(dpl:PI).
-pretract(PI) :- %format('retracting ~q~n',[PI]),
-	retractall(dpl:PI).
 
 compose_policies(P1N,P2N,P3N) :-
 	policies:policy(P1N, P1R, P1G, dpl),
@@ -285,13 +289,22 @@ preset(conditions,Name) :- conditions_reset(Name).
 preset(policies,Name) :- atom(Name), !,
 	(	( Name == 'dynamic' ; Name == all )
 	->	dpl:re_init
-	;	dpl:purge_policy(Name,_),
+	;	%dpl:purge_policy(Name,_),
 		policies:policy(Name,Pr,Pg,Pt),
 		dpl:unpack_policy( policy(Name,Pr,Pg,Pt) )
 	).
 preset(policies,Name) :- var(Name), !, Name = all,
 	dpl:re_init.
 preset(_,_).
+
+% Instantiation of a general meta-element DPLP
+%
+
+add_meta_element(P:PC,Element,Status) :- !, atom(P), atom(PC), add_meta_element(P,PC,Element,Status).
+add_meta_element(P,Element,Status) :- atom(P), policy(P,PC), add_meta_element(P,PC,Element,Status).
+
+% add_meta_element(P,PC,ME,Status) :-
+% 	true.
 
 % Instantiation of a Consent meta-element DPLP
 %
@@ -305,35 +318,80 @@ add_consent(P,Consent,Status) :- atom(P), policy(P,PC), add_consent(P,PC,Consent
 add_consent(P,PC,ConsentME,Status) :-
 	% compound_name_arity(ConsentME,consent,10), % already tested
 	ConsentME = consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
-	StoreC = consent(P:PC,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
-	\+ call(StoreC), !, % TODO - deal with consent already there
-	passert( StoreC ),
-	%consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,_CE,CCE,PE),
-	consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,CC,CX,_PE),
+	StoredC = element(P:PC, ConsentME),
+	(	call(dpl:StoredC)
+	->	true
+	;	p_assert( StoredC )
+	),
+	 dpl:expand_meta_element(_,ConsentME,CC,CX,_PE),
+	%consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint,CC,CX,_PE),
 	(	ensure_existence(P:PC,CX)
 	->	true
 	;	fail % placeholder for action when not all prerequisite context elements exist TODO
 	),
 	% add_policy_elements(P,PC,CC),
 	dpl:unpack_policy_elements(P:PC,CC),
-	retractall( dpl:policy_elements_named(P:PC,_,ConsentID) ),
-	assert( dpl:policy_elements_named(P:PC, CC, ConsentID) ),
+	retractall( dpl:named_policy_elements(ConsentID,P,_) ),
+	assert( dpl:named_policy_elements(ConsentID, P, [ConsentME|CC]) ),
 	Status = success,
 	true.
 
 delete_consent(P:PC,Consent) :- !, atom(P), atom(PC), delete_consent(P,PC,Consent).
 delete_consent(P,Consent) :- atom(P), policy(P,PC), delete_consent(P,PC,Consent).
 
-delete_consent(P,PC,ConsentShort) :-
-	ConsentShort = consent(ConsentID),
-	delete_policy_elements_named(P:PC,_,ConsentID),
-
-	% policy_elements_named(P:PC,ConsentID,CCE), !,
-	% retractall( dpl:policy_elements_named(P:PC,ConsentID,_) ),
-	% delete_policy_elements(P,PC,CCE),
-	retractall( consent(P:PC,ConsentID,_,_,_,_,_,_,_,_,_) ),
+delete_consent(P,_PC,ConsentShort) :-
+	(	ConsentShort = consent(ConsentID)
+	->	true
+	;	ConsentShort = ConsentID
+	),
+	delete_named_policy_elements(ConsentID,P,_),
 	true.
 %delete_consent(_,_,_). % fail silently
+
+delete_data_controller(P:PC, DC_ID) :-
+	% forall(
+	% 	consent(ConsentID,DC_ID,DP_ID,App,DPOs,Purpose,DS_ID,PDI_ID,PDC_ID,Constraint),
+	%	delete_consent(PPC,consent(ConsentID))
+	% )
+	forall(element(P:PC, consent(Cid,DC_ID,_,_,_,_,_,_,_,_)), delete_consent(P:PC,Cid)),
+	(	named_policy_elements(DC_ID,P,DCEs)
+	->	true
+	;	true
+	),
+	forall( (assign(P:PC, DP_ID, DC_ID), user(DP_ID)), delete_data_processor(P:PC,DP_ID) ),
+	element(PPC, data_controller(DC_ID, DC_POLICY)),
+	delete_named_policy_elements(DC_ID,P,_).
+
+delete_data_processor(P:PC, DP_ID) :-
+	% forall(
+	% 	consent(ConsentID,DC_ID,DP_ID,App,DPOs,Purpose,DS_ID,PDI_ID,PDC_ID,Constraint),
+	%	delete_consent(PPC,consent(ConsentID))
+	% )
+	forall(element(P:PC, consent(Cid,_,DP_ID,_,_,_,_,_,_,_)), delete_consent(P:PC,Cid)),
+	delete_named_policy_elements(DP_ID,P,_).
+
+delete_data_subject(P:PC, DS_ID) :-
+	% forall(
+	% 	consent(ConsentID,DC_ID,DP_ID,App,DPOs,Purpose,DS_ID,PDI_ID,PDC_ID,Constraint),
+	%	delete_consent(PPC,consent(ConsentID))
+	% )
+	forall(element(P:PC, consent(Cid,_,_,_,_,_,DS_ID,_,_,_)), delete_consent(P:PC,Cid)),
+	forall( assign(PDI_ID,DS_ID), delete_data_item(P:PC, PDI_ID) ),
+	delete_named_policy_elements(DS_ID,P,_).
+	%findall(PDI_ID, assign(PDI_ID,DS_ID), PDIs),
+	%forall( member(PDI,PDIs), delete_data_item(PPC, PDI) ).
+
+delete_data_item(P:_PC, PDI_ID) :-
+	% delete any consents that the data item is directly involved in
+	% forall(
+	% 	consent(ConsentID,DC_ID,DP_ID,App,DPOs,Purpose,DS_ID,PDI_ID,PDC_ID,Constraint),
+	%	delete_consent(PPr,consent(ConsentID))
+	% )
+	% delete assigns first then the objects
+	%p_retract( assign(P:PC, PDI_ID, _) ),
+	%p_retract( element(P:PC, object(PDI_ID))),
+	delete_named_policy_elements(PDI_ID,P,_).
+
 
 % ensure_existence/2 - ensure_existence(P:PC, RequiredElts)
 %

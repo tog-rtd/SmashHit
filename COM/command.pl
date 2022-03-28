@@ -91,6 +91,8 @@ defined_commands(CmdSets) :- findall(CmdSet, commands_defined(CmdSet), CmdSets).
 %
 syntax(advanced,                                    basic).
 syntax(basic,					    basic).
+syntax(compare(x,y),                                basic).
+syntax(compare_v(x,y,result),                       basic).
 syntax(conditions,			            basic).
 syntax(conditions(name),		            basic).
 syntax(demo(demo_command),                          basic).
@@ -137,9 +139,11 @@ syntax(versions,				    basic).
 %
 % optional static semantics entry, e.g., used to check command arguments
 % distinct from syntax so syntax can be called separately
+semantics(compare(X,Y)) :- !, ground(X), ground(Y).
+semantics(compare_v(X,Y,R)) :- !, ground(X), ground(Y), var(R).
 semantics(conditions(N)) :- !, atom(N).
 semantics(demo(C)) :- !, ground(C).
-semantics(echo(S)) :- !, atomic(S).
+semantics(echo(S)) :- !, ground(S).
 semantics(help(C)) :- !, ground(C).
 semantics(import_model(M)) :- atom(M).
 semantics(import_pm(PM)) :- atom(PM).
@@ -249,12 +253,16 @@ help(versions,	'Show past versions with descriptions and current version.').
 do(advanced) :- !, do(level(advanced)).
 do(basic) :- !, do(level(basic)).
 
+do(compare(X,Y)) :- !, X == Y.
+do(compare_v(X,Y,true)) :- X == Y, !.
+do(compare_v(_,_,false)).
+
 do(conditions) :- !, policyio:display_conditions.
 do(conditions(N)) :- !, policyio:display_conditions(N).
 
 do(demo(C)) :- !, perform_demo(C).
 do(developer) :- !, do(level(developer)).
-do(echo(S)) :- !, writeln(S).
+do(echo(S)) :- !, writeq(S), nl.
 do(guitracer) :- !,
 	(   param:guitracer(off)
 	->  setparam(guitracer,on),

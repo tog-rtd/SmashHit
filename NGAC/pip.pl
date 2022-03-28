@@ -33,7 +33,7 @@
 %
 
 % Work in Progress
-% must bring up to current version of module dpl
+% TODO - must bring up to current version of module dpl
 
 policy_elements([user,user_attribute,object,object_attribute,policy_class,
 		 operation,opset,composed_policy,assign,associate,connector,cond]).
@@ -41,7 +41,7 @@ policy_elements([user,user_attribute,object,object_attribute,policy_class,
 policy_elements_args([user(_),user_attribute(_),
 		      object(_),object(_,_,_,_,_,_,_),
 		      object_attribute(_),policy_class(_),operation(_),operation(_,_),
-		      opset(_,_),composed_policy(_,_,_),assign(_,_),associate(_,_,_),
+		      opset(_,_),composed_policy(_,_,_),assign(_,_),associate(_,_,_),associate(_,_,_,_),
 		      connector(_)],cond(_,_)).
 
 conditional_policy_elements_args([associate(_,_,_)]).
@@ -60,6 +60,7 @@ un_init :-
 
 clear_policy :-
 	retractall(policy(_,_)), retractall(element(_,_)),
-	retractall(assign(_,_,_)), retractall(associate(_,_,_,_)),
+	retractall(assign(_,_,_)),
+	retractall(associate(_,_,_,_)), retractall(associate(_,_,_,_,_)),
 	param:setparam(current_policy,none),
 	true.

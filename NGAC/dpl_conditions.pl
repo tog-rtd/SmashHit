@@ -249,9 +249,9 @@ c_associate(Policy,UA,OpSet,OA) :- % hook for conditional associations
     ).
 
 %  c_associatep/5
-c_associatep(Policy,UA,OpSet,OA,Pur) :- % hook for conditional associations
-    associate(Policy,UA,OpSet,OA,Pur),
-    (   cond(Policy, ConditionExpr, associate(UA,OpSet,OA,Pur))
+c_associatep(Policy,UA,OpSet,Pur,OA) :- % hook for conditional associations
+    associate(Policy,UA,OpSet,Pur,OA),
+    (   cond(Policy, ConditionExpr, associate(UA,OpSet,Pur,OA))
     ->  evaluate_condition(ConditionExpr)
     ;   true
     ).

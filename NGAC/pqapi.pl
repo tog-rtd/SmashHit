@@ -73,71 +73,71 @@ pqapi_access(Request) :-
 	->  param:current_policy(Policy)
 	;   true
 	),
-	access_response(Policy,User,AR,Object,Purpose,CondAtom),
+	access_response(Policy,User,AR,Purpose,Object,CondAtom),
 	!.
 pqapi_access(_) :- audit_gen(policy_query, access(failure)).
 
 % access_response/6
-access_response(deny,User,AR,Object,Purpose,_) :- !,
-	access_deny(deny,User,AR,Object,Purpose).
-access_response(grant,User,AR,Object,Purpose,_) :- !,
-	access_grant(grant,User,AR,Object,Purpose).
+access_response(deny,User,AR,Purpose,Object,_) :- !,
+	access_deny(deny,User,AR,Purpose,Object).
+access_response(grant,User,AR,Purpose,Object,_) :- !,
+	access_grant(grant,User,AR,Purpose,Object).
 access_response(none,_,_,_,_,_) :- !,
 	std_resp_MS(failure,'no current policy','').
-access_response(Policy,User,AR,Object,Purpose,Cond) :-
+access_response(Policy,User,AR,Purpose,Object,Cond) :-
 	(   var(Cond)
-	->  access_response1(Policy,User,AR,Object,Purpose) % case #1 -condition
-	;   access_response2(Policy,User,AR,Object,Purpose,Cond) % case #2 +condition
+	->  access_response1(Policy,User,AR,Purpose,Object) % case #1 -condition
+	;   access_response2(Policy,User,AR,Purpose,Object,Cond) % case #2 +condition
 	).
 
 % access_response1/5 case #1 -condition
-access_response1(Policy,User,AR,Object,Purpose) :-
+access_response1(Policy,User,AR,Purpose,Object) :-
 	(   var(Purpose)
 	->  (   access_check(Policy,(User,AR,Object)) % DPLP #1a -purpose/-condition
-	    ->	access_grant(Policy,User,AR,Object,Purpose)
-	    ;	access_deny(Policy,User,AR,Object,Purpose)
+	    ->	access_grant(Policy,User,AR,Purpose,Object)
+	    ;	access_deny(Policy,User,AR,Purpose,Object)
 	    )
-	;   (   access_check(Policy,(User,AR,Object,Purpose)) % DPLP #1b +purpose/-condition
-	    ->	access_grant(Policy,User,AR,Object,Purpose)
-	    ;	access_deny(Policy,User,AR,Object,Purpose)
+	;   (   access_check(Policy,(User,AR,Purpose,Object)) % DPLP #1b +purpose/-condition
+	    ->	access_grant(Policy,User,AR,Purpose,Object)
+	    ;	access_deny(Policy,User,AR,Purpose,Object)
 	    )
 	).
 
 % access_response2/6 case #2 +condition
-access_response2(Policy,User,AR,Object,Purpose,CondAtom) :-
+access_response2(Policy,User,AR,Purpose,Object,CondAtom) :-
         read_term_from_atom(CondAtom,CondArg,[]),
 	(   compound(CondArg) ; atom(CondArg) ; is_list(CondArg) ), !,
 	(   var(Purpose)
 	->  (   access_check(Policy,(User,AR,Object),CondArg) % DPLP #2a -purpose/+condition
-	    ->	access_grant(Policy,User,AR,Object,Purpose)
-	    ;	access_deny(Policy,User,AR,Object,Purpose)
+	    ->	access_grant(Policy,User,AR,Purpose,Object)
+	    ;	access_deny(Policy,User,AR,Purpose,Object)
 	    )
-	;   (   access_check(Policy,(User,AR,Object,Purpose),CondArg) % DPLP #2b +purpose/+condition
-	    ->	access_grant(Policy,User,AR,Object,Purpose)
-	    ;	access_deny(Policy,User,AR,Object,Purpose)
+	;   (   access_check(Policy,(User,AR,Purpose,Object),CondArg) % DPLP #2b +purpose/+condition
+	    ->	access_grant(Policy,User,AR,Purpose,Object)
+	    ;	access_deny(Policy,User,AR,Purpose,Object)
 	    )
 	).
 
-access_grant(Policy,UserOrSession,AR,Object,Purpose) :- % DPLP
+access_grant(Policy,UserOrSession,AR,Purpose,Object) :- % DPLP
 	( sessions:is_session(UserOrSession,U), User = session(U) ; User = UserOrSession ),
 	% audit record will show session(<user>) if session invocation, otherwise just <user>
-	access_status(User,AR,Object,Purpose,Status),
+	access_status(User,AR,Purpose,Object,Status),
 	audit_gen(policy_query, access_granted(Policy,Status)),
 	param:grant_resp(Grant),
 	std_resp_M(success,Grant,Status). % for backward compatibility respond w/grant only
 
-access_deny(Policy,UserOrSession,AR,Object,Purpose) :- % DPLP
+access_deny(Policy,UserOrSession,AR,Purpose,Object) :- % DPLP
 	( sessions:is_session(UserOrSession,U), User = session(U) ; User = UserOrSession ),
 	% audit record will show session(<user>) if session invocation, otherwise just <user>
-	access_status(User,AR,Object,Purpose,Status),
+	access_status(User,AR,Purpose,Object,Status),
 	audit_gen(policy_query, access_denied(Policy,Status)),
 	param:deny_resp(Deny),
 	std_resp_M(success,Deny,Status). % for backward compatibility respond w/deny only
 
 %access_status(U,A,O,P,status(U,A,O)) :- var(P), !.
 %access_status(U,A,O,P,status(U,A,O,P)).
-access_status(U,A,O,P,(U,A,O)) :- var(P), !.
-access_status(U,A,O,P,(U,A,O,P)).
+access_status(U,A,P,O,(U,A,O)) :- var(P), !.
+access_status(U,A,P,O,(U,A,P,O)).
 
 % caccess - access with a condition and its actual parameters
 pqapi_caccess(Request) :- % added optional cond to access obsoleting this
@@ -145,8 +145,8 @@ pqapi_caccess(Request) :- % added optional cond to access obsoleting this
 	catch(
 	     http_parameters(Request,[user(User,[atom]),
 				 ar(AR,[atom]),
-				 object(Object,[atom]),
 				 purpose(Purpose,[atom,optional(true)]), % DPLP
+				 object(Object,[atom]),
 				 cond(CondAtom,[atom]),
 				 policy(Policy,[atom,optional(true)])
 				]),
@@ -156,7 +156,7 @@ pqapi_caccess(Request) :- % added optional cond to access obsoleting this
 	->  param:current_policy(Policy)
 	;   true
 	),
-	access_response(Policy,User,AR,Object,Purpose,CondAtom),
+	access_response(Policy,User,AR,Purpose,Object,CondAtom),
 	!.
 
 % accessm

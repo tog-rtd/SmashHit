@@ -19,30 +19,64 @@
 % Do not modify the following policies down to the % test policies
 % marker
 
-policy(cons1,cpol1,[
-  user_attribute(data_controllers),
-  object_attribute(data_subjects),
-  user_attribute('dc_[x]'),
-  assign('dc_[x]',data_controllers),
-  user_attribute('dp_[y][x]'),
-  assign('dp_[y][x]','dc_[x]'),
-  user('app_(a)[y][x]'),
-  assign('app_(a)[y][x]','dp_[y][x]'),
-  object_attribute('ds_[1]'),
-  assign('ds_[1]',data_subjects),
-  object('pdi_(1)[1]'),
-  object_attribute('pdc_{1}'),
-  assign('pdi_(1)[1]','pdc_{1}'),
-  assign('pdi_(1)[1]','ds_[1]'),
-  assign(data_controllers,cpol1),
-  assign(data_subjects,cpol1),
-  policy_class(cpol1),
-  assign(cpol1,'PM')%,
-  %connector('PM')
+policy(testdef_ex, testdef_ex, [
+  data_type('pdc{1}'),
+  data_type('pdc{2}'),
+  data_type('PersonalDataCategory'),
+  assign('pdc{1}','PersonalDataCategory'),
+  assign('pdc{2}','PersonalDataCategory'),
+
+  operation('dpo(u)'),
+  operation('dpo(w)'),
+  operation('dpo(z)'),
+  operation('DataProcessing'),
+  assign('dpo(u)','DataProcessing'),
+  assign('dpo(w)','DataProcessing'),
+  assign('dpo(z)','DataProcessing'),
+
+  purpose('p(v)'),
+  purpose('p(r)'),
+  purpose('p(s)'),
+  purpose('Purpose'),
+
+  assign('p(v)','Purpose'),
+  assign('p(r)','Purpose'),
+  assign('p(s)','Purpose')
 ], dplp).
 
-policy(consent_ex, cpol_ex, [
-  definitions(onto),
+policy(consent4, cpol, [], dplp).
+
+policy(consent3, cpol, [
+  dplp_policy_base(cpol, testdef_ex)
+], dplp).
+
+policy(consent2, cpol_ex, [
+  policy_class(cpol_ex),
+  assign(cpol_ex,'PM'),
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+  assign(data_controllers,cpol_ex),
+  assign(data_subjects,cpol_ex),
+  object_attribute('pdc{1}'),
+  object_attribute('pdc{2}'),
+  object_attribute('PersonalDataCategory'),
+  assign('pdc{1}','PersonalDataCategory'),
+  assign('pdc{2}','PersonalDataCategory'),
+  assign('PersonalDataCategory',cpol_ex),
+  operation('dpo(u)'), operation('dpo(w)'), operation('dpo(z)'),
+  opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
+
+  data_controller('dc[x]', []),
+  data_processor('dp[y][x]',[],'dc[x]'),
+  data_subject('ds[1]', ['pdi(1)[1]':'pdc{1}'], []),
+  data_item('pdi(2)[1]','pdc{2}','ds[1]'),
+  consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true),
+
+  data_subject('ds[2]', ['pdi(1)[2]':'pdc{1}'], []),
+  consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',['dp[y][x]_app1'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)
+],dplp).
+
+policy(consent_ex1, cpol_ex, [
   policy_class(cpol_ex),
   assign(cpol_ex,'PM'),
   user_attribute(data_controllers),
@@ -50,51 +84,83 @@ policy(consent_ex, cpol_ex, [
   assign(data_controllers,cpol_ex),
   assign(data_subjects,cpol_ex),
 
-  user_attribute('dc_[x]'),
-  assign('dc_[x]', data_controllers),
+  user_attribute('dc[x]'),
+  assign('dc[x]', data_controllers),
 
-  user('dp_[y][x]'),
-  assign('dp_[y][x]', 'dc_[x]'),
+  user('dp[y][x]'),
+  assign('dp[y][x]', 'dc[x]'),
 
-  object_attribute('ds_[1]'),
-  assign('ds_[1]', data_subjects),  
+  object_attribute('ds[1]'),
+  assign('ds[1]', data_subjects),  
 
-  object('pdi_(1)[1]'),
-  assign('pdi_(1)[1]', 'ds_[1]'),
-  assign('pdi_(1)[1]', 'pdc_{1}'),
+  object_attribute('ds[2]'),
+  assign('ds[2]', data_subjects),  
 
-  object_attribute('pdc_{1}'), % should not need this if defined in definitions
-  assign('pdc_{1}',cpol_ex), % should not need this if defined in definitions
+  object('pdi(1)[1]'),
+  assign('pdi{1)[1]', 'ds[1]'),
+  assign('pdi(1)[1]', 'pdc{1}'),
+
+  object('pdi(1)[2]'),
+  assign('pdi(1)[2]', 'ds[2]'),
+  assign('pdi(1)[2]', 'pdc{1}'),
+
+  object_attribute('pdc{1}'), % should not need this if defined in definitions
+  assign('pdc{1}',cpol_ex), % should not need this if defined in definitions
+
+  consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true),
 
   connector('PM')
   ], dplp).
 
+% consent1 is used by the consent_me_demo in procs_ngac
 policy(consent1,cpol1,[
-  definitions(onto),
-  opset( 'dp_[y][x]_app1', ['dpo_(w)','dpo_(z)'] ),
+  definitions(core_ontology),
+  opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
   
   user_attribute(data_controllers),
   object_attribute(data_subjects),
 
-  user_attribute('dc_[x]'),
-  assign('dc_[x]',data_controllers),
-  user('dp_[y][x]'),
-  assign('dp_[y][x]','dc_[x]'),
+  user_attribute('dc[x]'),
+  assign('dc[x]',data_controllers),
+  user('dp[y][x]'),
+  assign('dp[y][x]','dc[x]'),
 
-  object_attribute('ds_[1]'),
-  assign('ds_[1]',data_subjects),
+  object_attribute('ds[1]'),
+  assign('ds[1]',data_subjects),
 
-  object('pdi_(1)[1]'),
-  object_attribute('pdc_{1}'),
-  assign('pdc_{1}',cpol1),
-  assign('pdi_(1)[1]','pdc_{1}'),
-  assign('pdi_(1)[1]','ds_[1]'),
+  object('pdi(1)[1]'),
+  object_attribute('pdc{1}'),
+  assign('pdc{1}',cpol1),
+  assign('pdi(1)[1]','pdc{1}'),
+  assign('pdi(1)[1]','ds[1]'),
 
   assign(data_controllers,cpol1),
   assign(data_subjects,cpol1),
   policy_class(cpol1),
   assign(cpol1,'PM'),
   connector('PM')
+], dplp).
+
+policy(cons1,cpol1,[
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+  user_attribute('dc[x]'),
+  assign('dc[x]',data_controllers),
+  user_attribute('dp[y][x]'),
+  assign('dp[y][x]','dc[x]'),
+  user('app_(a)[y][x]'),
+  assign('app_(a)[y][x]','dp[y][x]'),
+  object_attribute('ds[1]'),
+  assign('ds[1]',data_subjects),
+  object('pdi(1)[1]'),
+  object_attribute('pdc{1}'),
+  assign('pdi(1)[1]','pdc{1}'),
+  assign('pdi(1)[1]','ds[1]'),
+  assign(data_controllers,cpol1),
+  assign(data_subjects,cpol1),
+  policy_class(cpol1),
+  assign(cpol1,'PM')%,
+  %connector('PM')
 ], dplp).
 
 policy(priv1,priv_pol1,[
@@ -116,7 +182,7 @@ policy(priv1,priv_pol1,[
         assign(data_controllers,priv_pol1),
 
         % interpretation: DS allows asc(dc1) to use asc(ds1) for [r] ops for purpose p11
-        associate(dc1, [r], ds1, p11),
+        associate(dc1, [r], p11, ds1),
 
         purpose(p12),
         purpose(p112),
@@ -142,7 +208,7 @@ policy(priv1,priv_pol1,[
 
         % access(priv1,(s1,r,pii1,p112))=grant %interpretation: service s1 wants to r op on pii1 for purpose p112
         % Proof:
-        %   associate(dc1, [r], ds1, p11)
+        %   associate(dc1, [r], p11, ds1)
         %   s1<=dc1, r<=[r], pii1<=ds1, p112<=p11
         % QED
 
@@ -182,8 +248,8 @@ policy('Policy (ap)','Privacy Access', [
 	operation(w,'File'),
 	associate('Group1',[w],'Project1'),
 	associate('Group2',[w],'Project2'),
-	associate('Group2',[r,w],'Gr2-Secret',p11),
-	associate('Division',[r],'Projects',p22),
+	associate('Group2',[r,w], p11,'Gr2-Secret'),
+	associate('Division',[r], p22,'Projects'),
 
         purpose(p12),
         purpose(p112),
@@ -804,31 +870,31 @@ policy(priv2,priv_pol2,[
         ],dplp).
 
 % general privacy definitions
-policy(onto, onto, [
-        object_attribute('PersonalDataCategory'),
-          object_attribute('External'), assign('External','PersonalDataCategory'),
-            object_attribute('Identifying'), assign('Identifying','External'),
-              object_attribute('Address'), assign('Address','Identifying'),
-                object_attribute('PhysicalAddress'), assign('PhysicalAddress','Address'),
-                  object_attribute('ConventionalStreetAddress'), assign('ConventionalStreetAddress','PhysicalAddress'),
-                object_attribute('StreetAddress'), assign('StreetAddress','Address'),
-              object_attribute('Name'), assign('Name','Identifying'),
-              object_attribute('OfficialID'), assign('OfficialID','Identifying'),
-              object_attribute('UID'), assign('UID','Identifying'),
-              object_attribute('Username'), assign('Username','Identifying'),
-              object_attribute('BirthDate'), assign('BirthDate','Identifying'),
-          object_attribute('Financial'), assign('Financial','PersonalDataCategory'),
-            object_attribute('Ownership'), assign('Ownership','Financial'),
-          object_attribute('Internal'), assign('Internal','PersonalDataCategory'),
-            object_attribute('Authenticating'), assign('Authenticating','Internal'),
-              object_attribute('Password'), assign('Password','Authenticating'),
-            object_attribute('Preference'), assign('Preference','Internal'),
-              object_attribute('PrivacyPreference'), assign('PrivacyPreference','Preference'),
-          object_attribute('Tracking'), assign('Tracking','PersonalDataCategory'),
-            object_attribute('Contact'), assign('Contact','Tracking'),
-              object_attribute('TelephoneNumber'), assign('TelephoneNumber','Contact'),
-              object_attribute('EmailAddress'), assign('EmailAddress','Contact'),
-            object_attribute('Location'), assign('Location','Tracking'),
+policy(core_ontology, core_ontology, [
+        data_type('PersonalDataCategory'),
+          data_type('External'), assign('External','PersonalDataCategory'),
+            data_type('Identifying'), assign('Identifying','External'),
+              data_type('Address'), assign('Address','Identifying'),
+                data_type('PhysicalAddress'), assign('PhysicalAddress','Address'),
+                  data_type('ConventionalStreetAddress'), assign('ConventionalStreetAddress','PhysicalAddress'),
+                data_type('StreetAddress'), assign('StreetAddress','Address'),
+              data_type('Name'), assign('Name','Identifying'),
+              data_type('OfficialID'), assign('OfficialID','Identifying'),
+              data_type('UID'), assign('UID','Identifying'),
+              data_type('Username'), assign('Username','Identifying'),
+              data_type('BirthDate'), assign('BirthDate','Identifying'),
+          data_type('Financial'), assign('Financial','PersonalDataCategory'),
+            data_type('Ownership'), assign('Ownership','Financial'),
+          data_type('Internal'), assign('Internal','PersonalDataCategory'),
+            data_type('Authenticating'), assign('Authenticating','Internal'),
+              data_type('Password'), assign('Password','Authenticating'),
+            data_type('Preference'), assign('Preference','Internal'),
+              data_type('PrivacyPreference'), assign('PrivacyPreference','Preference'),
+          data_type('Tracking'), assign('Tracking','PersonalDataCategory'),
+            data_type('Contact'), assign('Contact','Tracking'),
+              data_type('TelephoneNumber'), assign('TelephoneNumber','Contact'),
+              data_type('EmailAddress'), assign('EmailAddress','Contact'),
+            data_type('Location'), assign('Location','Tracking'),
 
         operation('DataProcessing'),
           operation('Adapt'), assign('Adapt','DataProcessing'),
@@ -884,34 +950,34 @@ policy(onto, onto, [
 
         ], dplp).
 
-policy(data_onto, onto, [
-        object_attribute('PersonalDataCategory'),
-          object_attribute('External'), assign('External','PersonalDataCategory'),
-            object_attribute('Identifying'), assign('Identifying','External'),
-              object_attribute('Address'), assign('Address','Identifying'),
-                object_attribute('PhysicalAddress'), assign('PhysicalAddress','Address'),
-                  object_attribute('ConventionalStreetAddress'), assign('ConventionalStreetAddress','PhysicalAddress'),
-                object_attribute('StreetAddress'), assign('StreetAddress','Address'),
-              object_attribute('Name'), assign('Name','Identifying'),
-              object_attribute('OfficialID'), assign('OfficialID','Identifying'),
-              object_attribute('UID'), assign('UID','Identifying'),
-              object_attribute('Username'), assign('Username','Identifying'),
-              object_attribute('BirthDate'), assign('BirthDate','Identifying'),
-          object_attribute('Financial'), assign('Financial','PersonalDataCategory'),
-            object_attribute('Ownership'), assign('Ownership','Financial'),
-          object_attribute('Internal'), assign('Internal','PersonalDataCategory'),
-            object_attribute('Authenticating'), assign('Authenticating','Internal'),
-              object_attribute('Password'), assign('Password','Authenticating'),
-            object_attribute('Preference'), assign('Preference','Internal'),
-              object_attribute('PrivacyPreference'), assign('PrivacyPreference','Preference'),
-          object_attribute('Tracking'), assign('Tracking','PersonalDataCategory'),
-            object_attribute('Contact'), assign('Contact','Tracking'),
-              object_attribute('TelephoneNumber'), assign('TelephoneNumber','Contact'),
-              object_attribute('EmailAddress'), assign('EmailAddress','Contact'),
-            object_attribute('Location'), assign('Location','Tracking')
+policy(data_core_ontology, core_ontology, [
+        data_type('PersonalDataCategory'),
+          data_type('External'), assign('External','PersonalDataCategory'),
+            data_type('Identifying'), assign('Identifying','External'),
+              data_type('Address'), assign('Address','Identifying'),
+                data_type('PhysicalAddress'), assign('PhysicalAddress','Address'),
+                  data_type('ConventionalStreetAddress'), assign('ConventionalStreetAddress','PhysicalAddress'),
+                data_type('StreetAddress'), assign('StreetAddress','Address'),
+              data_type('Name'), assign('Name','Identifying'),
+              data_type('OfficialID'), assign('OfficialID','Identifying'),
+              data_type('UID'), assign('UID','Identifying'),
+              data_type('Username'), assign('Username','Identifying'),
+              data_type('BirthDate'), assign('BirthDate','Identifying'),
+          data_type('Financial'), assign('Financial','PersonalDataCategory'),
+            data_type('Ownership'), assign('Ownership','Financial'),
+          data_type('Internal'), assign('Internal','PersonalDataCategory'),
+            data_type('Authenticating'), assign('Authenticating','Internal'),
+              data_type('Password'), assign('Password','Authenticating'),
+            data_type('Preference'), assign('Preference','Internal'),
+              data_type('PrivacyPreference'), assign('PrivacyPreference','Preference'),
+          data_type('Tracking'), assign('Tracking','PersonalDataCategory'),
+            data_type('Contact'), assign('Contact','Tracking'),
+              data_type('TelephoneNumber'), assign('TelephoneNumber','Contact'),
+              data_type('EmailAddress'), assign('EmailAddress','Contact'),
+            data_type('Location'), assign('Location','Tracking')
         ], dplp).
 
-policy(process_onto, onto, [
+policy(process_core_ontology, core_ontology, [
         operation('DataProcessing'),
           operation('Adapt'), assign('Adapt','DataProcessing'),
           operation('Align'), assign('Align','DataProcessing'),
@@ -933,7 +999,7 @@ policy(process_onto, onto, [
           operation('Use'), assign('Use','DataProcessing')
         ], dplp).
 
-policy(purpose_onto, onto, [
+policy(purpose_core_ontology, core_ontology, [
       purpose('Purpose'),
         purpose('CommercialInterest'), assign('CommercialInterest','Purpose'),
           purpose('SellDataToThirdParties'), assign('SellDataToThirdParties','CommercialInterest'),

@@ -1,28 +1,118 @@
 % stored "built-in" procedures
 
 %%	NGAC Command Procs
+proc(consent_meta, [
+		reset,
+		reset(policies,consent3),
+		addm(consent3,[data_controller('dc[x]',[])]),
+		addm(consent3,[data_processor('dp[y][x]', [], 'dc[x]')]),
+		addm(consent3,[data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[])]),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		addm(consent3,[consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',
+			['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)]),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		addm(consent3, [data_subject('ds[2]',[],[])]),
+		addm(consent3, [ data_item('pdi(1)[2]', 'pdc{1}', 'ds[2]') ]),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		addm(consent3, [consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',
+			['dpo(z)'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)]),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		delete_consent(cID_234),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		delete_consent(cID_567),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') )
+	]).
 proc(consent_ex, [
+	% policy(consent_ex1, cpol_ex, [
+	% 	policy_class(cpol_ex),
+	% 	assign(cpol_ex,'PM'),
+	% 	user_attribute(data_controllers),
+	% 	object_attribute(data_subjects),
+	% 	assign(data_controllers,cpol_ex),
+	% 	assign(data_subjects,cpol_ex),
+	  
+	% 	user_attribute('dc_[x]'),
+	% 	assign('dc_[x]', data_controllers),
+	  
+	% 	user('dp_[y][x]'),
+	% 	assign('dp_[y][x]', 'dc_[x]'),
+	  
+	% 	object_attribute('ds_[1]'),
+	% 	assign('ds_[1]', data_subjects),  
+	  
+	% 	object_attribute('ds_[2]'),
+	% 	assign('ds_[2]', data_subjects),  
+	  
+	% 	object('pdi_(1)[1]'),
+	% 	assign('pdi_(1)[1]', 'ds_[1]'),
+	% 	assign('pdi_(1)[1]', 'pdc_{1}'),
+	  
+	% 	object('pdi_(1)[2]'),
+	% 	assign('pdi_(1)[2]', 'ds_[2]'),
+	% 	assign('pdi_(1)[2]', 'pdc_{1}'),
+	  
+	% 	object_attribute('pdc_{1}'), % should not need this if defined in definitions
+	% 	assign('pdc_{1}',cpol_ex), % should not need this if defined in definitions
+	  
+	% 	consent(cID_567,'dc_[x]','dp_[y][x]','app(a,y,x)',['dpo_(z)'],'p_(v)','ds_[2]','pdi_(1)[2]','pdc_{1}',true),
+	  
+	% 	connector('PM')
+	% 	], dplp).
+		reset,
+		reset(policies,consent_ex),
+		policy_spec(consent_ex),
+		deletem(consent2,[],cID_234),
+		policy_spec(consent_ex),
+		deletem(consent2,[],cID_567),
+		policy_spec(consent_ex),
+		deletem(consent2,[],'pdi_(2)[1]'),
+		policy_spec(consent_ex),
+		deletem(consent2,[],'ds_[2]'),
+		policy_spec(consent_ex),
+		deletem(consent2,[],'ds_[1]'),
+		policy_spec(consent_ex),
+		deletem(consent2,[],'dp_[y][x]'),
+		policy_spec(consent_ex),
+		deletem(consent2,[],'dc_[x]'),
+	  	policy_spec(consent_ex)
 	]).
 
-proc(consent, [
-		reset(policies,all),
+proc(vartest, [getpol_v(X),echo(X),policy_spec_v('Policy (a)',Y), echo(Y)]).
+proc(vartest1, [getpol_v(X),echo(X),setpol('Policy (a)'),getpol_v(Y),echo(Y)]).
+proc(vartest2, [policy_spec_v('Policy (a)',Y), policy_spec_v('Policy (a)',X,Y), echo(X)]).
+proc(vartest3, [policy_spec_v('Policy (a)',X), echo(X), policy_spec_v('Policy (b)',Y), echo(Y), compare_v(X,Y,R), echo(R)]).
+
+proc(meta_demo, [
+	reset(policies,consent2),
+	setpol(consent2),
+	policy_spec,
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+	delete_consent(consent2, cID_234),
+	policy_spec,
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+	delete_consent(consent2, cID_567),
+	policy_spec,
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') )
+]).
+
+proc(consent_me_demo, [
+		reset(policies,consent1),
 		setpol(consent1),
 		policy_spec,
-		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') ),
+		access(consent1, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
 		add_consent(consent1,
-			consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',
-			['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)),
+			consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)),
 		policy_spec,
-		reset(policies,consent1),
+		access(consent1, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		delete_consent(consent1, cID_234),
 		policy_spec,
-		add_consent(consent1,
-			consent(cID_234,'dc_[x]','dp_[y][x]','app(a,y,x)',
-			['dpo_(z)'],'p_(v)','ds_[1]','pdi_(1)[1]','pdc_{1}',true)),
-		policy_spec,
-		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') ),
-		delete_consent(cID_234),
-		policy_spec,
-		access(consent1, ('dp_[y][x]', 'dpo_(z)', 'pdi_(1)[1]', 'p_(v)') )
+		access(consent1, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') )
 	]).
 
 proc(guiserver, [

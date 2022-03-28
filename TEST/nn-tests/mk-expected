@@ -19,3 +19,4 @@
 17-dplp-query.sh >17-expected$1
 18-consent-meta.sh >18-expected$1
 19-consent-example-full.sh >19-expected$1
+20-consent-example-full-meta.sh >20-expected$1

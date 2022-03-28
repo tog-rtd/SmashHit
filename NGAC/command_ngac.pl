@@ -1,18 +1,26 @@
+:- use_module(policyio).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % definition of the ngac tool interactive commands syntax
 % syntax( Signature, CommandSet ).
 %
 syntax(access(policy,(user,mode,object)),           ngac).
 syntax(access(policy,(user,mode,object),condition), ngac).
-syntax(access(policy,(user,mode,object,purpose)),   ngac). % DPLP
+syntax(access(policy,(user,mode,purpose,object)),   ngac). % DPLP
+syntax(add(policy,element),                         ngac).
 syntax(add_consent(consent_meta_element),           ngac). % DPLP
 syntax(add_consent(policy,consent_meta_element),    ngac). % DPLP
+syntax(addm(policy,elements),                       ngac).
+syntax(addm(policy,elements,name),                  ngac).
 syntax(aoa(user),				    ngac).
 syntax(aua(object),				    ngac).
 syntax(combine(p1,p2,p3),			    ngac).
 syntax(decl2imp(decl_file,imp_file),		                                  obsolete).
+syntax(delete(policy,element),                      ngac).
 syntax(delete_consent(consent_id),                  ngac).
 syntax(delete_consent(policy,consent_id),           ngac).
+syntax(deletem(policy,elements),                    ngac).
+syntax(deletem(policy,elements,name),               ngac).
 syntax(dpl_reinit,                                  ngac).
 syntax(dps(policy),                                                               obsolete).
 syntax(export_commands(imp_file),                                                 obsolete).
@@ -33,6 +41,10 @@ syntax(policy_spec,                                 ngac).
 syntax(policy_spec(policy),                         ngac).
 syntax(policy_spec(policy,policy_file),	            ngac).
 syntax(policy_spec(policy,policy_file,silent),      ngac).
+syntax(policy_spec_v(var),                          ngac).
+syntax(policy_spec_v(var,compare),                  ngac).
+syntax(policy_spec_v(policy,var),                   ngac).
+syntax(policy_spec_v(policy,var,compare),           ngac).
 syntax(server,				            ngac).
 syntax(server(port),				    ngac).
 syntax(server(port,atoken),			    ngac).
@@ -51,19 +63,26 @@ syntax(users(object,mode,condition),                ngac).
 % distinct from syntax so syntax can be called separately
 %
 semantics(access(P,(U,M,O))) :- !, ground(P), ground(U), ground(M), ground(O).
-semantics(access(P,(U,M,O,Pur))) :- !, ground(P), ground(U), ground(M), ground(O), ground(Pur). % DPLP
+semantics(access(P,(U,M,Pur,O))) :- !, ground(P), ground(U), ground(M), ground(O), ground(Pur). % DPLP
 semantics(access(P,(U,M,O),C)) :- !, ground(P), ground(U), ground(M), ground(O),
 	(   C==true ; compound(C) ; is_list(C) ), !.
+semantics(add(P,E)) :- !, ground(P), ground(E).
 semantics(add_consent(C)) :- !, ground(C), compound_name_arity(C,consent,10).
 semantics(add_consent(P,C)) :- !, ground(P), ground(C), compound_name_arity(C,consent,10).
+semantics(addm(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
+semantics(addm(P,Es,Nam)) :- !, ground(P), ground(Es), is_list(Es), ground(Nam).
 semantics(aoa(U)) :- !, ground(U).
 semantics(aua(O)) :- !, ground(O).
 semantics(combine(P1,P2,P3)) :- !, atom(P1), atom(P2), atom(P3).
 semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
+semantics(delete(P,E)) :- !, ground(P), ground(E).
 semantics(delete_consent(Cid)) :- !, atom(Cid).
 semantics(delete_consent(P,Cid)) :- !, ground(P), atom(Cid).
+semantics(deletem(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
+semantics(deletem(P,Es,Nam)) :- !, ground(P), ground(Es), is_list(Es), ground(Nam).
 semantics(dps(P)) :- !, ground(P).
 semantics(export_commands(C)) :- atom(C).
+semantics(getpol_v(P)) :- !, var(P).
 semantics(import(FS)) :- !, functor(FS,F,1), (F==policy ; (F==model ; (F==pm ; F==database ; F==erp))).
 semantics(import_policy(P)) :- atom(P).
 semantics(los(P)) :- !, ground(P).
@@ -77,6 +96,10 @@ semantics(policy_graph(P,F,G,R)) :- !, atom(P), atom(F), (G==pdf;G==png), intege
 semantics(policy_spec(P)) :- !, atom(P).
 semantics(policy_spec(P,F)) :- !, atom(P), atom(F).
 semantics(policy_spec(P,F,S)) :- !, atom(P), atom(F), S == silent.
+syntax(policy_spec_v(V)) :- !, var(V).
+syntax(policy_spec_v(V,C)) :- var(V), !, ground(C).
+syntax(policy_spec_v(P,V)) :- atom(P), !, var(V).
+syntax(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C).
 semantics(server(Port)) :- !, integer(Port).
 semantics(server(Port,AToken)) :- !, integer(Port), atom(AToken).
 semantics(server(Port,AToken,EToken)) :- !, integer(Port), atom(AToken), atom(EToken).
@@ -96,12 +119,21 @@ semantics(users(O,M,C)) :- !, atom(O), atom(M),(atom(C);compound(C);is_list(C)),
 help(access,    'Under current policy, user can access with mode the object.').
 help(access,	'Arg1 is a policy name.').
 help(access,    'Arg2 is and access triple, "(User, Mode, Object)".').
-help(access,    'Optionally, Arg2 is an access 4-tuple, "(User, Mode, Object, Purpose)".'). % DPLP
+help(access,    'Optionally, Arg2 is an access 4-tuple, "(User, Mode, Purpose, Object)".'). % DPLP
 help(access,    'Arg3 (opt) a condition predicate for conditional rules.').
+
+help(add,       'add element to policy.').
+help(add,   	'Arg1 is a policy name.').
+help(add,   	'Arg2 is a policy element.').
 
 help(add_consent,'add consent meta-element').
 help(add_consent,'Arg1 (opt) is a policy name.').
 help(add_consent,'Arg2 is a consent meta-element.').
+
+help(addm,       'add elements to policy.').
+help(addm,   	 'Arg1 is a policy name.').
+help(addm,   	 'Arg2 is a list of policy elements.').
+help(addm,       'Arg3 (opt) is a name to associate with the policy elements.').
 
 help(aoa,	'all object attributes for user in current policy and policy class').
 help(aoa,       'Arg is user identifier.').
@@ -115,9 +147,18 @@ help(combine,	'Arg3 is name of a new policy spec that is the combination of the 
 help(decl2imp,	'Arg1 is name of input file containing declarative policy spec.').
 help(decl2imp,	'Arg2 is name of output file to contain imperative policy spec.').
 
-help(delete_consent,'delete consent meta-element').
+help(delete,    'delete element from policy.').
+help(delete,   	'Arg1 is a policy name.').
+help(delete,   	'Arg2 is a policy element.').
+
+help(delete_consent,'delete consent meta-element.').
 help(delete_consent,'Arg1 (opt) is a policy name.').
 help(delete_consent,'Arg2 is a consent ID.').
+
+help(deletem,    'delete elements from policy.').
+help(deletem,    'Arg1 is a policy name.').
+help(deletem,    'Arg2 is a list of policy elements.').
+help(deletem,    'Arg3 (opt) is a name associated with a list of stored policy elements.').
 
 help(dpl_reinit,'Reinitialize declarative policy language module.').
 
@@ -132,6 +173,7 @@ help(export_commands, '"export" a policy in PM commands').
 % help(export_model, '"export" a model for comsumption by external tools').
 
 help(getpol,    'Show the name of the current policy.').
+help(getpol_v,  'Return the name of the current policy in the variable given as Arg1.').
 
 help(import,    'import a specified policy policy(file), pm(file), erp(file).').
 
@@ -182,8 +224,8 @@ help(users,     'Arg3 (optional after Arg2) is a condition predicate.').
 % commands with an entry in do that fail are reported
 % as unimplemented commands.
 %
-do(access(P,(U,M,O,Pur))) :- !, % DPLP
-	(   pdp:access_check(P,(U,M,O,Pur))
+do(access(P,(U,M,Pur,O))) :- !, % DPLP
+	(   pdp:access_check(P,(U,M,Pur,O))
 	->  writeln(grant)
 	;   writeln(deny)
 	).
@@ -199,6 +241,8 @@ do(access(P,(U,M,O),C)) :- !,
 	).
 do(add_consent(C)) :- !, param:current_policy(P), pap:add_consent(P,C,Stat), writeln(Stat).
 do(add_consent(P,C)) :- !, pap:add_consent(P,C,Stat), writeln(Stat).
+do(addm(P,Elts)) :- !, pap:add_named_policy_elements(_,P,Elts).
+do(addm(P,Elts,Name)) :- !, pap:add_named_policy_elements(Name,P,Elts).
 do(aoa(U)) :- !, param:current_policy(P), dpl:policy(P,PC),
 	pdp:aoa(P,U,PC,AOA), ui:display_list(AOA).
 do(aua(O)) :- !, param:current_policy(P), dpl:policy(P,PC),
@@ -209,6 +253,7 @@ do(combine(P1,P2,Presult)) :- !,
 do(decl2imp(D,I)) :- !,
 	 % same as import_policy+export_commands w/o making current policy
 	dpl:decl2imp(D,I).
+do(deletem(P,_Elts,Name)) :- !, pap:delete_named_policy_elements(Name,P,_).
 do(delete_consent(Cid)) :- !, param:current_policy(P), pap:delete_consent(P,consent(Cid)).
 do(delete_consent(P,Cid)) :- !, pap:delete_consent(P,consent(Cid)).
 do(dpl_reinit) :- !, dpl:reinit.
@@ -220,6 +265,7 @@ do(export(commands,CmdFile)) :- !,
 do(export_commands(PolicyName,CmdFile)) :-
 	dpl:save_as_cmds(PolicyName,CmdFile).
 do(getpol) :- !, param:current_policy(P), writeq(P), nl.
+do(getpol_v(P)) :- !, param:current_policy(P).
 do(import(pm(PM))) :- do(import_pm(PM)).
 do(import(policy(P))) :- do(import_policy(P)).
 do(import_pm(PM)) :- % import a PM imperative command file
@@ -304,6 +350,10 @@ do(policy_spec(P,Fileroot,Silent)) :- !, dpl:policy(P,_),
 	->  policyio:display_policy(P)
 	;   true
 	).
+do(policy_spec_v(V)) :- !, var(V), param:current_policy(P), do(policy_spec_v(P,V)).
+do(policy_spec_v(V,C)) :- var(V), !, ground(C), param:current_policy(P), do(policy_spec_v(P,V)), V==C.
+do(policy_spec_v(P,V)) :- atom(P), !, var(V), policyio:canonical_policy(P,V).
+do(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C), policyio:canonical_policy(P,V), V==C.
 do(server) :- !, server:server.
 do(server(Port)) :- !, server:server(Port).
 do(server(Port,AToken)) :- !, server:server(Port,AToken).

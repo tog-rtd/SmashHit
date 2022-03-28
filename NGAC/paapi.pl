@@ -66,15 +66,24 @@ paapi_add(Request) :-
 	).
 paapi_add(_) :- audit_gen(policy_admin, add(failure)).
 
-add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
-	% consent is intercepted here just to enable consent-specific returns
-	% consent is also accepted in addm
-	(   add_consent(Policy, Consent,_Status)
-	->  std_resp_MS(success,'consent added',Consent),
-	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
-	;   std_resp_MS(failure,'error adding consent', Consent),
-	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
-	).
+% add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
+% 	% consent is intercepted here just to enable consent-specific returns
+% 	% consent is also accepted in addm
+% 	(   add_consent(Policy, Consent,_Status)
+% 	->  std_resp_MS(success,'consent added',Consent),
+% 	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
+% 	;   std_resp_MS(failure,'error adding consent', Consent),
+% 	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
+% 	).
+
+add(Policy,PElement) :- isa_meta_element(PElement), !, policy(Policy,PC),
+	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PElement])
+	->	std_resp_MS(success,'meta-element added',PElement),
+		audit_gen(policy_admin, add(Policy, PElement, success))
+	;   std_resp_MS(failure,'error adding meta-element',PElement),
+		audit_gen(policy_admin, add(Policy, PElement, failure))
+).
+
 add(Policy,PElement) :-
 	(   %add_policy_element_restricted(Policy,PElement)
 		add_policy_element(Policy,PElement)
@@ -156,7 +165,7 @@ paapi_addm(_) :- audit_gen(policy_admin, addm(failure)).
 
 addm(Policy,EltListAtom,Name) :-
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      add_policy_elements_named(Policy,EltList,Name) )
+	      add_named_policy_elements(Name,Policy,EltList) )
           ->  std_resp_MS(success,'elements added',EltList),
               audit_gen(policy_admin, addm(Policy, 'elements added'))
 	  ;   std_resp_MS(failure,'error adding elements',EltListAtom),
@@ -167,10 +176,11 @@ addm(Policy,EltListAtom,Name) :-
 paapi_deletem(Request) :-
 	std_resp_prefix,
 	catch(
-	    (	http_parameters(Request,[policy(Policy,[atom]),
-				     policy_elements(EltListAtom,[atom,optional(true)]),
-				     name(Name,[atom,optional(true)]),
-				     token(Token,[atom])]),
+	    (	http_parameters(Request,[
+					policy(Policy,[atom]),
+				    policy_elements(EltListAtom,[atom,optional(true)]),
+				    name(Name,[atom,optional(true)]),
+				    token(Token,[atom])]),
 	        ( var(EltListAtom) ; var(Name) ) % one must be specified but not both
 	    ),
 	    _,
@@ -183,19 +193,20 @@ paapi_deletem(Request) :-
 paapi_deletem(_) :- audit_gen(policy_admin, deletem(failure)).
 
 deletem(_Policy,EltListAtom,Name) :- ground(EltListAtom), ground(Name), !, fail.
+	% TODO - return error for both being specified
 deletem(Policy,EltListAtom,Name) :- ground(EltListAtom), var(Name), !,
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      delete_policy_elements_named(Policy,EltList,Name) )
+	      delete_named_policy_elements(Name,Policy,EltList) )
           ->  std_resp_MS(success,'elements deleted',EltList),
               audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
 	  ;   std_resp_MS(failure,'error deleting elements',EltListAtom),
               audit_gen(policy_admin, deletem(Policy, 'error deleting elements'))
 	).
 deletem(Policy,EltListAtom,Name) :- var(EltListAtom), ground(Name), !,
-	(   delete_policy_elements_named(Policy,_,Name)
-	->  std_resp_MS(success,'elements deleted',EltListAtom),
+	(   delete_named_policy_elements(Name,Policy,_)
+	->  std_resp_MS(success,'elements deleted',Policy:Name),
 		audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
-	;   std_resp_MS(failure,'error deleting elements',EltListAtom),
+	;   std_resp_MS(failure,'error deleting elements',Policy:Name),
 		audit_gen(policy_admin, deletem(Policy, 'error deleting elements'))
 	).
 
@@ -242,7 +253,7 @@ setpol(P) :-
 	).
 
 % loadpol
-paapi_loadpol(Request) :- % load policy
+paapi_loadpol(Request) :- % load policy from a file
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policyfile(Pfile,[atom]),token(Token,[atom])]),
@@ -254,7 +265,6 @@ paapi_loadpol(Request) :- % load policy
 	;   true
 	).
 paapi_loadpol(_) :- audit_gen(policy_admin, loadpol(failure)).
-
 
 loadpol(Pfile) :-
 	(   ( exists_file(Pfile), load_policy(Pfile,PolicyName) )

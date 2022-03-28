@@ -8,32 +8,32 @@ run test cases for priv1, expect grant grant deny deny grant deny
 {
   "respStatus":"success",
   "respMessage":"grant",
-  "respBody":"s1,r,pii1,p112"
+  "respBody":"s1,r,p112,pii1"
 }
 {
   "respStatus":"success",
   "respMessage":"grant",
-  "respBody":"s1,r,pii1,p111"
+  "respBody":"s1,r,p111,pii1"
 }
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"s1,r,pii1,p12"
+  "respBody":"s1,r,p12,pii1"
 }
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"s1,w,pii1,p111"
+  "respBody":"s1,w,p111,pii1"
 }
 {
   "respStatus":"success",
   "respMessage":"grant",
-  "respBody":"s1,r,pii1,p11"
+  "respBody":"s1,r,p11,pii1"
 }
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"s1,r,pii1,p221"
+  "respBody":"s1,r,p221,pii1"
 }
 set policy to Policy (ap)
 {
@@ -45,17 +45,17 @@ run test cases for Policy (ap), expect grant deny deny
 {
   "respStatus":"success",
   "respMessage":"grant",
-  "respBody":"u2,w,o3,p112"
+  "respBody":"u2,w,p112,o3"
 }
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"u2,w,o3,p21"
+  "respBody":"u2,w,p21,o3"
 }
 {
   "respStatus":"success",
   "respMessage":"deny",
-  "respBody":"u2,w,o3,p1"
+  "respBody":"u2,w,p1,o3"
 }
 policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat unsat
 {

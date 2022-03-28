@@ -13,11 +13,11 @@
 % access_check/2 is the standard query triple (U,A,O) under policy P
 % access_check/3 is a "condional query" with condition pred and params
 %
-access_check(P, (S,M,O,Pur)) :- !, % DPLP
+access_check(P, (S,M,Pur,O)) :- !, % DPLP
 	atom(P), atom(S), atom(M), atom(O), atom(Pur),
 	(   sessions:is_session(S,U) ; U = S  ), !, atom(U),
 	% report_event(access_check_event), % http or internal
-	access_check1(P,(U,M,O,Pur)).
+	access_check1(P,(U,M,Pur,O)).
 
 access_check(P, (S,M,O)) :- !,
 	atom(P), atom(S), atom(M), atom(O),
@@ -25,12 +25,12 @@ access_check(P, (S,M,O)) :- !,
 	% report_event(access_check_event), % http or internal
 	access_check1(P,(U,M,O)).
 
-access_check1(all, (U,M,O,Pur)) :- !, % DPLP
+access_check1(all, (U,M,Pur,O)) :- !, % DPLP
 	param:all_composition(V),
-	policy_dpc(all:V, (U,M,O,Pur)).
-access_check1(P, (U,M,O,Pur)) :- !, % DPLP
+	policy_dpc(all:V, (U,M,Pur,O)).
+access_check1(P, (U,M,Pur,O)) :- !, % DPLP
 	policy(P,PC),
-	policy_dpc(P:PC,(U,M,O,Pur)), !. % note policy_dpc/2
+	policy_dpc(P:PC,(U,M,Pur,O)), !. % note policy_dpc/2
 
 access_check1(all, (U,M,O)) :- !,
 	param:all_composition(V),
@@ -39,7 +39,7 @@ access_check1(P, (U,M,O)) :- !,
 	policy(P,PC),
 	policy_dpc(P:PC,(U,M,O)), !. % note policy_dpc/2
 
-access_check(_P, (_S,_M,_O,_Pur), _CA) :- !, fail. % DPLP conditional unimplemented
+access_check(_P, (_S,_M,_Pur,_O), _CA) :- !, fail. % DPLP conditional unimplemented
 
 access_check(P, (S,M,O), CA) :- !,
 	atom(P), atom(S), atom(M), atom(O), (is_list(CA);compound(CA);atom(CA)),
@@ -81,7 +81,7 @@ access_check1c(P, (U,M,O), CA) :- !,
 %   a pc qualifies if it governs O qualified_pc_for_o
 %
 
-policy_dpc(all:_X,(_U,_AR,_O,_Pur)) :- !, fail. % DPLP - complete to enable 'all' (4-tuples first!)
+policy_dpc(all:_X,(_U,_AR,_Pur,_O)) :- !, fail. % DPLP - complete to enable 'all' (4-tuples first!)
 policy_dpc(all:p_o,(U,AR,O)) :- !,
 	forall( (dpl:policy(P,Pr), qualified_p_for_o(P:Pr,O)),
 		 policy_dpc(P:Pr,(U,AR,O)) ).
@@ -121,12 +121,12 @@ policy_dpc(all:xpc_uo,(U,AR,O)) :- !,
 		(format('policy ~q, policy classes ~q~n',[P,PCs]),
 		 policy_dpc(P:Pr,(U,AR,O))) ).
 % the core test - policy_dpc/2
-policy_dpc(P:Pr,(U,AR,E,Pur)) :- !, atom(P), atom(Pur), % DPLP CHANGED CUT
+policy_dpc(P:Pr,(U,AR,Pur,E)) :- !, atom(P), atom(Pur), % DPLP CHANGED CUT
 	policy(P,Pr),
 	findall(PC, (policy_class(P:Pr,PC), is_contained_in_pc(P:Pr,E,PC)), PCs),
 	(   PCs == []
 	->  fail % !, fail
-	;   foreach( member(Pc,PCs), policy_dpc_body(P:Pr,(U,AR,E,Pur),Pc) )
+	;   foreach( member(Pc,PCs), policy_dpc_body(P:Pr,(U,AR,Pur,E),Pc) )
 	).
 policy_dpc(P:Pr,(U,AR,E)) :- !, atom(P), % DPLP CHANGED CUT
 	% All of the policy classes within the specified policy that
@@ -150,8 +150,8 @@ policy_dpc(P:Pr,(U,AR,E),CA) :- !, atom(P), % DPLP CHANGED CUT
 	).
 
 % body - policy_dpc_body/3
-policy_dpc_body(P:Pr,(U,AR,E,Pur),PC) :- !, % DPLP - note c_associatep/5
-	c_associatep(P:Pr,UA,ARs,AT,APur),
+policy_dpc_body(P:Pr,(U,AR,Pur,E),PC) :- !, % DPLP - note c_associatep/5
+	c_associatep(P:Pr,UA,ARs,APur,AT),
     ar_check(P:Pr,AR,ARs),
 	is_contained_in(P:Pr,UA,PC),
 	is_contained_in_pc(P:Pr,AT,PC),

@@ -165,15 +165,15 @@ tcc17 :- \+ access_check('CondPolicy1',(u2,r,o4)).
 tcc18 :- \+ access_check('CondPolicy1',(u2,w,o4)).
 
 % DPLP tests
-tcp01 :- access_check(priv1, (s1,r,pii1,p112)).
-tcp02 :- access_check(priv1, (s1,r,pii1,p111)).
-tcp03 :- \+ access_check(priv1, (s1,r,pii1,p12)).
-tcp04 :- \+ access_check(priv1, (s1,w,pii1,p111)).
-tcp05 :- access_check(priv1, (s1,r,pii1,p11)).
-tcp06 :- \+ access_check(priv1, (s1,r,pii1,p221)).
-tcp07 :- access_check('Policy (ap)', (u2,w,o3,p112)).
-tcp08 :- \+ access_check('Policy (ap)', (u2,w,o3,p21)).
-tcp09 :- \+ access_check('Policy (ap)', (u2,w,o3,p1)).
+tcp01 :- access_check(priv1, (s1,r,p112,pii1)).
+tcp02 :- access_check(priv1, (s1,r,p111,pii1)).
+tcp03 :- \+ access_check(priv1, (s1,r,p12,pii1)).
+tcp04 :- \+ access_check(priv1, (s1,w,p111,pii1)).
+tcp05 :- access_check(priv1, (s1,r,p11,pii1)).
+tcp06 :- \+ access_check(priv1, (s1,r,p221,pii1)).
+tcp07 :- access_check('Policy (ap)', (u2,w,p112,o3)).
+tcp08 :- \+ access_check('Policy (ap)', (u2,w,p21,o3)).
+tcp09 :- \+ access_check('Policy (ap)', (u2,w,p1,o3)).
 
 % privacy_sat
 tcp21 :- privacy_sat(testdefs, privacy_policy(dc1, [(p112,dpo22,dt1)]),
