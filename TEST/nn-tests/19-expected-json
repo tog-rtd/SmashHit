@@ -5,11 +5,6 @@ reset conditions and policy before tests are run
   "respMessage":"reset conditions",
   "respBody":"all"
 }
-{
-  "respStatus":"success",
-  "respMessage":"reset policies",
-  "respBody":"consent_ex"
-}
 set up the consent_ex policy root elements
 {
   "respStatus":"success",

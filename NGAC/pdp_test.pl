@@ -143,6 +143,7 @@ tcvc07 :- \+ access_check('Vehicle Combined Policy', ('Ana',w,'VIN-3001 Shift Si
 tcvc08 :- \+ access_check('Vehicle Combined Policy', ('Ana',w,'VIN-1001 Trip Signals')).
 tcvc09 :- \+ access_check('Vehicle Combined Policy', ('Ana',w,'VIN-3001 Trip Signals')).
 
+% conditional access checks without purposes
 % need to manipulate the condition variables so these results are
 % subject to controlled simulated conditions
 %
@@ -165,6 +166,7 @@ tcc17 :- \+ access_check('CondPolicy1',(u2,r,o4)).
 tcc18 :- \+ access_check('CondPolicy1',(u2,w,o4)).
 
 % DPLP tests
+% access checks with purposes
 tcp01 :- access_check(priv1, (s1,r,p112,pii1)).
 tcp02 :- access_check(priv1, (s1,r,p111,pii1)).
 tcp03 :- \+ access_check(priv1, (s1,r,p12,pii1)).
@@ -205,3 +207,6 @@ tcp29 :- privacy_sat(testdefs, privacy_policy(dc1, [(p112,dpo1,dt1),(p112,dpo21,
 
 tcp30 :- privacy_sat(testdefs, privacy_policy(dc1, [(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)]),
 		     privacy_preference(ds1, [(p11,dpo22,di1),(p112,dpo1,di1)]), (dc1,ds1):[(p112,dpo21,dt1),(p111,dpo12,dt1)] ).
+
+%
+tcp40 :- true.

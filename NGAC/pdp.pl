@@ -254,6 +254,10 @@ policy_dps(P:Pr,DPS) :-
 %
 %   DPOprs preference triples
 %   DPOpls policy triples
+%
+% This implementation depends only on a definitions policy
+% TODO - this needs to be extended for evaluation within the context of a policy not just definitions
+% TODO - this could be easily done by changing Defs:Defs in searches below to Defs:_Defs
 
 privacy_sat(Defs, Ppol, Pprf,(DCid,DSid):NonSatPs) :-
 	privacy_policy(Defs, Ppol, DCid, DPOpls),
@@ -262,23 +266,29 @@ privacy_sat(Defs, Ppol, Pprf,(DCid,DSid):NonSatPs) :-
 
 
 exists_pref(Defs, P, Prefs) :-
-	P = (Pp,Op,DTp), C = (Pc,Oc,DIc),
+	% P is an element of a DP's privacy policy (purpose,op,datatype)
+	P = (Pp,Op,DTp),
+	% C is an element of a DS's privacy preference (purpose,op,dataitem)
+	C = (Pc,Oc,DIc),
 	member( C, Prefs ),
 
 	% check purpose containment and op containment
 	is_contained_star(Defs:Defs,Pp,Pc), % Defs:purposes
-	is_contained_star(Defs:Defs,Op,Oc), % Defs:operations
+	is_contained_star(Defs:Defs,Op,Oc), % Defs:operations % TODO - extend for Apps
 
-	element(Defs:Defs, data_type(DTp,_)), % Defs:types
+	element(Defs:Defs, data_type(DTp,_) ), % Defs:types
 	element(Defs:Defs, object(DIc,DTp) ), % Defs:objects
 	!. % only one solution needed for each call
 
 % checkers:
 
-privacy_policy(Defs, privacy_policy(DCid,DPOpls), DCid, DPOpls) :-
+privacy_policy(Defs, privacy_policy(DCid,DPOpls), DCid, DPOpls) :- !,
+	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
+privacy_policy(Defs, privacy_policy(DCid,Apps,DPOpls), DCid, DPOpls) :- !,
+	valid_app_list(Apps),
 	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
 
-privacy_preference(Defs, privacy_preference(DSid,DPOprs), DSid, DPOprs) :-
+privacy_preference(Defs, privacy_preference(DSid,DPOprs), DSid, DPOprs) :- !,
 	data_subject(Defs, DSid), valid_preference_list(Defs, DPOprs).
 
 valid_policy_list(Defs, PLs) :- is_list(PLs),
@@ -299,9 +309,11 @@ valid_preference_list(Defs, PRs) :- is_list(PRs),
 	        )
 	      ).
 
+valid_app_list(Apps) :- is_list(Apps),
+	forall( member(A,Apps), (A=opset(_AppName,Ops), is_list(Ops)) ).
+
 data_subject(Defs, DS) :- atom(DS), % Defs:subjects
 	object_attribute(Defs:Defs, DS).
-
 
 data_controller(Defs, DC) :- atom(DC), % Defs:controllers
 	user_attribute(Defs:Defs, DC).

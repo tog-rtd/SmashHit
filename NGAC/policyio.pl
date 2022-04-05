@@ -197,13 +197,67 @@ canonical_policy(P,Pstruct) :- policies:policy(P,PC,PT), !,
 		As,A3s,A4s,CondEs,PPls,PPrs,PCs,[connector('PM')]],PE),
 	true.
 
-% new display_policy/1 uses canonical_policy which has other uses too
-display_policy(P) :- canonical_policy(P,Pstruct), !,
+% canonical_meta/2 puts only the meta-elements of a policy into canonical form
+canonical_meta(P,Pstruct) :- policies:policy(P,PC,PT), !,
+	Pstruct = policy(P,PC,PM,PT),
+	findall(dplp_policy_base(PC, REFS), element(P:PC,dplp_policy_base(PC, REFS)), PBs),
+	findall(data_controller(DC_ID,DC_POLICY), element(P:PC,data_controller(DC_ID,DC_POLICY)), DCs),
+	findall(data_processor(DP_ID,DP_POLICY,DC_ID), element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID)), DPs),
+	findall(application(APP_ID, DPOs, DP_ID), element(P:PC,application(APP_ID, DPOs, DP_ID)), As),
+	findall(data_subject(DS_ID,DS_PDIs,DS_PREFERENCE), element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)), DSs),
+	findall(data_item(PDI_ID,PDC_ID,DS_ID), element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID)), DIs),
+	findall(consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
+		element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)), Cs),
+	append([PBs,DCs,DPs,As,DSs,DIs,Cs], PM).
+
+% display_policy/1 uses canonical_policy which has other uses too
+display_policy(P) :- canonical_policy(P,Pstruct), !, display_canonical(Pstruct).
+
+% display_policy/2 second arg tells whether to display the meta-elements
+display_policy(P,meta) :- !,
+	canonical_policy(P,policy(P,PC,PE,PT)), canonical_meta(P,policy(P,PC,ME,PT)),
+	insert_meta(PE,ME,All),
+	display_canonical(policy(P,PC,All,PT)).
+display_policy(P,metaonly) :- !, display_meta(P:_).
+display_policy(P,_) :- display_policy(P).
+
+% insert_meta(Es,Ms,As)
+insert_meta([],Ms,Ms).
+insert_meta([E|Es],Ms,As) :- ( functor(E,policy_class,1) ; functor(E,connector,1) ), !, append(Ms,[E|Es],As).
+insert_meta([E|Es],Ms,[E|As]) :- !,	insert_meta(Es,Ms,As).
+
+display_canonical(Pstruct) :- 
 	Pstruct = policy(P,PC,PE,PT),
 	format('policy(~q, ~q, [~n', [P,PC]),
 	forall( member(E,PE), (E=connector(_) -> format('  ~q',E) ; format('  ~q,~n',E)) ),
 	format('~n], ~q).~n',PT).
 
+display_meta(P:PC) :-
+	policies:policy(P,PC,PT), % policy(P,PC,_PE,_PT),
+	canonical_meta(P,policy(P,PC,PM,PT)),
+	format('policy(~q, ~q, [~n', [P,PC]),
+	forall( member(E,PM), format('  ~q,~n',E)),
+	format('  policy_class(~q)',PC),
+	format('~n], ~q).~n',PT).
+
+% display_meta_old(P:PC) :-
+% 	policies:policy(P,PC,PT), % policy(P,PC,_PE,_PT),
+% 	format('policy(~q, ~q, [~n', [P,PC]),
+% 	forall(element(P:PC,dplp_policy_base(PC, REFS)),
+% 	format('  dplp_policy_base(~q,~q),~n',[PC, REFS])),
+% 	forall(element(P:PC,data_controller(DC_ID,DC_POLICY)),
+% 	format('  data_controller(~q,~q),~n',[DC_ID,DC_POLICY])),
+% 	forall(element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID)),
+% 	format('  data_processor(~q,~q,~q),~n',[DP_ID,DP_POLICY,DC_ID])),
+% 	forall(element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)),
+% 	format('  data_subject(~q,~q,~q),~n',[DS_ID,DS_PDIs,DS_PREFERENCE])),
+% 	forall(element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID)),
+% 	format('  data_item(~q,~q,~q),~n',[PDI_ID,PDC_ID,DS_ID])),
+% 	forall(element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)),
+% 	format('  consent(~q,~q,~q,~q,~q,~q,~q,~q,~q,~q),~n',
+% 			[ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint])),
+% 	format('  policy_class(~q)',PC),
+% 	format('~n], ~q).~n',PT).
 
 % DISPLAY POLICY
 display_policy_old(P) :- policy(P,PC), !,

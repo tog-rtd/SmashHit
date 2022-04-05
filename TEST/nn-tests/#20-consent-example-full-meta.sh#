@@ -4,7 +4,7 @@ echo 'demo extended consent policy with incremental policy/condition build using
 
 echo 'reset conditions and policy before tests are run'
 curl -s -G "http://127.0.0.1:8001/paapi/resetcond" --data-urlencode "token=admin_token"
-#curl -s -G "http://127.0.0.1:8001/paapi/reset" --data-urlencode "token=admin_token" --data-urlencode "domain=policy" --data-urlencode "name=consent_ex"
+#Curl -s -G "http://127.0.0.1:8001/paapi/reset" --data-urlencode "token=admin_token" --data-urlencode "domain=policy" --data-urlencode "name=consent_ex"
 
 Echo 'set up the consent_ex policy root elements'
 curl -s -G "http://127.0.0.1:8001/paapi/loadi" --data-urlencode "policyspec=policy(consent_ex,cpol_ex,[

@@ -17,6 +17,8 @@ syntax(aua(object),				    ngac).
 syntax(combine(p1,p2,p3),			    ngac).
 syntax(decl2imp(decl_file,imp_file),		                                  obsolete).
 syntax(delete(policy,element),                      ngac).
+syntax(deletem(policy,elements),                    ngac).
+syntax(delete_name(policy,name),                    ngac).
 syntax(delete_consent(consent_id),                  ngac).
 syntax(delete_consent(policy,consent_id),           ngac).
 syntax(deletem(policy,elements),                    ngac).
@@ -37,6 +39,7 @@ syntax(policy_graph(policy),			    ngac).
 syntax(policy_graph(policy,graph_file),	            ngac).
 syntax(policy_graph(policy,graph_file,graphics)    ,ngac).
 syntax(policy_graph(policy,graph_file,graphics,dpi),ngac).
+syntax(policy_meta(policy),                         ngac).
 syntax(policy_spec,                                 ngac).
 syntax(policy_spec(policy),                         ngac).
 syntax(policy_spec(policy,policy_file),	            ngac).
@@ -76,6 +79,8 @@ semantics(aua(O)) :- !, ground(O).
 semantics(combine(P1,P2,P3)) :- !, atom(P1), atom(P2), atom(P3).
 semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
 semantics(delete(P,E)) :- !, ground(P), ground(E).
+semantics(deletem(P,Es)) :- !, ground(P), ground(Es).
+semantics(delete_name(P,N)) :- !, ground(P), atom(N).
 semantics(delete_consent(Cid)) :- !, atom(Cid).
 semantics(delete_consent(P,Cid)) :- !, ground(P), atom(Cid).
 semantics(deletem(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
@@ -89,11 +94,12 @@ semantics(los(P)) :- !, ground(P).
 semantics(minaoa(U)) :- !, ground(U).
 semantics(newpol(ID)) :- !, ground(ID).
 semantics(newpol(T,ID)) :- !, ground(ID), ground(T). % synonym for setpol
+semantics(policy_meta(P)) :-  !, atom(P).
 semantics(policy_graph(P)) :- !, atom(P).
 semantics(policy_graph(P,F)) :- !, atom(P), atom(F).
 semantics(policy_graph(P,F,G)) :- !, atom(P), atom(F), (G==pdf;G==png).
 semantics(policy_graph(P,F,G,R)) :- !, atom(P), atom(F), (G==pdf;G==png), integer(R).
-semantics(policy_spec(P)) :- !, atom(P).
+semantics(policy_spec(P)) :- !, (atom(P) ; compound_name_arity(P,policy,4)).
 semantics(policy_spec(P,F)) :- !, atom(P), atom(F).
 semantics(policy_spec(P,F,S)) :- !, atom(P), atom(F), S == silent.
 syntax(policy_spec_v(V)) :- !, var(V).
@@ -151,6 +157,10 @@ help(delete,    'delete element from policy.').
 help(delete,   	'Arg1 is a policy name.').
 help(delete,   	'Arg2 is a policy element.').
 
+help(deletem,   'delete list of elements.').
+
+help(delete_name,'delete named list of elements.').
+
 help(delete_consent,'delete consent meta-element.').
 help(delete_consent,'Arg1 (opt) is a policy name.').
 help(delete_consent,'Arg2 is a consent ID.').
@@ -196,6 +206,9 @@ help(policy_graph, 'Arg1 (opt) names a currently loaded policy (or "current_poli
 help(policy_graph, 'Arg2 (opt) file name root for dot and png files.').
 help(policy_graph, 'Arg3 (opt) graphics output file type (pdf/png).').
 help(policy_graph, 'Arg4 (opt with Arg3) dots-per-inch setting, e.g. 300.').
+
+help(policy_meta,  'Display meta-elements of policy.').
+help(policy_meta,  'Arg1 names a currently loaded policy to display,').
 
 help(policy_spec, 'Display the current or named policy,').
 help(policy_spec, 'Arg1 (opt) names a currently loaded policy (or "current_policy") to display,').
@@ -253,7 +266,10 @@ do(combine(P1,P2,Presult)) :- !,
 do(decl2imp(D,I)) :- !,
 	 % same as import_policy+export_commands w/o making current policy
 	dpl:decl2imp(D,I).
-do(deletem(P,_Elts,Name)) :- !, pap:delete_named_policy_elements(Name,P,_).
+do(delete(P,Elt)) :- !, dpl:delete_PE(P:_,Elt).
+%do(deletem(P,_Elts,Name)) :- !, pap:delete_named_policy_elements(Name,P,_).
+do(deletem(P,Elts)) :- !, dpl:delete_PEs(P:_,Elts).
+do(delete_name(P,Name)) :- !, dpl:delete_named(P:_,Name).
 do(delete_consent(Cid)) :- !, param:current_policy(P), pap:delete_consent(P,consent(Cid)).
 do(delete_consent(P,Cid)) :- !, pap:delete_consent(P,consent(Cid)).
 do(dpl_reinit) :- !, dpl:reinit.
@@ -287,6 +303,7 @@ do(ngac) :- !, user_mode(M), retractall(user_mode(_)), assert(user_mode(ngac)),
 	param:prompt_string(ngac,Prompt), param:setparam(prompt_string,Prompt),
 	rem_commands(M), add_commands(ngac), banner(ngac).
 do(pmcmd) :- !, (interactive(true) -> tl(pmcmd) ; true).
+do(policy_meta(P)) :- atom(P), !, policyio:display_meta(P:_).
 do(policy_graph) :- !, do(policy_graph(current_policy)).
 do(policy_graph(current_policy)) :- !, param:current_policy(P), do(policy_graph(P)).
 do(policy_graph(current_policy,Fileroot)) :- !, param:current_policy(P), do(policy_graph(P,Fileroot)).
@@ -328,7 +345,8 @@ do(policy_spec) :- !, do(policy_spec(current_policy)).
 do(policy_spec(current_policy)) :- !, param:current_policy(P), do(policy_spec(P,no_file_output,false)).
 do(policy_spec(current_policy,Fileroot)) :- !, param:current_policy(P), do(policy_spec(P,Fileroot,false)).
 do(policy_spec(current_policy,Fileroot,Silent)) :- !, param:current_policy(P), do(policy_spec(P,Fileroot,Silent)).
-do(policy_spec(P)) :- !, do(policy_spec(P,no_file_output,false)).
+do(policy_spec(P)) :- atom(P), !, do(policy_spec(P,no_file_output,false)).
+do(policy_spec(P)) :- compound_name_arity(P,policy,4), !, policyio:display_canonical(P).
 do(policy_spec(P,Fileroot)) :- !, do(policy_spec(P,Fileroot,false)).
 do(policy_spec(P,Fileroot,Silent)) :- !, dpl:policy(P,_),
 	(   Fileroot \== no_file_output
@@ -347,7 +365,7 @@ do(policy_spec(P,Fileroot,Silent)) :- !, dpl:policy(P,_),
 	;   true
 	),
 	(   Silent == false
-	->  policyio:display_policy(P)
+	->  policyio:display_policy(P,meta)
 	;   true
 	).
 do(policy_spec_v(V)) :- !, var(V), param:current_policy(P), do(policy_spec_v(P,V)).

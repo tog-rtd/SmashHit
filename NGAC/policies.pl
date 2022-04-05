@@ -20,9 +20,10 @@
 % marker
 
 policy(testdef_ex, testdef_ex, [
-  data_type('pdc{1}'),
-  data_type('pdc{2}'),
-  data_type('PersonalDataCategory'),
+  object_attribute('pdc{1}'), % data_type('pdc{1}'),
+  object_attribute('pdc{2}'), % data_type('pdc{2}'),
+  object_attribute('PersonalDataCategory'), % data_type('PersonalDataCategory'),
+  
   assign('pdc{1}','PersonalDataCategory'),
   assign('pdc{2}','PersonalDataCategory'),
 
@@ -44,13 +45,37 @@ policy(testdef_ex, testdef_ex, [
   assign('p(s)','Purpose')
 ], dplp).
 
-policy(consent4, cpol, [], dplp).
+policy(dplp_min, pc, [], dplp).
 
-policy(consent3, cpol, [
+policy(dplp_base, cpol, [
   dplp_policy_base(cpol, testdef_ex)
 ], dplp).
 
-policy(consent2, cpol_ex, [
+policy(dplp4, cpol, [
+  dplp_policy_base(cpol, testdef_ex),
+  application( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'], 'dp[y][x]'),
+  data_controller('dc[x]', []),
+  data_processor('dp[y][x]',[],'dc[x]'),
+  data_subject('ds[1]', ['pdi(1)[1]':'pdc{1}'], []),
+  data_item('pdi(2)[1]','pdc{2}','ds[1]'),
+  consent(cID_234,'dc[x]','dp[y][x]','dp[y][x]_app1',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true),
+  data_subject('ds[2]', ['pdi(1)[2]':'pdc{1}'], []),
+  consent(cID_567,'dc[x]','dp[y][x]','dp[y][x]_app1',['dp[y][x]_app1'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)
+], dplp).
+
+policy(dplp3, cpol, [
+  dplp_policy_base(cpol, testdef_ex),
+  opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
+  data_controller('dc[x]', []),
+  data_processor('dp[y][x]',[],'dc[x]'),
+  data_subject('ds[1]', ['pdi(1)[1]':'pdc{1}'], []),
+  data_item('pdi(2)[1]','pdc{2}','ds[1]'),
+  consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true),
+  data_subject('ds[2]', ['pdi(1)[2]':'pdc{1}'], []),
+  consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',['dp[y][x]_app1'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)
+], dplp).
+
+policy(dplp2, cpol_ex, [
   policy_class(cpol_ex),
   assign(cpol_ex,'PM'),
   user_attribute(data_controllers),
@@ -63,7 +88,9 @@ policy(consent2, cpol_ex, [
   assign('pdc{1}','PersonalDataCategory'),
   assign('pdc{2}','PersonalDataCategory'),
   assign('PersonalDataCategory',cpol_ex),
-  operation('dpo(u)'), operation('dpo(w)'), operation('dpo(z)'),
+  operation('dpo(u)'),
+  operation('dpo(w)'),
+  operation('dpo(z)'),
   opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
 
   data_controller('dc[x]', []),

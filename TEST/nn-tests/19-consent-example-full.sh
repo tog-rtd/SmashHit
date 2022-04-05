@@ -7,7 +7,7 @@ echo 'demo extended consent policy with incremental policy/condition build'
 
 echo 'reset conditions and policy before tests are run'
 curl -s -G "http://127.0.0.1:8001/paapi/resetcond" --data-urlencode "token=admin_token"
-curl -s -G "http://127.0.0.1:8001/paapi/reset" --data-urlencode "token=admin_token" --data-urlencode "domain=policies" --data-urlencode "name=consent_ex"
+#curl -s -G "http://127.0.0.1:8001/paapi/reset" --data-urlencode "token=admin_token" --data-urlencode "domain=policy" --data-urlencode "name=consent_ex"
 
 #
 # POLICY ROOT -- root of the policy

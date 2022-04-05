@@ -1,30 +1,88 @@
 % stored "built-in" procedures
 
 %%	NGAC Command Procs
-proc(consent_meta, [
-		reset,
-		reset(policies,consent3),
-		addm(consent3,[data_controller('dc[x]',[])]),
-		addm(consent3,[data_processor('dp[y][x]', [], 'dc[x]')]),
-		addm(consent3,[data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[])]),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
-		addm(consent3,[consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',
-			['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)]),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
-		addm(consent3, [data_subject('ds[2]',[],[])]),
-		addm(consent3, [ data_item('pdi(1)[2]', 'pdc{1}', 'ds[2]') ]),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
-		addm(consent3, [consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',
-			['dpo(z)'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)]),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
-		delete_consent(cID_234),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
-		delete_consent(cID_567),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
-		access(consent3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') )
+
+proc(meta_delete, [ % check policy consistency after deleting meta-elements
+	% Start with a policy that has many meta-elements (dplp3).
+	% First, perform a sequence of meta-element bottom-up deletes
+	% and capture the resulting policy as C3_1.
+	% Then, perform top-down deletes (DCs and DSs) and capture as C3_2.
+	% Compare C3_1 to C3_2. Policy starts as:
+	% 
+	% policy(dplp3, cpol, [
+	%   dplp_policy_base(cpol, testdef_ex),
+	%   opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
+	%   data_controller('dc[x]', []),
+	%   data_processor('dp[y][x]',[],'dc[x]'),
+	%   data_subject('ds[1]', ['pdi(1)[1]':'pdc{1}'], []),
+	%   data_item('pdi(2)[1]','pdc{2}','ds[1]'),
+	%   consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true),
+	%   data_subject('ds[2]', ['pdi(1)[2]':'pdc{1}'], []),
+	%   consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',['dp[y][x]_app1'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)
+	% ], dplp).
+
+	reset,
+	reset(policy,dplp3),
+	echo('initial state'),
+	policy_spec_v(dplp3, C0a),
+	policy_spec(C0a),
+	echo('performing deletions'),
+	delete_name(dplp3, 'pdi(1)[1]'),
+	delete_name(dplp3, 'pdi(1)[2]'),
+	delete_name(dplp3, 'ds[2]'),
+	delete_name(dplp3, 'ds[1]'),
+	delete_name(dplp3, 'dp[y][x]'),
+	delete_name(dplp3, 'dc[x]'),
+	echo('saving result policy'),
+	policy_spec_v(dplp3, C1a), % capture the resulting policy
+	policy_spec(C1a),
+
+	% restore the policy
+	reset(policy,dplp3),
+	policy_spec_v(dplp3, C0b),
+	%policy_spec(C0b),
+	echo('comparing restored to initial policy, expect equal'),
+	compare_v(C0a,C0b,R0), echo(R0),
+
+	% perform a different sequence of meta-element deletes (top-down)
+	echo('performing different deletions'),
+	delete_name(dplp3, 'ds[2]'),
+	delete_name(dplp3, 'ds[1]'),
+	delete_name(dplp3, 'dc[x]'),
+	echo('save new result'),
+	policy_spec_v(dplp3, C1b), % capture the resulting policy
+	policy_spec(C1b),
+
+	% compare the last resulting policy to the earlier result
+	echo('comparing last result to first result, expect equal'),
+	compare_v(C1a, C1b, R1), echo(R1)
 	]).
+
+proc(meta_add, [
+		reset,
+		reset(policies,dplp3),
+		addm(dplp3,[data_controller('dc[x]',[])]),
+		addm(dplp3,[data_processor('dp[y][x]', [], 'dc[x]')]),
+		addm(dplp3,[data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[])]),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		addm(dplp3,[consent(cID_234,'dc[x]','dp[y][x]','app(a,y,x)',
+			['dpo(z)'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)]),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		addm(dplp3, [data_subject('ds[2]',[],[])]),
+		addm(dplp3, [ data_item('pdi(1)[2]', 'pdc{1}', 'ds[2]') ]),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		addm(dplp3, [consent(cID_567,'dc[x]','dp[y][x]','app(a,y,x)',
+			['dpo(z)'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)]),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		delete_consent(cID_234),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') ),
+		delete_consent(cID_567),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
+		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') )
+	]).
+
 proc(consent_ex, [
 	% policy(consent_ex1, cpol_ex, [
 	% 	policy_class(cpol_ex),
@@ -83,7 +141,8 @@ proc(consent_ex, [
 proc(vartest, [getpol_v(X),echo(X),policy_spec_v('Policy (a)',Y), echo(Y)]).
 proc(vartest1, [getpol_v(X),echo(X),setpol('Policy (a)'),getpol_v(Y),echo(Y)]).
 proc(vartest2, [policy_spec_v('Policy (a)',Y), policy_spec_v('Policy (a)',X,Y), echo(X)]).
-proc(vartest3, [policy_spec_v('Policy (a)',X), echo(X), policy_spec_v('Policy (b)',Y), echo(Y), compare_v(X,Y,R), echo(R)]).
+proc(vartest3, [policy_spec_v('Policy (a)',X), echo(X),
+				policy_spec_v('Policy (b)',Y), echo(Y), compare_v(X,Y,R), echo(R)]).
 
 proc(meta_demo, [
 	reset(policies,consent2),

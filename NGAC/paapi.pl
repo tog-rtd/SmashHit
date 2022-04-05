@@ -86,7 +86,7 @@ add(Policy,PElement) :- isa_meta_element(PElement), !, policy(Policy,PC),
 
 add(Policy,PElement) :-
 	(   %add_policy_element_restricted(Policy,PElement)
-		add_policy_element(Policy,PElement)
+		 add_policy_element(Policy,PElement)
 	->  std_resp_MS(success,'element added',PElement),
 	    audit_gen(policy_admin, add(Policy, PElement, success))
 	;   std_resp_MS(failure,'error adding element',PElement),
@@ -111,7 +111,9 @@ delete(Policy,Consent) :- compound_name_arity(Consent,consent,1), !,
 		audit_gen(policy_admin, delete_consent(Policy, Consent, failure))
 	).
 delete(Policy,PElement) :-
-	(   delete_policy_element(Policy,PElement)
+	(   %delete_policy_element(Policy,PElement) % orig
+		 delete_PE(Policy:_,PElement,chk)
+		 %delete_PE(Policy:_,PElement)
 	->  std_resp_MS(success,'element deleted',PElement),
 	    audit_gen(policy_admin, delete(Policy, PElement, success))
 	;   std_resp_MS(failure,'error deleting element',PElement),
@@ -196,14 +198,16 @@ deletem(_Policy,EltListAtom,Name) :- ground(EltListAtom), ground(Name), !, fail.
 	% TODO - return error for both being specified
 deletem(Policy,EltListAtom,Name) :- ground(EltListAtom), var(Name), !,
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      delete_named_policy_elements(Name,Policy,EltList) )
+	      	%delete_named_policy_elements(Name,Policy,EltList) )
+			delete_PEs(Policy:_, EltList) )
           ->  std_resp_MS(success,'elements deleted',EltList),
               audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
 	  ;   std_resp_MS(failure,'error deleting elements',EltListAtom),
               audit_gen(policy_admin, deletem(Policy, 'error deleting elements'))
 	).
 deletem(Policy,EltListAtom,Name) :- var(EltListAtom), ground(Name), !,
-	(   delete_named_policy_elements(Name,Policy,_)
+	(   %delete_named_policy_elements(Name,Policy,_)
+		delete_named(Policy:_, Name)
 	->  std_resp_MS(success,'elements deleted',Policy:Name),
 		audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
 	;   std_resp_MS(failure,'error deleting elements',Policy:Name),
@@ -471,16 +475,18 @@ reset(conditions,CN) :- !, % conditions domain
 	    preset(conditions,CN),
 	    std_resp_BS(success,'reset conditions',CN)
 	;   std_resp_MS(failure,'unknown condition name',CN),
-	    audit_gen(policy_admin, reset(cond,CN,failure))
+	    audit_gen(policy_admin, reset(conditions,CN,failure))
 	).
-reset(policies,PN) :- !, % policies domain
+reset(policy,PN) :- !, % policies domain
 	(   preset(policies,PN)
-	->	std_resp_BS(success,'reset policies',PN),
-		audit_gen(policy_admin, reset(policies,PN,success))
-	;   std_resp_MS(failure,'reset policies','unknown policy'),
-		audit_gen(policy_admin, reset(policies,'unknown policy',failure))
+	->	std_resp_BS(success,'reset policy',PN),
+		audit_gen(policy_admin, reset(policy,PN,success))
+	;   std_resp_MS(failure,'unknown policy name',PN),
+		audit_gen(policy_admin, reset(policy,PN,failure))
 	).
-reset(_,_). % ignore any other domain for now
+reset(D,_) :- !,
+	std_resp_MS(failure,'reset policies',unknown_domain(D)),
+	audit_gen(policy_admin, reset(unknown_domain(D),failure)).
 
 % resetcond - short-cut for conditions
 %

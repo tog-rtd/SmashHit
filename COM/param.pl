@@ -266,8 +266,8 @@ files_directory_name('RUNTIME/FILES').
 default_policy_file('policy_tmp').
 graph_tmp_file('graph_tmp').
 
-conditions_file('NGAC/conditions.pl').
-context_file('NGAC/context.pl').
+conditions_file('RUNTIME/conditions.pl').
+context_file('RUNTIME/context.pl').
 
 % Misc values
 %

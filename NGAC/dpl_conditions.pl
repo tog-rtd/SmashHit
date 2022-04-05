@@ -25,6 +25,12 @@ dpl_conditions_initialized(false).
 init :-
     init_predefined_condition_variables,
     init_predefined_condition_predicates,
+    % "static" condition variables and predicates are defined in the conditions file
+    param:conditions_file(CF),
+    (   exists_file(CF)
+    ->  ensure_loaded(CF)
+    ;   true
+    ),
     init_static_condition_variables,
     init_static_condition_predicates,
     retractall( dpl_conditions_initialized(_) ), assert( dpl_conditions_initialized(true) ),

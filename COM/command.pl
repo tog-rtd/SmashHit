@@ -254,8 +254,8 @@ do(advanced) :- !, do(level(advanced)).
 do(basic) :- !, do(level(basic)).
 
 do(compare(X,Y)) :- !, X == Y.
-do(compare_v(X,Y,true)) :- X == Y, !.
-do(compare_v(_,_,false)).
+do(compare_v(X,Y,equal)) :- X == Y, !.
+do(compare_v(_,_,unequal)).
 
 do(conditions) :- !, policyio:display_conditions.
 do(conditions(N)) :- !, policyio:display_conditions(N).

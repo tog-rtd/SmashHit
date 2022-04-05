@@ -12,12 +12,14 @@
 		load_decl_policy/2, load_decl_policy_immediate/2, save_decl_policy/2,
 		object_attribute/2, object_oattribute/2, object_oattribute_nd/2, object/2, object/8,
 		user_attribute/2, user_uattribute/2, user/2,
-	    purpose/2, operation/2, data_type/2, object_class/2, % DPLP
+	    purpose/2, operation/2, data_type/2, object_class/2, application/2, % DPLP
 	    decl2imp/2, imp2decl/3,
 		cmdTerms2policy/2,
 	    get_id_operation_set/3,
 		/*consent/11,*/ consent/13, named_policy_elements/3,
-		p_assert/1, p_retract/1
+		p_assert/1, p_retract/1,
+		delete_meta_element/2, isa_meta_element/1, isa_meta_element/2, policy_meta_elements/1,
+		delete_named/2, delete_PEs/2, delete_PE/3
 	    ]).
 
 :- use_module(dpl_conditions).
@@ -54,6 +56,16 @@
 
 :- dynamic named_policy_elements/3. % name, policy, elements
 
+% Note that in this definition dplp_policy_base is not listed as a meta-element.
+% This affects delete_PE.
+policy_meta_elements([data_controller,data_processor,application,data_subject,data_item,consent]).
+policy_meta_elements_args([data_controller(_,_),data_processor(_,_,_),application(_,_,_),
+	data_subject(_,_,_),data_item(_,_,_),consent(_,_,_,_,_,_,_,_,_,_)]).
+
+isa_meta_element(E) :- policy_meta_elements_args(PME), memberchk(E,PME).
+
+isa_meta_element(E,Name) :- isa_meta_element(E), !, arg(1,E,Name).
+
 % policy types
 %
 policy_types([dpl,dplp,s4p]). % DPLP
@@ -70,7 +82,7 @@ policy(Pname,Pclass) :- policy(Pname,Pclass,_). % get just the Policy:PolicyClas
 %	dplp_policy_base(PolicyClass,Defs)
 %               [
 %			definitions(onto),
-%                   include(onto),
+%           include(onto),
 %			policy_class(cpol_ex),
 %			assign(cpol_ex,'PM'),
 %			user_attribute(data_controllers),
@@ -218,15 +230,30 @@ elt_member(E,[_|Elts]) :- elt_member(E,Elts).
 %	consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
 %     [ user_attribute(CUA), object_attribute(COA), assign(DP,CUA), assign(CUA,DC),
 %       assign(PDitem,COA), assign(COA,DS), cond( ConsentCond, associate(CUA,ADPOs,Purpose,COA) ) ]
+%
+% NOTE that CoreElts of a meta-element can not contain other meta-elements (see delete_ME)
+%
+% Data Controller and Data Processor policies (appearing below as DC_POLICY and DP_POLICY)
+% have the following form: (NOTE Apps extension to privacy_policy structure)
+%
+%   privacy_policy( DCid, Apps, [ (Purpose, DPO, ObjectType), ... ] )
+%   privacy_preference( DSid, [ (Purpose, DPO, Object), ... ] )
+%
+%   Defs structures from ontology
+%   DCid Data Controller Identifier
+%   DSid Data Subject Identifier
+%
+%   DPOprs preference triples
+%   DPOpls policy triples
 
-expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, ContextElts, PolicyElts ) :-
+
+expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, ContextElts, PolicyElts ) :- !,
 	 ContextElts = [
         purpose('Purpose'),
         operation('DataProcessing'),
-        data_type('PersonalDataCategory')
+        object_attribute('PersonalDataCategory') % data_type('PersonalDataCategory')
     ],
 	 CoreElts1 = [
-        %include(GlobalDefs),
 		connector('PM'),
         policy_class(PolicyClass),
         assign(PolicyClass,'PM'),
@@ -244,7 +271,7 @@ expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, Cont
 	),
 	append(ContextElts,CoreElts,PolicyElts).
 
-expand_meta_element( _, data_controller(DC_ID, DC_POLICY), CoreElts, ContextElts, PolicyElts ) :-
+expand_meta_element( _, data_controller(DC_ID, DC_POLICY), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
 		user_attribute(data_controllers)
 	],
@@ -255,7 +282,7 @@ expand_meta_element( _, data_controller(DC_ID, DC_POLICY), CoreElts, ContextElts
 	],
 	append(ContextElts,CoreElts,PolicyElts).
 
-expand_meta_element( _, data_processor(DP_ID, DP_POLICY, DC_ID), CoreElts, ContextElts, PolicyElts ) :-
+expand_meta_element( _, data_processor(DP_ID, DP_POLICY, DC_ID), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
 		user_attribute(DC_ID)
 	],
@@ -266,7 +293,21 @@ expand_meta_element( _, data_processor(DP_ID, DP_POLICY, DC_ID), CoreElts, Conte
 	],
 	append(ContextElts,CoreElts,PolicyElts).
 
-expand_meta_element( _, data_subject(DS_ID, DS_PDIs, DS_PREFERENCE), CoreElts, ContextElts, PolicyElts ) :-
+expand_meta_element( _, application(APP_ID, DPOs, DP_ID), CoreElts, ContextElts, PolicyElts ) :- !,
+	ContextElts1 = [
+		user(DP_ID)
+		% for each OP in DPOs
+		%   operation(OP)
+	],
+	CoreElts = [
+		opset(APP_ID, DPOs),
+		assign(APP_ID, DP_ID)
+	],
+	findall(operation(DPO), member(DPO,DPOs), DPOelts),
+	append(ContextElts1,DPOelts,ContextElts),
+	append(ContextElts,CoreElts,PolicyElts).
+
+expand_meta_element( _, data_subject(DS_ID, DS_PDIs, DS_PREFERENCE), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
 		object_attribute(data_subjects)
 	],
@@ -277,13 +318,21 @@ expand_meta_element( _, data_subject(DS_ID, DS_PDIs, DS_PREFERENCE), CoreElts, C
 	    %    . . .
 	    privacy_preference(DS_ID, DS_PREFERENCE)
 	],
-	maplist(pdi_elt(DS_ID), DS_PDIs, PDIElts),
-	findall(PDIC, (member(PDIE,PDIElts), expand_meta_element(_,PDIE,PDIC,_,_)), PDICs ),
-	append([CoreElts1,PDICs],CoreElts2),
-	flatten(CoreElts2,CoreElts),
+
+	% this approach immediately expands the explicit data items but doesn't make data_item elements
+	%maplist(pdi_elt(DS_ID), DS_PDIs, PDIElts),
+	%findall(PDIC, (member(PDIE,PDIElts), expand_meta_element(_,PDIE,PDIC,_,_)), PDICs ),
+
+	% this approach generates data_item elements for the explicit data items and defers expansion
+	% pdi_elt( DS_ID, PDI_ID:PDC, data_item(PDI_ID, PDC, DS_ID) )
+	%maplist(pdi_elt(DS_ID), DS_PDIs, PDICs), % each member of PDIElts is a data_item()
+	%append([CoreElts1,PDICs],CoreElts2),
+	%flatten(CoreElts2,CoreElts),
+	findall(data_item(PDI_ID, PDC, DS_ID), member(PDI_ID:PDC,DS_PDIs), PDICs),
+	append(CoreElts1,PDICs,CoreElts),
 	append(ContextElts,CoreElts,PolicyElts).
 
-expand_meta_element( _, data_item(PDI_ID, PDC_ID, DS_ID), CoreElts, ContextElts, PolicyElts ) :-
+expand_meta_element( _, data_item(PDI_ID, PDC_ID, DS_ID), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
 		object_attribute(PDC_ID), % should already exist if the categories are pre-defined
 		object_attribute(DS_ID)
@@ -295,7 +344,7 @@ expand_meta_element( _, data_item(PDI_ID, PDC_ID, DS_ID), CoreElts, ContextElts,
 	],
 	append(ContextElts,CoreElts,PolicyElts).
 
-expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint), CoreElts, ContextElts, PolicyElts ) :-
+expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
         user_attribute(data_controllers),
         object_attribute(data_subjects),
@@ -340,7 +389,90 @@ expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcate
 	CAssoc = cond( ConsentCond,	associate(CUA,ADPOs,Purpose,COA) ),
 	!.
 
-pdi_elt( DS_ID, PDI_ID:PDC, data_item(PDI_ID, PDC, DS_ID) ).
+% pdi_elt( DS_ID, PDI_ID:PDC, data_item(PDI_ID, PDC, DS_ID) ).
+
+% expand_meta_elements/3
+expand_meta_elements(_,[],[]) :- !.
+expand_meta_elements(P:PC,[ME|MEs],EMEs) :-
+	expand_meta_element(P:PC,ME,EME,_,_),
+	append(EME,EMEs1,EMEs),
+	expand_meta_elements(P:PC,MEs,EMEs1).
+
+% expand_meta_elements/2
+expand_meta_elements(P:PC,Elements) :-
+	findall( PBEs,
+		(	element(P:PC,dplp_policy_base(PC, REFS)),
+			expand_meta_element(P:PC,dplp_policy_base(PC, REFS),PBEs,CXs,_),
+			expand_includes(P:PC,PBEs,PBEsNoIncludes), % for elements that ensure_existence depends upon
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(PC,P,_) ),
+			assert( named_policy_elements(PC,P,[dplp_policy_base(PC, REFS)|PBEs]) ),
+			unpack_policy_elements(P:PC,PBEsNoIncludes)
+		),
+		PBEss),
+	(	length(PBEss,PBcount), PBcount > 1
+	->	true % TODO there shouldn't be more than one dplp policy base
+	;	true
+	),
+	findall( DCEs,
+		(	element(P:PC,data_controller(DC_ID, DC_POLICY)),
+			expand_meta_element(P:PC,data_controller(DC_ID,DC_POLICY),DCEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(DC_ID,P,_) ),
+			assert( named_policy_elements(DC_ID,P,[data_controller(DC_ID,DC_POLICY)|DCEs]) ),
+			unpack_policy_elements(P:PC,DCEs)
+		),
+		DCEss),
+	findall( DPEs,
+		(	element(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID)),
+			expand_meta_element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID),DPEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(DP_ID,P,_) ),
+			assert( named_policy_elements(DP_ID,P,[data_processor(DP_ID,DP_POLICY,DC_ID)|DPEs]) ),
+			unpack_policy_elements(P:PC,DPEs)
+		),
+		DPEss),
+	findall( DSEs,
+		(	element(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)),
+			expand_meta_element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE),DSEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(DS_ID,P,_) ),
+			assert( named_policy_elements(DS_ID,P,[data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)|DSEs]) ),
+			unpack_policy_elements(P:PC,DSEs)
+		),
+		DSEss),
+	findall( APPEs,
+		(	element(P:PC,application(APP_ID, DPOs, DP_ID)),
+			expand_meta_element(P:PC,application(APP_ID, DPOs, DP_ID),APPEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(APP_ID,P,_) ),
+			assert( named_policy_elements(APP_ID,P,[application(APP_ID, DPOs, DP_ID)|APPEs]) ),
+			unpack_policy_elements(P:PC,APPEs)
+		),
+		APPEss),
+	findall( PDIEs,
+		(	element(P:PC,data_item(PDI_ID, PDC_ID, DS_ID)),
+			expand_meta_element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID),PDIEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(PDI_ID,P,_) ),
+			assert( named_policy_elements(PDI_ID,P,[data_item(PDI_ID,PDC_ID,DS_ID)|PDIEs]) ),
+			unpack_policy_elements(P:PC,PDIEs)
+		),
+		PDIEss),
+	findall( CEs,
+		(	element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)),
+			expand_meta_element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),CEs,CXs,_),
+			(	ensure_existence(P:PC,CXs) -> true ; fail ),
+			retractall( named_policy_elements(ConsentID,P,_) ),
+			assert(	named_policy_elements(ConsentID, P,
+					       [consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)|CEs]
+					)
+			),
+			unpack_policy_elements(P:PC,CEs)
+		),
+		CEss),
+	append( [DCEss,DPEss,APPEss,DSEss,PDIEss,CEss], Elements1 ), flatten(Elements1,Elements).
+
 
 % ensure_existence/2 - ensure_existence(P:PC, RequiredElts)
 %
@@ -362,75 +494,11 @@ ensure_existence(P,[E|Es],M) :- !,
 	;	ensure_existence(P,Es,Ms), M=[E|Ms]
 	).
 
-% expand_meta_elements/3
-expand_meta_elements(_,[],[]) :- !.
-expand_meta_elements(P:PC,[ME|MEs],EMEs) :-
-	expand_meta_element(P:PC,ME,EME,_,_),
-	append(EME,EMEs1,EMEs),
-	expand_meta_elements(P:PC,MEs,EMEs1).
-
-% expand_meta_elements/2
-expand_meta_elements(P:PC,Elements) :-
-	findall( PBEs,
-		(	element(P:PC,dplp_policy_base(PC, REFS)),
-			expand_meta_element(P:PC,dplp_policy_base(PC, REFS),PBEs,_,_),
-			retractall( named_policy_elements(PC,P,_) ),
-			assert( named_policy_elements(PC,P,[dplp_policy_base(PC, REFS)|PBEs]) ),
-			unpack_policy_elements(P:PC,PBEs)
-		),
-		PBEss),
-	(	length(PBEss,PBcount), PBcount > 1
-	->	true % TODO there shouldn't be more than one dplp policy base
-	;	true
-	),
-	findall( DCEs,
-		(	element(P:PC,data_controller(DC_ID, DC_POLICY)),
-			expand_meta_element(P:PC,data_controller(DC_ID,DC_POLICY),DCEs,_,_),
-			retractall( named_policy_elements(DC_ID,P,_) ),
-			assert( named_policy_elements(DC_ID,P,[data_controller(DC_ID,DC_POLICY)|DCEs]) ),
-			unpack_policy_elements(P:PC,DCEs)
-		),
-		DCEss),
-	findall( DPEs,
-		(	element(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID)),
-			expand_meta_element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID),DPEs,_,_),
-			retractall( named_policy_elements(DP_ID,P,_) ),
-			assert( named_policy_elements(DP_ID,P,[data_processor(DP_ID,DP_POLICY,DC_ID)|DPEs]) ),
-			unpack_policy_elements(P:PC,DPEs)
-		),
-		DPEss),
-	findall( DSEs,
-		(	element(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)),
-			expand_meta_element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE),DSEs,_,_),
-			retractall( named_policy_elements(DS_ID,P,_) ),
-			assert( named_policy_elements(DS_ID,P,[data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)|DSEs]) ),
-			unpack_policy_elements(P:PC,DSEs)
-		),
-		DSEss),
-	findall( PDIEs,
-		(	element(P:PC,data_item(PDI_ID, PDC_ID, DS_ID)),
-			expand_meta_element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID),PDIEs,_,_),
-			retractall( named_policy_elements(PDI_ID,P,_) ),
-			assert( named_policy_elements(PDI_ID,P,[data_item(PDI_ID,PDC_ID,DS_ID)|PDIEs]) ),
-			unpack_policy_elements(P:PC,PDIEs)
-		),
-		PDIEss),
-	findall( CEs,
-		(	element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)),
-			expand_meta_element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),CEs,CXs,_),
-			(	ensure_existence(P:PC,CXs)
-			->	true
-			;	true % placeholder for action when not all prerequisite context elements exist TODO
-			),
-			retractall( named_policy_elements(ConsentID,P,_) ),
-			assert(	named_policy_elements(ConsentID, P,
-					       [consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)|CEs]
-					)
-			),
-			unpack_policy_elements(P:PC,CEs)
-		),
-		CEss),
-	append( [DCEss,DPEss,DSEss,PDIEss,CEss], Elements1 ), flatten(Elements1,Elements).
+expand_includes(_,[],[]).
+expand_includes(PName, [include(P)|Elts], EltsNoIncludes) :- !,
+	unpack_policy_elements(PName,[include(P)]),
+	expand_includes(PName, Elts, EltsNoIncludes).
+expand_includes(_,EltsNoIncludes,EltsNoIncludes).
 
 %
 % The core DPL and DPLP language
@@ -455,7 +523,7 @@ policy_elements_args([user(_),user_attribute(_),
 /* DPLP */	  purpose(_),retention(_,_),privacy_policy(_,_),privacy_preference(_,_),
 /* DPLP */    dplp_policy_base(_,_), include(_), definitions(_),
 /* DPLP */	  data_controller(_,_), data_processor(_,_,_), data_subject(_,_,_), data_item(_,_,_),
-/* DPLP */	  consent(_,_,_,_,_,_,_,_,_,_)]).
+/* DPLP */	  application(_,_,_), consent(_,_,_,_,_,_,_,_,_,_)]).
 
 conditional_policy_elements_args([assign(_,_),associate(_,_,_),
 /* DPLP */	      associate(_,_,_,_)]).
@@ -699,6 +767,119 @@ purge_ccpolicy(PolicyName) :-
 	retractall(cc_external_attribute(PolicyName,_)),
 	retractall(cc_local_cloud_gateway(PolicyName,_,_)).
 
+%%%%%%%%%%%%%
+% DELETE POLICY ELEMENTS
+%  When elements (especially meta-elements) are deleted care must be taken to
+%  preserve a consistent state of the policy.
+%
+%  cases:
+%  named items:
+%    for every ME there is
+%      a named_policy_elements/3 - that lists its own and all its constituent elements
+%      an element for the ME in the policy
+%    when a ME shows up in a delete list it must be handled specifically (see below)
+%
+%    There are also named lists that are the result of addm operations that are not MEs
+%      These just delete the list of elements (should be NO MEs in the list)
+%
+%  ordinary elements: just retract the element
+%
+%  operations:
+%    delete an item by name - delete_named(PPC, Name)
+%      lookup associated named_policy_elements/3
+%      take the first item from the list (check whether it is a ME) EEs=[ME|Es]
+%      if first item is an ME
+%        delete item delete_PE(PPC,ME) and throw away the rest of the list (will be deleted by delete_PE)
+%      if not an ME delete the entire list delete_PEs(PPC,EEs)
+%
+%    delete an element E - delete_PE
+%      if the element is an ordinary element pap:delete_policy_element_no_chk(P,PC,E)
+%      if the element is a meta-element
+%        delete associated structures: e.g. consents
+%        delete subordinate structures: e.g. data_items assigned to a data_subject
+%        delete all the elements associated with the ME (including it's own element)
+%          note that some of these may already be deleted so deletions ahould silently succeed
+%        delete the named_policy_elements/3 associated with the item
+%      silently succeed even if the element does not exist
+% 
+%    delete a list of elements EEs - delete_PEs(PPC,EEs)
+%      invoke delete_PE for every item in the list
+%
+
+delete_named(P:PC, Name) :- policy(P,PC),
+	named_policy_elements(Name,P,[E|Es]),
+	(	isa_meta_element(E,Name)
+	->	delete_ME(P:PC,E)
+	;	delete_PEs(P:PC, [E|Es])
+	),
+	( named_policy_elements(Name,P,_) -> writeln('Should not happen!') ; true ). 
+
+%delete_PEs( _, [ ] ) :- !.
+%delete_PEs( PPC, [E | Es] ) :- delete_PE( PPC, E ), delete_PEs(PPC, Es).
+
+delete_PEs( PPC, Es ) :- forall( member(E,Es), delete_PE(PPC,E,no_chk) ). % replacement for recursive version above
+
+
+delete_PE( _, dplp_policy_base(_,_), _ ) :- !, fail. % don't allow deletion of policy base meta-element
+delete_PE(P:PC, A, _) :- atom(A), !, delete_named(P:PC,A). % named element specified by name only (not necessarily a ME)
+delete_PE(P:PC, MetaRef, _) :- MetaRef =.. [F,N], policy_meta_elements(ME), member(F,ME), !, delete_named(P:PC,N).
+delete_PE(P:PC, E, _) :- isa_meta_element(E), !, delete_ME(P:PC,E).
+delete_PE(P:PC, E, no_chk) :- !, pap:delete_policy_element_no_chk(P,PC,E).
+delete_PE(P:PC, E, chk) :- !, pap:delete_policy_element(P,PC,E).
+
+
+delete_ME( P:PC, ME ) :- 
+	cleanup_ME(P:PC,ME,Name),
+	named_policy_elements(Name,P,NEs), % NEs should not contain meta-elements other than the first element
+	forall( member(E,NEs), pap:delete_policy_element_no_chk(P,PC,E) ), 
+	retractall( named_policy_elements(Name,P,_) ).
+
+
+cleanup_ME(_P:PC, dplp_policy_base(PC,_), PC) :- !,
+	true.
+
+cleanup_ME(P:PC, data_controller(DC,_), DC) :- !,
+	forall(element(P:PC, consent(Cid,DC,_,_,_,_,_,_,_,_)),
+		delete_ME(P:PC,consent(Cid,DC,_,_,_,_,_,_,_,_))),
+	forall( element(P:PC, data_processor(DP,_,DC)), delete_ME(P:PC, data_processor(DP,_,DC)) ).
+
+cleanup_ME(P:PC, data_processor(DP,_,_), DP) :- !,
+	forall(element(P:PC, consent(Cid,_,DP,_,_,_,_,_,_,_)),
+		delete_ME(P:PC,consent(Cid,_,DP,_,_,_,_,_,_,_))),
+	forall( element(P:PC, application(APP,_,DP)), delete_ME(P:PC, application(APP,_,DP)) ).
+
+cleanup_ME(_P:_PC, application(APP,_,_), APP) :- !,
+	forall(element(P:PC, consent(Cid,_,_,APP,_,_,_,_,_,_)),
+		delete_ME(P:PC,consent(Cid,_,_,APP,_,_,_,_,_,_))).
+
+cleanup_ME(P:PC, data_subject(DS,_,_), DS) :- !,
+	forall(element(P:PC, consent(Cid,_,_,_,_,_,DS,_,_,_)),
+		delete_ME(P:PC,consent(Cid,_,_,_,_,_,DS,_,_,_))),
+	forall( element(P:PC, data_item(DI,_,DS)), delete_ME(P:PC, data_item(DI,_,DS)) ).
+
+cleanup_ME(_P:_PC, data_item(PDI,_,_), PDI) :- !,
+	forall(element(P:PC, consent(Cid,_,_,_,_,_,_,PDI,_,_)),
+		delete_ME(P:PC,consent(Cid,_,_,_,_,_,_,PDI,_,_))).
+
+cleanup_ME(_P:_PC, consent(CID,_,_,_,_,_,_,_,_,_), CID) :- !,
+	true.
+
+cleanup_ME(_P:_PC, consent(CID), CID) :- !,
+	true.
+
+% TODO - remove the following if not needed
+delete_meta_element(PName, dplp_policy_base(PC,_)) :- !, pap:delete_dplp_policy_base(PName,PC).
+delete_meta_element(PName, data_controller(DC,_)) :- !, pap: delete_data_controller(PName,DC).
+delete_meta_element(PName, data_processor(DP,_,_)) :- !, pap:delete_data_processor(PName,DP).
+delete_meta_element(PName, data_subject(DS,_,_)) :- !, pap:deleta_data_subject(PName,DS).
+delete_meta_element(PName, data_item(PDI,_,_)) :- !, pap:delete_data_item(PName,PDI).
+delete_meta_element(PName, consent(CID,_,_,_,_,_,_,_,_,_)) :- !, pap:delete_consent(PName,CID).
+delete_meta_element(PName, consent(CID)) :- !, pap:delete_consent(PName,CID).
+
+%
+%%%%%%%%%%%%%
+
+
 % assert and retract policy fact
 p_assert(PI) :-	%format('asserting ~q~n',[PI]),
 	% TODO - Better to have this check enabled but test script 07c fails due to non-ground rule in cpolicy.
@@ -810,6 +991,8 @@ purpose(P,Purpose) :- element(P,purpose(Purpose)).
 
 operation(P,Op) :- element(P,operation(Op)) ; element(P,operation(Op,_)).
 
-data_type(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)).
+application(P,App) :- element(P,application(App,_,_)).
 
-object_class(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)).
+data_type(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
+
+object_class(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
