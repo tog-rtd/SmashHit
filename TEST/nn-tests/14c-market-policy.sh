@@ -146,7 +146,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/loadcondi" --data-urlencode "cond_elemen
 		gbox_in_gbox( LoMin, LoMax, LaMin, LaMax, -9.39, 4.3, 35.95, 43.75) )
 	]" --data-urlencode "token=admin_token"
 
-# add a contract
+# Add a contract
 echo 'now add a contract to the policy for the new offer'
 # Stage 4 -- add a contract
 # template: addm( [ user_attribute(UATTR_CONTRACT_ID), object_attribute(OATTR_CONTRACT_ID),
@@ -165,7 +165,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/addm" --data-urlencode "policy=mpolicy" 
 		associate(ua_cntr_6g4gb632c2893558170d3750, [r], oa_cntr_6g4gb632c2893558170d3750) )
 	]" --data-urlencode "token=admin_token"
 
-# read out the conditions
+# Read out the conditions
 echo 'read the conditions'
 curl -s -G "http://127.0.0.1:8001/paapi/readcond" --data-urlencode "token=admin_token"
 

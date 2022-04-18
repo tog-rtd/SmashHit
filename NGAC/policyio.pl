@@ -198,16 +198,18 @@ canonical_policy(P,Pstruct) :- policies:policy(P,PC,PT), !,
 	true.
 
 % canonical_meta/2 puts only the meta-elements of a policy into canonical form
+% currently takes all meta elements whether expanded or not
+% to change to expaned/unexpanded set E to true/false respectively
 canonical_meta(P,Pstruct) :- policies:policy(P,PC,PT), !,
-	Pstruct = policy(P,PC,PM,PT),
-	findall(dplp_policy_base(PC, REFS), element(P:PC,dplp_policy_base(PC, REFS)), PBs),
-	findall(data_controller(DC_ID,DC_POLICY), element(P:PC,data_controller(DC_ID,DC_POLICY)), DCs),
-	findall(data_processor(DP_ID,DP_POLICY,DC_ID), element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID)), DPs),
-	findall(application(APP_ID, DPOs, DP_ID), element(P:PC,application(APP_ID, DPOs, DP_ID)), As),
-	findall(data_subject(DS_ID,DS_PDIs,DS_PREFERENCE), element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)), DSs),
-	findall(data_item(PDI_ID,PDC_ID,DS_ID), element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID)), DIs),
+	Pstruct = policy(P,PC,PM,PT),  E = true, % true to get expanded; leave E var to get all - expanded or not
+	findall(dplp_policy_base(PC, REFS), melement(P:PC,dplp_policy_base(PC, REFS),E), PBs),
+	findall(data_controller(DC_ID,DC_POLICY), melement(P:PC,data_controller(DC_ID,DC_POLICY),E), DCs),
+	findall(data_processor(DP_ID,DP_POLICY,DC_ID), melement(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID),E), DPs),
+	findall(application(APP_ID, DPOs, DP_ID), melement(P:PC,application(APP_ID, DPOs, DP_ID),E), As),
+	findall(data_subject(DS_ID,DS_PDIs,DS_PREFERENCE), melement(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE),E), DSs),
+	findall(data_item(PDI_ID,PDC_ID,DS_ID), melement(P:PC,data_item(PDI_ID,PDC_ID,DS_ID),E), DIs),
 	findall(consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),
-		element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)), Cs),
+		melement(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),E), Cs),
 	append([PBs,DCs,DPs,As,DSs,DIs,Cs], PM).
 
 % display_policy/1 uses canonical_policy which has other uses too

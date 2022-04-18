@@ -8,6 +8,18 @@ syntax(access(policy,(user,mode,object)),           ngac).
 syntax(access(policy,(user,mode,object),condition), ngac).
 syntax(access(policy,(user,mode,purpose,object)),   ngac). % DPLP
 syntax(add(policy,element),                         ngac).
+syntax(add_dplp_policy_base(dplp_policy_base_meta_element),ngac). % DPLP
+syntax(add_dplp_policy_base(policy, dplp_policy_base_meta_element),    ngac). % DPLP
+syntax(add_data_controller(data_controller_meta_element),ngac). % DPLP
+syntax(add_data_controller(policy, data_controller_meta_element),ngac). % DPLP
+syntax(add_data_processor(data_processor_meta_element),ngac). % DPLP
+syntax(add_data_processor(policy,data_processor_meta_element),ngac). % DPLP
+syntax(add_data_subject(data_subject_meta_element), ngac). % DPLP
+syntax(add_data_subject(policy,data_subject_meta_element),ngac). % DPLP
+syntax(add_data_item(data_item_meta_element),       ngac). % DPLP
+syntax(add_data_item(policy,data_item_meta_element),ngac). % DPLP
+syntax(add_application(application_meta_element),   ngac). % DPLP
+syntax(add_application(policy, application_meta_element),ngac). % DPLP
 syntax(add_consent(consent_meta_element),           ngac). % DPLP
 syntax(add_consent(policy,consent_meta_element),    ngac). % DPLP
 syntax(addm(policy,elements),                       ngac).
@@ -19,8 +31,20 @@ syntax(decl2imp(decl_file,imp_file),		                                  obsolete
 syntax(delete(policy,element),                      ngac).
 syntax(deletem(policy,elements),                    ngac).
 syntax(delete_name(policy,name),                    ngac).
-syntax(delete_consent(consent_id),                  ngac).
-syntax(delete_consent(policy,consent_id),           ngac).
+syntax(delete_dplp_policy_base(dplp_policy_base_meta_element),ngac). % DPLP
+syntax(delete_dplp_policy_base(policy, dplp_policy_base_meta_element),    ngac). % DPLP
+syntax(delete_data_controller(data_controller_meta_element),ngac). % DPLP
+syntax(delete_data_controller(policy, data_controller_meta_element),ngac). % DPLP
+syntax(delete_data_processor(data_processor_meta_element),ngac). % DPLP
+syntax(delete_data_processor(policy,data_processor_meta_element),ngac). % DPLP
+syntax(delete_data_subject(data_subject_meta_element), ngac). % DPLP
+syntax(delete_data_subject(policy,data_subject_meta_element),ngac). % DPLP
+syntax(delete_data_item(data_item_meta_element),       ngac). % DPLP
+syntax(delete_data_item(policy,data_item_meta_element),ngac). % DPLP
+syntax(delete_application(application_meta_element),   ngac). % DPLP
+syntax(delete_application(policy, application_meta_element),ngac). % DPLP
+syntax(delete_consent(consent_id),                  ngac). % DPLP
+syntax(delete_consent(policy,consent_id),           ngac). % DPLP
 syntax(deletem(policy,elements),                    ngac).
 syntax(deletem(policy,elements,name),               ngac).
 syntax(dpl_reinit,                                  ngac).
@@ -39,7 +63,10 @@ syntax(policy_graph(policy),			    ngac).
 syntax(policy_graph(policy,graph_file),	            ngac).
 syntax(policy_graph(policy,graph_file,graphics)    ,ngac).
 syntax(policy_graph(policy,graph_file,graphics,dpi),ngac).
-syntax(policy_meta(policy),                         ngac).
+syntax(policy_meta,                                 ngac). % DPLP
+syntax(policy_meta(policy),                         ngac). % DPLP
+syntax(policy_sat(privpol,privpref),                ngac). % DPLP
+syntax(policy_sat(policy,privpol,privpref),         ngac). % DPLP
 syntax(policy_spec,                                 ngac).
 syntax(policy_spec(policy),                         ngac).
 syntax(policy_spec(policy,policy_file),	            ngac).
@@ -70,6 +97,18 @@ semantics(access(P,(U,M,Pur,O))) :- !, ground(P), ground(U), ground(M), ground(O
 semantics(access(P,(U,M,O),C)) :- !, ground(P), ground(U), ground(M), ground(O),
 	(   C==true ; compound(C) ; is_list(C) ), !.
 semantics(add(P,E)) :- !, ground(P), ground(E).
+semantics(add_dplp_policy_base(PB)) :- ground(PB). % DPLP
+semantics(add_dplp_policy_base(P, PB)) :- atom(P), ground(PB). % DPLP
+semantics(add_data_controller(DC)) :- ground(DC). % DPLP
+semantics(add_data_controller(P, DC)) :- atom(P), ground(DC). % DPLP
+semantics(add_data_processor(DP)) :- ground(DP). % DPLP
+semantics(add_data_processor(P,DP)) :- atom(P), ground(DP). % DPLP
+semantics(add_data_subject(DS)) :- ground(DS). % DPLP
+semantics(add_data_subject(P,DS)) :- atom(P), ground(DS). % DPLP
+semantics(add_data_item(DI)) :- ground(DI). % DPLP
+semantics(add_data_item(P,DI)) :- atom(P), ground(DI). % DPLP
+semantics(add_application(APP)) :- ground(APP). % DPLP
+semantics(add_application(P,APP)) :- atom(P), ground(APP). % DPLP
 semantics(add_consent(C)) :- !, ground(C), compound_name_arity(C,consent,10).
 semantics(add_consent(P,C)) :- !, ground(P), ground(C), compound_name_arity(C,consent,10).
 semantics(addm(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
@@ -81,6 +120,18 @@ semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
 semantics(delete(P,E)) :- !, ground(P), ground(E).
 semantics(deletem(P,Es)) :- !, ground(P), ground(Es).
 semantics(delete_name(P,N)) :- !, ground(P), atom(N).
+semantics(delete_dplp_policy_base(PB)) :- ground(PB). % DPLP
+semantics(delete_dplp_policy_base(P,PB)) :- atom(P), ground(PB). % DPLP
+semantics(delete_data_controller(DC)) :- ground(DC). % DPLP
+semantics(delete_data_controller(P,DC)) :- atom(P), ground(DC). % DPLP
+semantics(delete_data_processor(DP)) :- ground(DP). % DPLP
+semantics(delete_data_processor(P,DP)) :- atom(P), ground(DP). % DPLP
+semantics(delete_data_subject(DS)) :- ground(DS). % DPLP
+semantics(delete_data_subject(P,DS)) :- atom(P), ground(DS). % DPLP
+semantics(delete_data_item(DI)) :- ground(DI). % DPLP
+semantics(delete_data_item(P,DI)) :- atom(P), ground(DI). % DPLP
+semantics(delete_application(APP)) :- ground(APP). % DPLP
+semantics(delete_application(P,APP)) :- atom(P), ground(APP). % DPLP
 semantics(delete_consent(Cid)) :- !, atom(Cid).
 semantics(delete_consent(P,Cid)) :- !, ground(P), atom(Cid).
 semantics(deletem(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
@@ -99,13 +150,16 @@ semantics(policy_graph(P)) :- !, atom(P).
 semantics(policy_graph(P,F)) :- !, atom(P), atom(F).
 semantics(policy_graph(P,F,G)) :- !, atom(P), atom(F), (G==pdf;G==png).
 semantics(policy_graph(P,F,G,R)) :- !, atom(P), atom(F), (G==pdf;G==png), integer(R).
+semantics(policy_sat(PP,PR)) :- !,
+	(atom(PP) ; PP=privacy_policy(DP,DPEs),atom(DP),is_list(DPEs)),
+	(atom(PR) ; PR=privacy_preference(DS,DSEs),atom(DS),is_list(DSEs)).
 semantics(policy_spec(P)) :- !, (atom(P) ; compound_name_arity(P,policy,4)).
 semantics(policy_spec(P,F)) :- !, atom(P), atom(F).
 semantics(policy_spec(P,F,S)) :- !, atom(P), atom(F), S == silent.
-syntax(policy_spec_v(V)) :- !, var(V).
-syntax(policy_spec_v(V,C)) :- var(V), !, ground(C).
-syntax(policy_spec_v(P,V)) :- atom(P), !, var(V).
-syntax(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C).
+semantics(policy_spec_v(V)) :- !, var(V).
+semantics(policy_spec_v(V,C)) :- var(V), !, ground(C).
+semantics(policy_spec_v(P,V)) :- atom(P), !, var(V).
+semantics(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C).
 semantics(server(Port)) :- !, integer(Port).
 semantics(server(Port,AToken)) :- !, integer(Port), atom(AToken).
 semantics(server(Port,AToken,EToken)) :- !, integer(Port), atom(AToken), atom(EToken).
@@ -129,16 +183,16 @@ help(access,    'Optionally, Arg2 is an access 4-tuple, "(User, Mode, Purpose, O
 help(access,    'Arg3 (opt) a condition predicate for conditional rules.').
 
 help(add,       'add element to policy.').
-help(add,   	'Arg1 is a policy name.').
-help(add,   	'Arg2 is a policy element.').
+help(add,	'Arg1 is a policy name.').
+help(add,	'Arg2 is a policy element.').
 
 help(add_consent,'add consent meta-element').
 help(add_consent,'Arg1 (opt) is a policy name.').
 help(add_consent,'Arg2 is a consent meta-element.').
 
 help(addm,       'add elements to policy.').
-help(addm,   	 'Arg1 is a policy name.').
-help(addm,   	 'Arg2 is a list of policy elements.').
+help(addm,	 'Arg1 is a policy name.').
+help(addm,	 'Arg2 is a list of policy elements.').
 help(addm,       'Arg3 (opt) is a name to associate with the policy elements.').
 
 help(aoa,	'all object attributes for user in current policy and policy class').
@@ -154,8 +208,8 @@ help(decl2imp,	'Arg1 is name of input file containing declarative policy spec.')
 help(decl2imp,	'Arg2 is name of output file to contain imperative policy spec.').
 
 help(delete,    'delete element from policy.').
-help(delete,   	'Arg1 is a policy name.').
-help(delete,   	'Arg2 is a policy element.').
+help(delete,	'Arg1 is a policy name.').
+help(delete,	'Arg2 is a policy element.').
 
 help(deletem,   'delete list of elements.').
 
@@ -208,7 +262,12 @@ help(policy_graph, 'Arg3 (opt) graphics output file type (pdf/png).').
 help(policy_graph, 'Arg4 (opt with Arg3) dots-per-inch setting, e.g. 300.').
 
 help(policy_meta,  'Display meta-elements of policy.').
-help(policy_meta,  'Arg1 names a currently loaded policy to display,').
+help(policy_meta,  'Arg1 (opt) names a currently loaded policy to display,').
+
+help(policy_sat,   'Privacy policy satisfies privacy preference.').
+help(policy_sat,   'Arg1 (opt) names a currently loaded policy (or "current_policy") to use,').
+help(policy_sat,   'Arg2 is a DC/DP identifier or privacy policy,').
+help(policy_sat,   'Arg3 is a DS identifier or privacy preference.').
 
 help(policy_spec, 'Display the current or named policy,').
 help(policy_spec, 'Arg1 (opt) names a currently loaded policy (or "current_policy") to display,').
@@ -252,6 +311,20 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
+/*
+do(add_dplp_policy_base(PB)) :- !, param:current_policy(P), true.
+do(add_dplp_policy_base(P, PB)) :- !, true.
+do(add_data_controller(DC)) :- !, param:current_policy(P), true.
+do(add_data_controller(P, DC)) :- !, true.
+do(add_data_processor(DP)) :- !, param:current_policy(P), true.
+do(add_data_processor(P,DP)) :- !, true.
+do(add_data_subject(DS)) :- !, param:current_policy(P), true.
+do(add_data_subject(P,DS)) :- !, true.
+do(add_data_item(DI)) :- !, param:current_policy(P), true.
+do(add_data_item(P,DI)) :- !, true.
+do(add_application(APP)) :- !, param:current_policy(P), true.
+do(add_application(P,APP)) :- !, true.
+*/
 do(add_consent(C)) :- !, param:current_policy(P), pap:add_consent(P,C,Stat), writeln(Stat).
 do(add_consent(P,C)) :- !, pap:add_consent(P,C,Stat), writeln(Stat).
 do(addm(P,Elts)) :- !, pap:add_named_policy_elements(_,P,Elts).
@@ -270,6 +343,20 @@ do(delete(P,Elt)) :- !, dpl:delete_PE(P:_,Elt).
 %do(deletem(P,_Elts,Name)) :- !, pap:delete_named_policy_elements(Name,P,_).
 do(deletem(P,Elts)) :- !, dpl:delete_PEs(P:_,Elts).
 do(delete_name(P,Name)) :- !, dpl:delete_named(P:_,Name).
+/*
+do(delete_dplp_policy_base(PB)) :- !, param:current_policy(P), true.
+do(delete_dplp_policy_base(P,PB)) :- !, true.
+do(delete_data_controller(DC)) :- !, param:current_policy(P), true.
+do(delete_data_controller(P,DC)) :- !, true.
+do(delete_data_processor(DP)) :- !, param:current_policy(P), true.
+do(delete_data_processor(P,DP)) :- !, true.
+do(delete_data_subject(DS)) :- !, param:current_policy(P), true.
+do(delete_data_subject(P,DS)) :- !, true.
+do(delete_data_item(DI)) :- !, param:current_policy(P), true.
+do(delete_data_item(P,DI)) :- !, true.
+do(delete_application(APP)) :- !, param:current_policy(P), true.
+do(delete_application(P,APP)) :- !, true.
+*/
 do(delete_consent(Cid)) :- !, param:current_policy(P), pap:delete_consent(P,consent(Cid)).
 do(delete_consent(P,Cid)) :- !, pap:delete_consent(P,consent(Cid)).
 do(dpl_reinit) :- !, dpl:reinit.
@@ -303,6 +390,8 @@ do(ngac) :- !, user_mode(M), retractall(user_mode(_)), assert(user_mode(ngac)),
 	param:prompt_string(ngac,Prompt), param:setparam(prompt_string,Prompt),
 	rem_commands(M), add_commands(ngac), banner(ngac).
 do(pmcmd) :- !, (interactive(true) -> tl(pmcmd) ; true).
+do(policy_meta) :- !, do(policy_meta(current_policy)).
+do(policy_meta(current_policy)) :- !, param:current_policy(P), do(policy_meta(P)).
 do(policy_meta(P)) :- atom(P), !, policyio:display_meta(P:_).
 do(policy_graph) :- !, do(policy_graph(current_policy)).
 do(policy_graph(current_policy)) :- !, param:current_policy(P), do(policy_graph(P)).
@@ -332,7 +421,7 @@ do(policy_graph(P,Fileroot,Gfiletype,Res)) :- !, dpl:policy(P,_), % must specify
 	param:local_open_file(_,OPEN),
 	atomic_list_concat([DOTcmd,' -T', Gfiletype, ' ', Gdpi_arg, DOTfile , ' >', DISPfile], DotCommand),
 	atomic_list_concat([OPEN,' ', DISPfile], OpenCommand),
-	shell(DotCommand,Stat1), 
+	shell(DotCommand,Stat1),
 	(	Stat1 =\= 0
 	->	writeln(/*user_error,*/'error in dot file')
 	;	shell(OpenCommand,_)
@@ -341,6 +430,9 @@ do(policy_graph(P,Fileroot,Gfiletype,Res)) :- !, dpl:policy(P,_), % must specify
 	->  sleep(2), delete_file(DOTfile), delete_file(DISPfile)
 	;   true
 	).
+do(policy_sat(PPol,PPref)) :- !, do(policy_sat(current_policy,PPol,PPref)).
+do(policy_sat(current_policy,PPol,PPref)) :- !, param:current_policy(P), do(policy_sat(P,PPol,PPref)).
+do(policy_sat(P,PPol,PPref)) :- !, pdp:privacy_sat(P,PPol,PPref,NonSat), format('Non-satisfying: ~q~n',[NonSat]).
 do(policy_spec) :- !, do(policy_spec(current_policy)).
 do(policy_spec(current_policy)) :- !, param:current_policy(P), do(policy_spec(P,no_file_output,false)).
 do(policy_spec(current_policy,Fileroot)) :- !, param:current_policy(P), do(policy_spec(P,Fileroot,false)).

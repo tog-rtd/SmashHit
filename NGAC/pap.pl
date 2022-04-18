@@ -4,8 +4,8 @@
 		permitted_add_delete_policy_elements/1,
 		add_policy_element_restricted/2,
 		add_policy_element/2, add_policy_element/3,
-		add_consent/3, add_consent/4,
-		delete_consent/2, delete_consent/3,
+		%add_consent/3, add_consent/4,
+		%delete_consent/2, delete_consent/3,
 		delete_policy_element/2, delete_policy_element/3,
 
 		add_policy_elements/2, add_policy_elements/3,
@@ -209,6 +209,7 @@ delete_policy_element_no_chk(P,PC,cond(C,E)) :- !,
 	retractall( dpl:cond(P:PC,C,E) ),
 	delete_policy_element_cond_no_chk(P,PC,E,C).
 %delete_policy_element_no_chk(P,PC,Meta) :- isa_meta_element(Meta), !, delete_meta_element(P:PC,Meta).
+delete_policy_element_no_chk(P,PC,Element) :- isa_meta_element(Element), !, p_retract( melement(P:PC, Element, true) ).
 delete_policy_element_no_chk(P,PC,Element) :- !, p_retract( element(P:PC, Element) ).
 delete_policy_element_no_chk(_,_,_). % silently ignore if conditions not met
 
@@ -331,12 +332,9 @@ add_consent(P,PC,ConsentME,Status) :-
 	% add_policy_elements(P,PC,CC),
 	dpl:unpack_policy_elements(P:PC,CC),
 	retractall( dpl:named_policy_elements(ConsentID,P,_) ),
-	assert( dpl:named_policy_elements(ConsentID, P, [ConsentME|CC]) ),
+	assert( named_policy_elements(ConsentID, P, [ConsentME|CC]) ),
 	Status = success,
 	true.
-
-delete_dplp_policy_base(P:PC, PC) :- !, atom(P), atom(PC),
-	delete_named_policy_elements(PC,P,_).
 
 delete_consent(P:PC,Consent) :- !, atom(P), atom(PC), delete_consent(P,PC,Consent).
 delete_consent(P,Consent) :- atom(P), policy(P,PC), delete_consent(P,PC,Consent).
@@ -349,6 +347,11 @@ delete_consent(P,_PC,ConsentShort) :-
 	delete_named_policy_elements(ConsentID,P,_),
 	true.
 %delete_consent(_,_,_). % fail silently
+
+/*
+
+delete_dplp_policy_base(P:PC, PC) :- !, atom(P), atom(PC),
+	delete_named_policy_elements(PC,P,_).
 
 delete_data_controller(P:PC, DC_ID) :-
 	% forall(
@@ -393,6 +396,9 @@ delete_data_item(P:PC, PDI_ID) :-
 	% )
 	forall(element(P:PC, consent(Cid,_,_,_,_,_,_,PDI_ID,_,_)), delete_consent(P:PC,Cid)),
 	p_retract( element(P:PC, data_item(PDI_ID,_,_))).
+
+*/
+
 
 % ensure_existence/2 - ensure_existence(P:PC, RequiredElts)
 %

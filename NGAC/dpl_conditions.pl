@@ -148,14 +148,19 @@ add_cond_element( Cname, Clause) :- atom(Cname), Clause=(H:-_B), !, % a conditio
 add_cond_element(_,_). % ignore anything else; could also be an error
 
 % Condition Variable install / deinstall
+%   TODO - check on possible static vs dynamic conflictx
 %
 dynamic_install_condition_variable(Cname,V) :- condition_variable(V,Cname), !. % already there
 dynamic_install_condition_variable(Cname,V) :- V = Vn:Vt, atom(Vn), atom(Vt), !,
     assert( condition_variable(V,Cname) ),
     declared_condition_variables(CondVars1),
+    % TODO - add here a test whether member(V,CondVars1) if so don't add again
+    % ( member(V,CondVars1) -> true ;  % uncomment ) below
     CondVars = [V|CondVars1],
     retractall(declared_condition_variables(_)),
-    assert(declared_condition_variables(CondVars)).
+    assert(declared_condition_variables(CondVars))
+    % )
+    .
 
 dynamic_deinstall_condition_variable(Cname,V:_) :-
     retractall( condition_variable(V:_,Cname) ),
@@ -169,20 +174,28 @@ dynamic_install_condition_predicate(_Cname,Pname,Pargs) :- atom(Pname), is_list(
     condition_predicate(Pred,_,_), !. % declaration already there, do nothing
 dynamic_install_condition_predicate(Cname,Pname,Pargs) :- atom(Cname), atom(Pname), is_list(Pargs), !,
     compound_name_arguments(Pred,Pname,Pargs),
-    retractall( condition_predicate(Pred,_,_) ), % retract any with same name, should be unnecessary
+    retractall( condition_predicate(Pred,_,_) ), % retract any with same name/sig, should be unnecessary
+    % retractall( condition_predicate(Pname,_)),
     assert( condition_predicate(Pred,Cname,undefined) ),
     declared_condition_predicates(CurrentPredicates),
+    % TODO - add here a test whether member(Pred,CurrentPredicates) if so don't add again
+    % ( member(Pred,CurrentPredicates) -> true ;  % uncomment ) below
     AllPredicates = [Pred|CurrentPredicates],
     retractall(declared_condition_predicates(_)),
-    assert(declared_condition_predicates(AllPredicates)).
+    assert(declared_condition_predicates(AllPredicates))
+    % )
+    .
 
 % TODO following needs Cname
 dynamic_deinstall_condition_predicate(P,A) :- % TODO this needs to be condition_predicate/3
     retractall( condition_predicate(P,A) ), compound_name_arguments(Pred,P,A),
+    % retractall( condition_predicate(Pred,dynamic,PDef))
+    
     declared_condition_predicates(CPs), subtract(CPs,[Pred],CPs1),
     retractall(declared_condition_predicates(_)),
     assert(declared_condition_predicates(CPs1)).
-    % TODO must also clear the predicate definition
+    % TODO must also clear the predicate definition clause
+    % ( PDef == defined -> /* clear the definition */ ; true )
 
 
 % delete condition elements that aren't predefined

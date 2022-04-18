@@ -4,6 +4,12 @@ set policy to consent1
   "respMessage":"policy set",
   "respBody":"consent1"
 }
+reset policy before tests are run
+{
+  "respStatus":"success",
+  "respMessage":"reset policy",
+  "respBody":"consent1"
+}
 fetch the unmodified policy
 {
   "respStatus":"success",

@@ -296,21 +296,22 @@ users(P,O,M) :- % an AR is specified
 pqapi_policy_sat(Request) :-
 	std_resp_prefix,
 	catch(
-	    http_parameters(Request,[privpol(PPolicyAtom,[atom]),
-				     privpref(PrefAtom,[atom]),
-	                             env(Defs,[atom])
+	    http_parameters(Request,[
+					privacy_policy(PPolicyAtom,[atom]),
+				    privacy_preference(PrefAtom,[atom]),
+	                definitions(Defs,[atom])
 				    ]),
 	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
 	policy_sat(Defs,PPolicyAtom,PrefAtom).
 pqapi_policy_sat(_) :- audit_gen(policy_query, policy_sat(failure)).
 
-policy_sat(Defs,_,_) :- \+ dpl:policy(Defs,Defs), !,
+policy_sat(Defs,_,_) :- \+ dpl:policy(Defs,_), !,
 	std_resp_MS(failure,'unknown policy',Defs),
 	audit_gen(policy_query, policy_sat(Defs,failure)).
 policy_sat(Defs,PolicyAtom,PrefAtom) :-
-        read_term_from_atom(PolicyAtom,Ppolicy,[]),
-        read_term_from_atom(PrefAtom,Ppref,[]),
+    read_term_from_atom(PolicyAtom,Ppolicy,[]),
+    read_term_from_atom(PrefAtom,Ppref,[]), %!,
 	privacy_sat(Defs,Ppolicy,Ppref,Tau:UnSatPs), !,
 	(   UnSatPs == []
 	->  std_resp_BS(success, policy_sat, satisfied)

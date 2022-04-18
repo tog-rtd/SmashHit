@@ -11,7 +11,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/loadi" --data-urlencode "policyspec=poli
     purpose('Purpose'), % these 3 are to satisfy prerequisites of dplp_policy meta-element
     operation('DataProcessing'),
     object_attribute('PersonalDataCategory'),
-    dplp_policy_base(cpol_ex, testdef_ex)
+    dplp_policy_base(cpol_ex, testdefs2)
 
     %Policy_class(cpol_ex),
     %assign(cpol_ex,'PM'),

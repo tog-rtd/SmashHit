@@ -1,0 +1,210 @@
+demo extended consent policy with incremental policy/condition build using meta-elements
+reset conditions and policy before tests are run
+{
+  "respStatus":"success",
+  "respMessage":"reset conditions",
+  "respBody":"all"
+}
+{
+  "respStatus":"success",
+  "respMessage":"reset policy",
+  "respBody":"dplp_min"
+}
+set current policy to dplp_min
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"dplp_min"
+}
+set up the policy root elements
+{
+  "respStatus":"success",
+  "respMessage":"policy base added",
+  "respBody":"dplp_policy_base(pc,testdefs2)"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  user_attribute(data_controllers),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+add a Data Controller (DC)
+{
+  "respStatus":"success",
+  "respMessage":"data controller added",
+  "respBody":"data_controller('dc[x]',[])"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  privacy_policy('dc[x]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+add a Data Processor (DP)
+{
+  "respStatus":"success",
+  "respMessage":"data processor added",
+  "respBody":"data_processor('dp[y][x]',[],'dc[x]')"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+add a Data Subject (DS)
+{
+  "respStatus":"success",
+  "respMessage":"data subject added",
+  "respBody":"data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[])"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+add another personal data item (PDI)
+{
+  "respStatus":"success",
+  "respMessage":"data item added",
+  "respBody":"data_item('pdi(2)[1]','pdc{2}','ds[1]')"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object('pdi(2)[1]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(2)[1]','ds[1]'),\n  assign('pdi(2)[1]','pdc{2}'),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+add an application
+{
+  "respStatus":"success",
+  "respMessage":"application added",
+  "respBody":"application('dp[y][x]_app1',['dpo(w)','dpo(z)'],'dp[y][x]')"
+}
+now add the first consent to the policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc[x]','dp[y][x]','dp[y][x]_app1',['dp[y][x]_app1'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  user_attribute(cUA_234),\n  object('pdi(1)[1]'),\n  object('pdi(2)[1]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute(cOA_234),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(2)[1]','ds[1]'),\n  assign('pdi(2)[1]','pdc{2}'),\n  assign('dp[y][x]_app1','dp[y][x]'),\n  assign('dp[y][x]',cUA_234),\n  assign(cUA_234,'dc[x]'),\n  assign('pdi(1)[1]',cOA_234),\n  assign(cOA_234,'ds[1]'),\n  associate(cUA_234,['dp[y][x]_app1'],'p(v)',cOA_234),\n  cond(true,associate(cUA_234,['dp[y][x]_app1'],'p(v)',cOA_234)),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+read the conditions
+{
+  "respStatus":"success",
+  "respMessage":"read conditions",
+  "respBody":"conditions(dynamic):\n"
+}
+query the policy for an access - expect grant
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
+}
+delete the consent meta-element
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"cID_234"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object('pdi(2)[1]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(2)[1]','ds[1]'),\n  assign('pdi(2)[1]','pdc{2}'),\n  assign('dp[y][x]_app1','dp[y][x]'),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+query the policy for an access - expect deny
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
+}
+now add back the first consent to the policy
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_234,'dc[x]','dp[y][x]','dp[y][x]_app1',['dp[y][x]_app1'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true)"
+}
+add a second Data Subject (DS)
+{
+  "respStatus":"success",
+  "respMessage":"data subject added",
+  "respBody":"data_subject('ds[2]',[],[])"
+}
+add a personal data item to second subject(PDI)
+{
+  "respStatus":"success",
+  "respMessage":"data item added",
+  "respBody":"data_item('pdi(1)[2]','pdc{1}','ds[2]')"
+}
+add consent for second DS and data item
+{
+  "respStatus":"success",
+  "respMessage":"consent added",
+  "respBody":"consent(cID_567,'dc[x]','dp[y][x]','dp[y][x]_app1',['dpo(z)'],'p(v)','ds[2]','pdi(1)[2]','pdc{1}',true)"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  user_attribute(cUA_234),\n  user_attribute(cUA_567),\n  object('pdi(1)[1]'),\n  object('pdi(2)[1]'),\n  object('pdi(1)[2]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute(cOA_234),\n  object_attribute('ds[2]'),\n  object_attribute(cOA_567),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(2)[1]','ds[1]'),\n  assign('pdi(2)[1]','pdc{2}'),\n  assign('dp[y][x]_app1','dp[y][x]'),\n  assign('dp[y][x]',cUA_234),\n  assign(cUA_234,'dc[x]'),\n  assign('pdi(1)[1]',cOA_234),\n  assign(cOA_234,'ds[1]'),\n  assign('ds[2]',data_subjects),\n  assign('pdi(1)[2]','ds[2]'),\n  assign('pdi(1)[2]','pdc{1}'),\n  assign('dp[y][x]',cUA_567),\n  assign(cUA_567,'dc[x]'),\n  assign('pdi(1)[2]',cOA_567),\n  assign(cOA_567,'ds[2]'),\n  associate(cUA_234,['dp[y][x]_app1'],'p(v)',cOA_234),\n  associate(cUA_567,['dpo(z)'],'p(v)',cOA_567),\n  cond(true,associate(cUA_234,['dp[y][x]_app1'],'p(v)',cOA_234)),\n  cond(true,associate(cUA_567,['dpo(z)'],'p(v)',cOA_567)),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  privacy_preference('ds[2]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+query the policy for an access for DS 1 - expect grant
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
+}
+query the policy for an access for DS 2 - expect grant
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[2]'"
+}
+delete the consent meta-element for DS 1
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"cID_234"
+}
+query the policy for an access for DS 1 - expect deny
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
+}
+query the policy for an access for DS 2 - expect grant
+{
+  "respStatus":"success",
+  "respMessage":"grant",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[2]'"
+}
+delete the consent meta-element for DS 2
+{
+  "respStatus":"success",
+  "respMessage":"consent deleted",
+  "respBody":"cID_567"
+}
+fetch the policy
+{
+  "respStatus":"success",
+  "respMessage":"read policy",
+  "respBody":"policy(dplp_min, pc, [\n  purpose('p(v)'),\n  purpose('p(r)'),\n  purpose('p(s)'),\n  purpose('Purpose'),\n  operation('dpo(u)'),\n  operation('dpo(w)'),\n  operation('dpo(z)'),\n  operation('DataProcessing'),\n  opset('dp[y][x]_app1',['dpo(w)','dpo(z)']),\n  user('dp[y][x]'),\n  user_attribute(data_controllers),\n  user_attribute('dc[x]'),\n  object('pdi(1)[1]'),\n  object('pdi(2)[1]'),\n  object('pdi(1)[2]'),\n  object_attribute('pdc{1}'),\n  object_attribute('pdc{2}'),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(data_subjects),\n  object_attribute('ds[1]'),\n  object_attribute('ds[2]'),\n  assign('pdc{1}','PersonalDataCategory'),\n  assign('pdc{2}','PersonalDataCategory'),\n  assign('dpo(u)','DataProcessing'),\n  assign('dpo(w)','DataProcessing'),\n  assign('dpo(z)','DataProcessing'),\n  assign('p(v)','Purpose'),\n  assign('p(r)','Purpose'),\n  assign('p(s)','Purpose'),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign('dc[x]',data_controllers),\n  assign('dp[y][x]','dc[x]'),\n  assign('ds[1]',data_subjects),\n  assign('pdi(1)[1]','ds[1]'),\n  assign('pdi(1)[1]','pdc{1}'),\n  assign('pdi(2)[1]','ds[1]'),\n  assign('pdi(2)[1]','pdc{2}'),\n  assign('dp[y][x]_app1','dp[y][x]'),\n  assign('ds[2]',data_subjects),\n  assign('pdi(1)[2]','ds[2]'),\n  assign('pdi(1)[2]','pdc{1}'),\n  privacy_policy('dc[x]',[]),\n  privacy_policy('dp[y][x]',[]),\n  privacy_preference('ds[1]',[]),\n  privacy_preference('ds[2]',[]),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
+}
+query the policy for an access for DS 1 - expect deny
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[1]'"
+}
+query the policy for an access for DS 2 - expect deny
+{
+  "respStatus":"success",
+  "respMessage":"deny",
+  "respBody":"'dp[y][x]','dpo(z)','p(v)','pdi(1)[2]'"
+}

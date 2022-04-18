@@ -255,9 +255,7 @@ policy_dps(P:Pr,DPS) :-
 %   DPOprs preference triples
 %   DPOpls policy triples
 %
-% This implementation depends only on a definitions policy
-% TODO - this needs to be extended for evaluation within the context of a policy not just definitions
-% TODO - this could be easily done by changing Defs:Defs in searches below to Defs:_Defs
+% This implementation depends only on a definitions policy but may be a full policy
 
 privacy_sat(Defs, Ppol, Pprf,(DCid,DSid):NonSatPs) :-
 	privacy_policy(Defs, Ppol, DCid, DPOpls),
@@ -273,39 +271,43 @@ exists_pref(Defs, P, Prefs) :-
 	member( C, Prefs ),
 
 	% check purpose containment and op containment
-	is_contained_star(Defs:Defs,Pp,Pc), % Defs:purposes
-	is_contained_star(Defs:Defs,Op,Oc), % Defs:operations % TODO - extend for Apps
+	is_contained_star(Defs:_,Pp,Pc), % Defs:purposes
+	is_contained_star(Defs:_,Op,Oc), % Defs:operations % TODO - extend for Apps
 
-	element(Defs:Defs, data_type(DTp,_) ), % Defs:types
-	element(Defs:Defs, object(DIc,DTp) ), % Defs:objects
+	data_type(Defs:_,DTp),
+	( object(Defs:_,DIc,DTp) ; object(Defs:_,DIc), c_assign(Defs:_,DIc,DTp) ),
 	!. % only one solution needed for each call
 
-% checkers:
+% check/lookup privacy policy/preference
 
+privacy_policy(Policy, DCid, DCid, DPOpls) :- atom(DCid), !, % lookup DC/DP policy for id
+	element(Policy:_, privacy_policy(DCid, DPOpls)).
 privacy_policy(Defs, privacy_policy(DCid,DPOpls), DCid, DPOpls) :- !,
 	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
 privacy_policy(Defs, privacy_policy(DCid,Apps,DPOpls), DCid, DPOpls) :- !,
 	valid_app_list(Apps),
 	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
 
+privacy_preference(Policy, DSid, DSid, DPOprs) :- atom(DSid), !, % lookup DS pref for id
+	element(Policy:_, privacy_preference(DSid, DPOprs)).
 privacy_preference(Defs, privacy_preference(DSid,DPOprs), DSid, DPOprs) :- !,
 	data_subject(Defs, DSid), valid_preference_list(Defs, DPOprs).
 
 valid_policy_list(Defs, PLs) :- is_list(PLs),
 	forall( member(PL,PLs),
 	        ( PL = (Purpose, DPO, ObjectType),
-		  purpose(Defs:Defs,Purpose),
-		  operation(Defs:Defs,DPO),
-		  data_type(Defs:Defs,ObjectType)
+		  purpose(Defs:_,Purpose),
+		  operation(Defs:_,DPO),
+		  data_type(Defs:_,ObjectType)
 	        )
 	      ).
 
 valid_preference_list(Defs, PRs) :- is_list(PRs),
 	forall( member(PR,PRs),
 	        ( PR = (Purpose, DPO, Object),
-		  purpose(Defs:Defs,Purpose),
-		  operation(Defs:Defs,DPO),
-		  object(Defs:Defs,Object)
+		  purpose(Defs:_,Purpose),
+		  operation(Defs:_,DPO),
+		  object(Defs:_,Object)
 	        )
 	      ).
 
@@ -313,10 +315,10 @@ valid_app_list(Apps) :- is_list(Apps),
 	forall( member(A,Apps), (A=opset(_AppName,Ops), is_list(Ops)) ).
 
 data_subject(Defs, DS) :- atom(DS), % Defs:subjects
-	object_attribute(Defs:Defs, DS).
+	object_attribute(Defs:_, DS).
 
 data_controller(Defs, DC) :- atom(DC), % Defs:controllers
-	user_attribute(Defs:Defs, DC).
+	user_attribute(Defs:_, DC).
 
 % from module dpl:
 %
@@ -324,9 +326,9 @@ data_controller(Defs, DC) :- atom(DC), % Defs:controllers
 %
 %  operation(P,Op) :- element(P,operation(Op)) ; element(P,operation(Op,_)).
 %
-%  data_type(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)).
+%  data_type(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
 %
-%  object_class(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)).
+%  object_class(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

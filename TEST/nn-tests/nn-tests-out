@@ -1,0 +1,53 @@
+01-servercurltest
+02-serverCombinedtest
+03-loaditest2
+04-server-grantdeny-test
+05-delete-multiple-test
+06-server-new-feature-test
+07-context-change-test
+07c-conditional-query-test
+08-event-triggered-response-test
+09-cme-context-reg-test
+10-servercurltest-accessm
+11-servercurltest-accessmc
+12-users
+13-market-policy
+14-market-policy
+14c-market-policy
+17-dplp-query
+64c64
+<   "respBody":"satisfied"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo22,dt1)]"
+74c74
+<   "respBody":"satisfied"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo2,dt1)]"
+84c84
+<   "respBody":"satisfied"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p11,dpo22,dt1),(p112,dpo21,dt1)]"
+89c89
+<   "respBody":"unsatisfied:(dc1,ds1):[(p1,dpo22,dt1)]"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p1,dpo22,dt1),(p112,dpo21,dt1)]"
+94c94
+<   "respBody":"satisfied"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p1,dpo22,dt1),(p112,dpo21,dt1)]"
+99c99
+<   "respBody":"satisfied"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo1,dt1),(p112,dpo21,dt1)]"
+104c104
+<   "respBody":"unsatisfied:(dc1,ds1):[(p111,dpo12,dt1)]"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)]"
+109c109
+<   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo21,dt1),(p111,dpo12,dt1)]"
+---
+>   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)]"
+18-consent-meta
+19-consent-example-full
+20-consent-example-full-meta
+21-consent-example-full-meta-new

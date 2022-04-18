@@ -15,11 +15,9 @@
 :- dynamic policy/3, policy/4, gg_policy/2, cc_policy/2.
 :- discontiguous policy/3, policy/4, gg_policy/2, cc_policy/2.
 
-%
-% Do not modify the following policies down to the % test policies
-% marker
+% Do not modify the following policies down to the % test policies marker
 
-policy(testdef_ex, testdef_ex, [
+policy(testdefs2, testdefs2, [
   object_attribute('pdc{1}'), % data_type('pdc{1}'),
   object_attribute('pdc{2}'), % data_type('pdc{2}'),
   object_attribute('PersonalDataCategory'), % data_type('PersonalDataCategory'),
@@ -45,14 +43,196 @@ policy(testdef_ex, testdef_ex, [
   assign('p(s)','Purpose')
 ], dplp).
 
+policy(testdefs1, testdefs1, [
+  user_attribute(data_controllers),
+  object_attribute(data_subjects),
+  object_attribute('PersonalDataCategory'), % data_type('PersonalDataCategory'),
+
+  object_attribute(dt1), data_type(dt1,[]),
+  object_attribute(dt2), data_type(dt2,[]),
+
+  assign(dt1,'PersonalDataCategory'),
+  assign(dt2,'PersonalDataCategory'),
+
+  % object(di1,dt1), % data item
+  % object(di2,dt2),
+  % object(di3,dt2),
+  % data_item(di1,dt1,ds1),
+  % data_item(di2,dt2,ds1),
+  % data_item(di3,dt2,ds2),
+
+  % object_attribute(ds1), % data subject
+  %data_subject(ds1, [di1:dt1], [(p11,dpo2,di1), (p112,dpo1,di1)]),
+
+  % user_attribute(dc1), % data controller
+  % user_attribute(dc2), % data controller
+  %data_controller(dc1, [(p112,dpo1,dt1), (p112,dpo21,dt1)]),
+  %data_controller(dc2, [], []),
+
+  operation(dpo12),
+  operation(dpo11),
+  operation(dpo1),
+  operation(dpo22),
+  operation(dpo21),
+  operation(dpo2),
+  operation('DataProcessing'),
+
+  assign(dpo1,'DataProcessing'),
+  assign(dpo11,dpo1),
+  assign(dpo12,dpo1),
+  assign(dpo2,'DataProcessing'),
+  assign(dpo21,dpo2),
+  assign(dpo22,dpo2),
+
+  purpose(p12),
+  purpose(p112),
+  purpose(p111),
+  purpose(p11),
+  purpose(p1),
+  purpose(p221),
+  purpose(p22),
+  purpose(p21),
+  purpose(p2),
+  purpose('Purpose'),
+
+  assign(p1,'Purpose'),
+  assign(p11,p1),
+  assign(p12,p1),
+  assign(p111,p11),
+  assign(p112,p11),
+  assign(p2,'Purpose'),
+  assign(p21,p2),
+  assign(p22,p2),
+  assign(p221,p22)
+], dplp).
+
+policy(testdefs1a, testdefs1a, [
+  data_type(dt1,[]),
+  data_type(dt2,[]),
+
+  object(di1,dt1), % data item
+  object(di2,dt2),
+  object(di3,dt2),
+
+  % assign(di1,dt1),
+  % assign(di2,dt2),
+  % assign(di3,dt2),
+
+  object_attribute(data_subjects),
+
+  object_attribute(ds1), % data subject
+  object_attribute(ds2), % data subject
+
+  user_attribute(dc1), % data controller
+
+  user_attribute(dp1), % data processor
+  user_attribute(dp2), % data processor
+
+  user_attribute(data_controllers),
+
+  assign(dc1,data_controllers),
+  assign(dp1,dc1),
+  assign(dp2,dc1),
+
+  operation(dpo12),
+  operation(dpo11),
+  operation(dpo1),
+  operation(dpo22),
+  operation(dpo21),
+  operation(dpo2),
+  operation(all_operations),
+
+  assign(dpo1,all_operations),
+  assign(dpo11,dpo1),
+  assign(dpo12,dpo1),
+  assign(dpo2,all_operations),
+  assign(dpo21,dpo2),
+  assign(dpo22,dpo2),
+
+  purpose(p12),
+  purpose(p112),
+  purpose(p111),
+  purpose(p11),
+  purpose(p1),
+  purpose(p221),
+  purpose(p22),
+  purpose(p21),
+  purpose(p2),
+  purpose(all_purposes),
+
+  assign(p1,all_purposes),
+  assign(p11,p1),
+  assign(p12,p1),
+  assign(p111,p11),
+  assign(p112,p11),
+  assign(p2,all_purposes),
+  assign(p21,p2),
+  assign(p22,p2),
+  assign(p221,p22)
+  ], dplp).
+
+policy(testdefs, testdefs, [
+  data_type(dt1,[]),
+  data_type(dt2,[]),
+
+  object(di1,dt1), % data item
+  object(di2,dt2),
+  object(di3,dt2),
+
+  % assign(di1,dt1),
+  % assign(di2,dt2),
+  % assign(di3,dt2),
+
+  object_attribute(ds1), % data subject
+  user_attribute(dc1), % data controller
+  user_attribute(dc2), % data controller
+
+  operation(dpo12),
+  operation(dpo11),
+  operation(dpo1),
+  operation(dpo22),
+  operation(dpo21),
+  operation(dpo2),
+  operation(all_operations),
+
+  assign(dpo1,all_operations),
+  assign(dpo11,dpo1),
+  assign(dpo12,dpo1),
+  assign(dpo2,all_operations),
+  assign(dpo21,dpo2),
+  assign(dpo22,dpo2),
+
+  purpose(p12),
+  purpose(p112),
+  purpose(p111),
+  purpose(p11),
+  purpose(p1),
+  purpose(p221),
+  purpose(p22),
+  purpose(p21),
+  purpose(p2),
+  purpose(all_purposes),
+
+  assign(p1,all_purposes),
+  assign(p11,p1),
+  assign(p12,p1),
+  assign(p111,p11),
+  assign(p112,p11),
+  assign(p2,all_purposes),
+  assign(p21,p2),
+  assign(p22,p2),
+  assign(p221,p22)
+
+  ], dplp).
+
 policy(dplp_min, pc, [], dplp).
 
 policy(dplp_base, cpol, [
-  dplp_policy_base(cpol, testdef_ex)
+  dplp_policy_base(cpol, testdefs2)
 ], dplp).
 
 policy(dplp4, cpol, [
-  dplp_policy_base(cpol, testdef_ex),
+  dplp_policy_base(cpol, testdefs2),
   application( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'], 'dp[y][x]'),
   data_controller('dc[x]', []),
   data_processor('dp[y][x]',[],'dc[x]'),
@@ -64,7 +244,7 @@ policy(dplp4, cpol, [
 ], dplp).
 
 policy(dplp3, cpol, [
-  dplp_policy_base(cpol, testdef_ex),
+  dplp_policy_base(cpol, testdefs2),
   opset( 'dp[y][x]_app1', ['dpo(w)','dpo(z)'] ),
   data_controller('dc[x]', []),
   data_processor('dp[y][x]',[],'dc[x]'),
@@ -1058,54 +1238,4 @@ policy(purpose_core_ontology, core_ontology, [
         purpose('ServiceProvision'), assign('ServiceProvision','Purpose'),
           purpose('CustomerCare'), assign('CustomerCare','ServiceProvision'),
           purpose('DeliveryOfGoods'), assign('DeliveryOfGoods','ServiceProvision')
-        ], dplp).
-
-policy(testdefs, testdefs, [
-        data_type(dt1,[]),
-        data_type(dt2,[]),
-
-        object(di1,dt1), % data item
-        object(di2,dt2),
-        object(di3,dt2),
-
-        object_attribute(ds1), % data subject
-        user_attribute(dc1), % data controller
-        user_attribute(dc2), % data controller
-
-        operation(dpo12),
-        operation(dpo11),
-        operation(dpo1),
-        operation(dpo22),
-        operation(dpo21),
-        operation(dpo2),
-        operation(all_operations),
-
-        assign(dpo1,all_operations),
-        assign(dpo11,dpo1),
-        assign(dpo12,dpo1),
-        assign(dpo2,all_operations),
-        assign(dpo21,dpo2),
-        assign(dpo22,dpo2),
-
-        purpose(p12),
-        purpose(p112),
-        purpose(p111),
-        purpose(p11),
-        purpose(p1),
-        purpose(p221),
-        purpose(p22),
-        purpose(p21),
-        purpose(p2),
-        purpose(all_purposes),
-
-        assign(p1,all_purposes),
-        assign(p11,p1),
-        assign(p12,p1),
-        assign(p111,p11),
-        assign(p112,p11),
-        assign(p2,all_purposes),
-        assign(p21,p2),
-        assign(p22,p2),
-        assign(p221,p22)
-
         ], dplp).
