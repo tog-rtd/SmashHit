@@ -593,6 +593,7 @@ endsession(S) :-
 % DPLP META-ELEMENT ADMIN
 %
 
+% add_dplp_policy_base
 dplp_add_dplp_policy_base(Request):- 
 	std_resp_prefix,
 	catch(
@@ -605,7 +606,7 @@ dplp_add_dplp_policy_base(Request):-
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
 	(   authenticate(Token)
-	->  add_dplp_policy_base(Policy, PolicyClass,Definitions), !
+	->  add_dplp_policy_base(Policy, PolicyClass, Definitions), !
 	;   true
 	).
 dplp_add_dplp_policy_base(_) :- audit_gen(dplp_admin, add_dplp_policy_base(failure)).
@@ -624,7 +625,7 @@ add_dplp_policy_base(Policy, PolicyClass, GlobalDefs) :-
 		audit_gen(dplp_admin, add_dplp_policy_base(Policy, PolicyBase, failure))
 	).
 
-
+% add_data_controller
 dplp_add_data_controller(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -648,16 +649,19 @@ add_data_controller(Policy, DC_ID, DC_POLICYatom) :-
 	;	true
 	),
 	policy(Policy,PC,dplp),
-	read_term_from_atom(DC_POLICYatom,DC_POLICY,[]),
+	(	atom(DC_POLICYatom)
+	->	read_term_from_atom(DC_POLICYatom,DC_POLICY,[])
+	;	DC_POLICY = DC_POLICYatom
+	),
 	DataController = data_controller(DC_ID, DC_POLICY),
 	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataController])
 	->	std_resp_MS(success,'data controller added',DataController),
-		audit_gen(dplp_admin, add_dplp_policy_base(Policy, DataController, success))
+		audit_gen(dplp_admin, add_data_controller(Policy, DataController, success))
 	;   std_resp_MS(failure,'error adding data controller',DataController),
-		audit_gen(dplp_admin, add_dplp_policy_base(Policy, DataController, failure))
+		audit_gen(dplp_admin, add_data_controller(Policy, DataController, failure))
 	).
 
-
+% delete_data_controller
 dplp_delete_data_controller(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -687,7 +691,7 @@ delete_data_controller(Policy, DC_ID) :-
 		audit_gen(dplp_admin, delete_data_controller(Policy, DC_ID, failure))
 	).
 
-
+% add_data_processor
 dplp_add_data_processor(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -712,7 +716,10 @@ add_data_processor(Policy, DP_ID, DP_POLICYatom, DC_ID) :-
 	;	true
 	),
 	policy(Policy,PC,dplp),
-	read_term_from_atom(DP_POLICYatom,DP_POLICY,[]),
+	(	atom(DP_POLICYatom)
+	->	read_term_from_atom(DP_POLICYatom,DP_POLICY,[])
+	;	DP_POLICY = DP_POLICYatom
+	),
 	DataProcessor = data_processor(DP_ID, DP_POLICY, DC_ID),
 	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataProcessor])
 	->	std_resp_MS(success,'data processor added',DataProcessor),
@@ -721,7 +728,7 @@ add_data_processor(Policy, DP_ID, DP_POLICYatom, DC_ID) :-
 		audit_gen(dplp_admin, add_data_processor(Policy, DataProcessor, failure))
 	).
 
-
+% delete_data_processor
 dplp_delete_data_processor(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -751,7 +758,7 @@ delete_data_processor(Policy, DP_ID) :-
 		audit_gen(dplp_admin, delete_data_processor(Policy, DP_ID, failure))
 	).
 
-
+% add_application
 dplp_add_application(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -776,7 +783,10 @@ add_application(Policy, APP_ID, DPOatom, DP_ID) :-
 	;	true
 	),
 	policy(Policy,PC,dplp),
-	read_term_from_atom(DPOatom,DPOs,[]),
+	(	atom(DPOatom)
+	->	read_term_from_atom(DPOatom,DPOs,[])
+	;	DPOs = DPOatom
+	),
 	Application = application(APP_ID, DPOs, DP_ID),
 	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[Application])
 	->	std_resp_MS(success,'application added',Application),
@@ -785,7 +795,7 @@ add_application(Policy, APP_ID, DPOatom, DP_ID) :-
 		audit_gen(dplp_admin, add_application(Policy, Application, failure))
 	).
 
-
+% delete_application
 dplp_delete_application(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -815,7 +825,7 @@ delete_application(Policy, APP_ID) :-
 		audit_gen(dplp_admin, delete_application(Policy, APP_ID, failure))
 	).
 
-		
+% add_data_subject	
 dplp_add_data_subject(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -840,8 +850,14 @@ add_data_subject(Policy, DS_ID, DS_PDIatom, DS_PREFERENCEatom) :-
 	;	true
 	),
 	policy(Policy,PC,dplp),
-	read_term_from_atom(DS_PDIatom,DS_PDIs,[]),
-	read_term_from_atom(DS_PREFERENCEatom,DS_PREFERENCE,[]),
+	(	atom(DS_PDIatom)
+	->	read_term_from_atom(DS_PDIatom,DS_PDIs,[])
+	;	DS_PDIs = DS_PDIatom
+	),
+	(	atom(DS_PREFERENCEatom)
+	->	read_term_from_atom(DS_PREFERENCEatom,DS_PREFERENCE,[])
+	;	DS_PREFERENCE = DS_PREFERENCEatom
+	),
 	DataSubject = data_subject(DS_ID, DS_PDIs, DS_PREFERENCE),
 	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataSubject])
 	->	std_resp_MS(success,'data subject added',DataSubject),
@@ -850,7 +866,7 @@ add_data_subject(Policy, DS_ID, DS_PDIatom, DS_PREFERENCEatom) :-
 		audit_gen(dplp_admin, add_data_subject(Policy, DataSubject, failure))
 	).
 
-
+% delete_data_subject
 dplp_delete_data_subject(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -880,7 +896,7 @@ delete_data_subject(Policy, DS_ID) :-
 		audit_gen(dplp_admin, delete_data_subject(Policy, DS_ID, failure))
 	).
 
-
+% add_data_item
 dplp_add_data_item(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -913,7 +929,7 @@ add_data_item(Policy, PDI_ID, PDC_ID, DS_ID) :-
 		audit_gen(dplp_admin, add_data_item(Policy, DataItem, failure))
 	).
 
-
+% delete_data_item
 dplp_delete_data_item(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -943,7 +959,7 @@ delete_data_item(Policy, PDI_ID) :-
 		audit_gen(dplp_admin, delete_data_item(Policy, PDI_ID, failure))
 ).
 
-
+% add_consent
 dplp_add_consent(Request) :- 
 	std_resp_prefix,
 	catch(
@@ -976,11 +992,17 @@ add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDc
 	;	true
 	),
 	policy(Policy,PC,dplp),
-	(var(ConsentAtom)
-	->	atom(ConsentID),atom(DC),atom(DP),atom(App),atom(DPOAtom),atom(Purpose),
-		atom(DS),atom(PDitem), atom(PDcategory),atom(ConstraintAtom),
-		read_term_from_atom(DPOAtom,DPOs,[]),
-		read_term_from_atom(ConstraintAtom,Constraint,[]),
+	(	var(ConsentAtom)
+	->	atom(ConsentID),atom(DC),atom(DP),atom(App),ground(DPOAtom),atom(Purpose),
+		atom(DS),atom(PDitem),atom(PDcategory),ground(ConstraintAtom),
+		(	atom(DPOAtom)
+		->	read_term_from_atom(DPOAtom,DPOs,[])
+		;	DPOs = DPOAtom
+			),
+		(	atom(ConstraintAtom)
+		->	read_term_from_atom(ConstraintAtom,Constraint,[])
+		;	Constraint = ConstraintAtom
+		),
 		Consent=consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
 	;	read_term_from_atom(ConsentAtom,Consent,[]),
 		functor(Consent,consent,10)
@@ -992,7 +1014,7 @@ add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDc
 		audit_gen(dplp_admin, add_consent(Policy, Consent, failure))
 	).
 
-
+% delete_consent
 dplp_delete_consent(Request) :- 
 	std_resp_prefix,
 	catch(

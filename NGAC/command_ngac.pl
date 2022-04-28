@@ -8,20 +8,20 @@ syntax(access(policy,(user,mode,object)),           ngac).
 syntax(access(policy,(user,mode,object),condition), ngac).
 syntax(access(policy,(user,mode,purpose,object)),   ngac). % DPLP
 syntax(add(policy,element),                         ngac).
-syntax(add_dplp_policy_base(dplp_policy_base_meta_element),ngac). % DPLP
-syntax(add_dplp_policy_base(policy, dplp_policy_base_meta_element),    ngac). % DPLP
-syntax(add_data_controller(data_controller_meta_element),ngac). % DPLP
-syntax(add_data_controller(policy, data_controller_meta_element),ngac). % DPLP
-syntax(add_data_processor(data_processor_meta_element),ngac). % DPLP
-syntax(add_data_processor(policy,data_processor_meta_element),ngac). % DPLP
-syntax(add_data_subject(data_subject_meta_element), ngac). % DPLP
-syntax(add_data_subject(policy,data_subject_meta_element),ngac). % DPLP
-syntax(add_data_item(data_item_meta_element),       ngac). % DPLP
-syntax(add_data_item(policy,data_item_meta_element),ngac). % DPLP
-syntax(add_application(application_meta_element),   ngac). % DPLP
-syntax(add_application(policy, application_meta_element),ngac). % DPLP
-syntax(add_consent(consent_meta_element),           ngac). % DPLP
-syntax(add_consent(policy,consent_meta_element),    ngac). % DPLP
+syntax(add_dplp_policy_base(policy_class,definitions),ngac). % DPLP
+syntax(add_dplp_policy_base(policy,policy_class,definitions),    ngac). % DPLP
+syntax(add_data_controller(dc_id, dc_policy),ngac). % DPLP
+syntax(add_data_controller(policy, dc_id, dc_policy),ngac). % DPLP
+syntax(add_data_processor(dp_id, dp_policy, dc_id),ngac). % DPLP
+syntax(add_data_processor(policy, dp_id, dp_policy, dc_id),ngac). % DPLP
+syntax(add_data_subject(ds_id, ds_pdis, ds_preference), ngac). % DPLP
+syntax(add_data_subject(policy, ds_id, ds_pdis, ds_preference),ngac). % DPLP
+syntax(add_data_item(pdi_id,pdc_id,ds_id),       ngac). % DPLP
+syntax(add_data_item(policy,pdi_id,pdc_id,ds_id),ngac). % DPLP
+syntax(add_application(app_id, dpos),   ngac). % DPLP
+syntax(add_application(policy, app_id, dpos),ngac). % DPLP
+syntax(add_consent(consent_id,dc_id,dp_id,app_id,dpos,purpose,ds_id,pdi_id,pdc_id,constraint),ngac). % DPLP
+syntax(add_consent(policy,consent_id,dc_id,dp_id,app_id,dpos,purpose,ds_id,pdi_id,pdc_id,constraint),ngac). % DPLP
 syntax(addm(policy,elements),                       ngac).
 syntax(addm(policy,elements,name),                  ngac).
 syntax(aoa(user),				    ngac).
@@ -31,18 +31,18 @@ syntax(decl2imp(decl_file,imp_file),		                                  obsolete
 syntax(delete(policy,element),                      ngac).
 syntax(deletem(policy,elements),                    ngac).
 syntax(delete_name(policy,name),                    ngac).
-syntax(delete_dplp_policy_base(dplp_policy_base_meta_element),ngac). % DPLP
-syntax(delete_dplp_policy_base(policy, dplp_policy_base_meta_element),    ngac). % DPLP
-syntax(delete_data_controller(data_controller_meta_element),ngac). % DPLP
-syntax(delete_data_controller(policy, data_controller_meta_element),ngac). % DPLP
-syntax(delete_data_processor(data_processor_meta_element),ngac). % DPLP
-syntax(delete_data_processor(policy,data_processor_meta_element),ngac). % DPLP
-syntax(delete_data_subject(data_subject_meta_element), ngac). % DPLP
-syntax(delete_data_subject(policy,data_subject_meta_element),ngac). % DPLP
-syntax(delete_data_item(data_item_meta_element),       ngac). % DPLP
-syntax(delete_data_item(policy,data_item_meta_element),ngac). % DPLP
-syntax(delete_application(application_meta_element),   ngac). % DPLP
-syntax(delete_application(policy, application_meta_element),ngac). % DPLP
+%syntax(delete_dplp_policy_base(dplp_policy_base_meta_element),ngac). % DPLP
+%syntax(delete_dplp_policy_base(policy, dplp_policy_base_meta_element),    ngac). % DPLP
+syntax(delete_data_controller(dc_id),ngac). % DPLP
+syntax(delete_data_controller(policy, dc_id),ngac). % DPLP
+syntax(delete_data_processor(dp_id),ngac). % DPLP
+syntax(delete_data_processor(policy,dp_id),ngac). % DPLP
+syntax(delete_data_subject(ds_id), ngac). % DPLP
+syntax(delete_data_subject(policy,ds_id),ngac). % DPLP
+syntax(delete_data_item(pdi_id),       ngac). % DPLP
+syntax(delete_data_item(policy,pdi_id),ngac). % DPLP
+syntax(delete_application(app_id),   ngac). % DPLP
+syntax(delete_application(policy, app_id),ngac). % DPLP
 syntax(delete_consent(consent_id),                  ngac). % DPLP
 syntax(delete_consent(policy,consent_id),           ngac). % DPLP
 syntax(deletem(policy,elements),                    ngac).
@@ -97,20 +97,24 @@ semantics(access(P,(U,M,Pur,O))) :- !, ground(P), ground(U), ground(M), ground(O
 semantics(access(P,(U,M,O),C)) :- !, ground(P), ground(U), ground(M), ground(O),
 	(   C==true ; compound(C) ; is_list(C) ), !.
 semantics(add(P,E)) :- !, ground(P), ground(E).
-semantics(add_dplp_policy_base(PB)) :- ground(PB). % DPLP
-semantics(add_dplp_policy_base(P, PB)) :- atom(P), ground(PB). % DPLP
-semantics(add_data_controller(DC)) :- ground(DC). % DPLP
-semantics(add_data_controller(P, DC)) :- atom(P), ground(DC). % DPLP
-semantics(add_data_processor(DP)) :- ground(DP). % DPLP
-semantics(add_data_processor(P,DP)) :- atom(P), ground(DP). % DPLP
-semantics(add_data_subject(DS)) :- ground(DS). % DPLP
-semantics(add_data_subject(P,DS)) :- atom(P), ground(DS). % DPLP
-semantics(add_data_item(DI)) :- ground(DI). % DPLP
-semantics(add_data_item(P,DI)) :- atom(P), ground(DI). % DPLP
-semantics(add_application(APP)) :- ground(APP). % DPLP
-semantics(add_application(P,APP)) :- atom(P), ground(APP). % DPLP
-semantics(add_consent(C)) :- !, ground(C), compound_name_arity(C,consent,10).
-semantics(add_consent(P,C)) :- !, ground(P), ground(C), compound_name_arity(C,consent,10).
+semantics(add_dplp_policy_base(PC,Defs)) :- atom(PC), atom(Defs). % DPLP
+semantics(add_dplp_policy_base(P,PC,Defs)) :- atom(P), atom(PC), atom(Defs). % DPLP
+semantics(add_data_controller(DC_ID,DC_POLICY)) :- atom(DC_ID), is_list(DC_POLICY). % DPLP
+semantics(add_data_controller(P,DC_ID,DC_POLICY)) :- atom(P), atom(DC_ID), is_list(DC_POLICY). % DPLP
+semantics(add_data_processor(DP_ID,DP_POLICY,DC_ID)) :- atom(DP_ID), is_list(DP_POLICY), atom(DC_ID). % DPLP
+semantics(add_data_processor(P,DP_ID,DP_POLICY,DC_ID)) :- atom(P), atom(DP_ID), is_list(DP_POLICY), atom(DC_ID). % DPLP
+semantics(add_data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)) :- atom(DS_ID), is_list(DS_PDIs), is_list(DS_PREFERENCE). % DPLP
+semantics(add_data_subject(P, DS_ID, DS_PDIs, DS_PREFERENCE)) :- atom(P), atom(DS_ID), is_list(DS_PDIs), is_list(DS_PREFERENCE). % DPLP
+semantics(add_data_item(PDI_ID, PDC_ID, DS_ID)) :- atom(PDI_ID), atom(PDC_ID), atom(DS_ID). % DPLP
+semantics(add_data_item(P,PDI_ID, PDC_ID, DS_ID)) :- atom(P), atom(PDI_ID), atom(PDC_ID), atom(DS_ID). % DPLP
+semantics(add_application(APP_ID,DPOs)) :-  atom(APP_ID), is_list(DPOs). % DPLP
+semantics(add_application(P,APP_ID,DPOs)) :- atom(P), atom(APP_ID), is_list(DPOs). % DPLP
+semantics(add_consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
+	atom(ConsentID),atom(DC),atom(DP),atom(App),is_list(DPOs),atom(Purpose),atom(DS),
+	atom(PDitem),atom(PDcategory),ground(Constraint).
+semantics(add_consent(P,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
+	atom(P),atom(ConsentID),atom(DC),atom(DP),atom(App),is_list(DPOs),atom(Purpose),atom(DS),
+	atom(PDitem),atom(PDcategory),ground(Constraint).
 semantics(addm(P,Es)) :- !, ground(P), ground(Es), is_list(Es).
 semantics(addm(P,Es,Nam)) :- !, ground(P), ground(Es), is_list(Es), ground(Nam).
 semantics(aoa(U)) :- !, ground(U).
@@ -120,16 +124,16 @@ semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
 semantics(delete(P,E)) :- !, ground(P), ground(E).
 semantics(deletem(P,Es)) :- !, ground(P), ground(Es).
 semantics(delete_name(P,N)) :- !, ground(P), atom(N).
-semantics(delete_dplp_policy_base(PB)) :- ground(PB). % DPLP
-semantics(delete_dplp_policy_base(P,PB)) :- atom(P), ground(PB). % DPLP
+%semantics(delete_dplp_policy_base(PB)) :- ground(PB). % DPLP
+%semantics(delete_dplp_policy_base(P,PB)) :- atom(P), ground(PB). % DPLP
 semantics(delete_data_controller(DC)) :- ground(DC). % DPLP
 semantics(delete_data_controller(P,DC)) :- atom(P), ground(DC). % DPLP
 semantics(delete_data_processor(DP)) :- ground(DP). % DPLP
 semantics(delete_data_processor(P,DP)) :- atom(P), ground(DP). % DPLP
 semantics(delete_data_subject(DS)) :- ground(DS). % DPLP
 semantics(delete_data_subject(P,DS)) :- atom(P), ground(DS). % DPLP
-semantics(delete_data_item(DI)) :- ground(DI). % DPLP
-semantics(delete_data_item(P,DI)) :- atom(P), ground(DI). % DPLP
+semantics(delete_data_item(DI)) :- atom(DI). % DPLP
+semantics(delete_data_item(P,DI)) :- atom(P), atom(DI). % DPLP
 semantics(delete_application(APP)) :- ground(APP). % DPLP
 semantics(delete_application(P,APP)) :- atom(P), ground(APP). % DPLP
 semantics(delete_consent(Cid)) :- !, atom(Cid).
@@ -311,22 +315,35 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
-/*
-do(add_dplp_policy_base(PB)) :- !, param:current_policy(P), true.
-do(add_dplp_policy_base(P, PB)) :- !, true.
-do(add_data_controller(DC)) :- !, param:current_policy(P), true.
-do(add_data_controller(P, DC)) :- !, true.
-do(add_data_processor(DP)) :- !, param:current_policy(P), true.
-do(add_data_processor(P,DP)) :- !, true.
-do(add_data_subject(DS)) :- !, param:current_policy(P), true.
-do(add_data_subject(P,DS)) :- !, true.
-do(add_data_item(DI)) :- !, param:current_policy(P), true.
-do(add_data_item(P,DI)) :- !, true.
-do(add_application(APP)) :- !, param:current_policy(P), true.
-do(add_application(P,APP)) :- !, true.
-*/
-do(add_consent(C)) :- !, param:current_policy(P), pap:add_consent(P,C,Stat), writeln(Stat).
-do(add_consent(P,C)) :- !, pap:add_consent(P,C,Stat), writeln(Stat).
+do(add_dplp_policy_base(PC,Defs)) :- !, param:current_policy(P),
+	do(add_dplp_policy_base(P,PC,Defs)).
+do(add_dplp_policy_base(P, PC, Defs)) :- !,
+	paapi:add_dplp_policy_base(P,PC,Defs).
+do(add_data_controller(DC_ID,DC_POLICY)) :- !, param:current_policy(P),
+	do(add_data_controller(P, DC_ID, DC_POLICY)).
+do(add_data_controller(P, DC_ID, DC_POLICY)) :- !,
+	paapi:add_data_controller(P,DC_ID,DC_POLICY).
+do(add_data_processor(DP_ID, DP_POLICY, DC_ID)) :- !, param:current_policy(P),
+	do(add_data_processor(P, DP_ID, DP_POLICY, DC_ID)).
+do(add_data_processor(P, DP_ID, DP_POLICY, DC_ID)) :- !,
+	paapi:add_data_processor(P,DP_ID,DP_POLICY,DC_ID).
+do(add_data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)) :- !, param:current_policy(P),
+	do(add_data_subject(P, DS_ID, DS_PDIs, DS_PREFERENCE)).
+do(add_data_subject(P, DS_ID, DS_PDIs, DS_PREFERENCE)) :- !,
+	paapi:add_data_subject(P, DS_ID, DS_PDIs, DS_PREFERENCE).
+do(add_data_item(PDI_ID, PDC_ID, DS_ID)) :- !, param:current_policy(P),
+	do(add_data_item(P, PDI_ID, PDC_ID, DS_ID)).
+do(add_data_item(P,PDI_ID, PDC_ID, DS_ID)) :- !,
+	paapi:add_data_item(P, PDI_ID, PDC_ID, DS_ID).
+do(add_application(APP_ID,DPOs,DP_ID)) :- !, param:current_policy(P),
+	do(add_application(P,APP_ID,DPOs,DP_ID)).
+do(add_application(P,APP_ID,DPOs,DP_ID)) :- !,
+	paapi:add_application(P,APP_ID,DPOs,DP_ID).
+do(add_consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
+	param:current_policy(P),
+	do(add_consent(P,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)).
+do(add_consent(P,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
+	paapi:add_consent(P,_,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint).
 do(addm(P,Elts)) :- !, pap:add_named_policy_elements(_,P,Elts).
 do(addm(P,Elts,Name)) :- !, pap:add_named_policy_elements(Name,P,Elts).
 do(aoa(U)) :- !, param:current_policy(P), dpl:policy(P,PC),
@@ -346,19 +363,19 @@ do(delete_name(P,Name)) :- !, dpl:delete_named(P:_,Name).
 /*
 do(delete_dplp_policy_base(PB)) :- !, param:current_policy(P), true.
 do(delete_dplp_policy_base(P,PB)) :- !, true.
-do(delete_data_controller(DC)) :- !, param:current_policy(P), true.
-do(delete_data_controller(P,DC)) :- !, true.
-do(delete_data_processor(DP)) :- !, param:current_policy(P), true.
-do(delete_data_processor(P,DP)) :- !, true.
-do(delete_data_subject(DS)) :- !, param:current_policy(P), true.
-do(delete_data_subject(P,DS)) :- !, true.
-do(delete_data_item(DI)) :- !, param:current_policy(P), true.
-do(delete_data_item(P,DI)) :- !, true.
-do(delete_application(APP)) :- !, param:current_policy(P), true.
-do(delete_application(P,APP)) :- !, true.
 */
-do(delete_consent(Cid)) :- !, param:current_policy(P), pap:delete_consent(P,consent(Cid)).
-do(delete_consent(P,Cid)) :- !, pap:delete_consent(P,consent(Cid)).
+do(delete_data_controller(DC)) :- !, param:current_policy(P), do(delete_data_controller(P,DC)).
+do(delete_data_controller(P,DC)) :- !, paapi:delete_data_controller(P,DC).
+do(delete_data_processor(DP)) :- !, param:current_policy(P), do(delete_data_processor(P,DP)).
+do(delete_data_processor(P,DP)) :- !, paapi:delete_data_processor(P,DP).
+do(delete_data_subject(DS)) :- !, param:current_policy(P), do(delete_data_subject(P,DS)).
+do(delete_data_subject(P,DS)) :- !, paapi:delete_data_subject(P,DS).
+do(delete_data_item(DI)) :- !, param:current_policy(P), do(delete_data_item(P,DI)).
+do(delete_data_item(P,DI)) :- !, paapi:delete_data_item(P,DI).
+do(delete_application(APP)) :- !, param:current_policy(P), do(delete_application(P,APP)).
+do(delete_application(P,APP)) :- !, paapi:delete_application(P,APP).
+do(delete_consent(Cid)) :- !, param:current_policy(P), do(delete_consent(P,Cid)).
+do(delete_consent(P,Cid)) :- !, paapi:delete_consent(P,Cid).
 do(dpl_reinit) :- !, dpl:reinit.
 do(dps(P)) :- !, %param:current_policy(P), % dpl:policy(P,PC),
 	pdp:policy_dps(P,DPS), ui:display_list(DPS).

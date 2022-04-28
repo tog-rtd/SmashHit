@@ -80,8 +80,8 @@ echo 20-consent-example-full-meta
 20-consent-example-full-meta.sh >20-result-tmp
 diff 20-expected$ext 20-result-tmp
 
-echo 21-consent-example-full-meta-new
-21-consent-example-full-meta-new.sh >21-result-tmp
+echo 21-consent-example-full-meta-2
+21-consent-example-full-meta-2.sh >21-result-tmp
 diff 21-expected$ext 21-result-tmp
 
 echo 22-policy-sat
