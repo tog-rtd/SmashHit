@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = ../NGAC-APIs
+	branch = master
+	commit = fed82bce53e9629c11b82b6557b049dc4542d483
+	parent = bb73ba9ca7e2d6496cf8a6ed17254c76798242e6
+	method = merge
+	cmdver = 0.4.3

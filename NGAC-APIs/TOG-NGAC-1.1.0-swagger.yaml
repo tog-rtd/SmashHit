@@ -1,0 +1,2061 @@
+swagger: '2.0'
+info:
+  description: TOG-NGAC, EPP, and Audit APIs
+  version: 1.1.1
+  title: NGAC APIs
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    
+host: 127.0.0.1:8001
+#host: 195.201.23.72:8001
+basePath: /
+schemes:
+  - http
+#  - https
+
+paths:
+  '/paapi/getpol':
+    get:
+      tags:
+      - policy administration
+      summary: get the name of the current policy being used for policy queries
+      operationId: getpol
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token required to access admin apis
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus": "success", "respMessage": "current policy", "respBody": "Policy (a)" }
+        400:
+          description: failure
+        
+          
+  '/paapi/setpol':
+    post:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: set current policy to be used for policy queries
+      description: | 
+        sets the server’s current policy to the named policy 
+        
+        distinguished policy names have special effects: 
+        all –  the composition of all subsequently loaded policies to be applied; 
+        grant – all queries to return grant; 
+        deny – all queries to return deny
+      operationId: setpol
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policy set",
+                                "respBody":"Policy (a)" }
+        400:
+          description: Failure
+        404:
+          description: Unknown policy (the named policy is not known to the server)
+          
+  '/paapi/add':
+    post:
+      tags:
+      - policy administration
+      summary: add an element to the current policy
+      description: | 
+        The named policy is augmented with the provided policy element.
+      
+        Only user, object, and assignment elements as defined in the declarative policy language;restriction&#58; only user to user attribute and object to object attribute assignments may be added. Elements referred to by an assignment must be added before adding an assignment that refers to them.
+      operationId: add
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+      - in: query
+        name: policyelement
+        description: policy element
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"element added",
+                                "respBody":"user(u3)"}
+        400:
+          description: failure (add constraints not met)
+
+  '/paapi/addm':
+    post:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: add multiple elements to the current policy
+      description:  | 
+        The named policy is augmented with the provided policy elements.
+        
+        Unlike **paapi/add** this call does not fail for the failure of an add of any of the individual elements. Note that this feature of **paapi/addm** can be used instead of **paapi/add** to issue an add that is immune to failure by passing a list consisting of just one policy element. The user is responsible for maintaining consistency of the policy.
+      operationId: addm
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: true
+        type: string
+      - in: query
+        name: policy_elements
+        description: '[policy element, ...]: only user, object, assign and associate elements as defined in the declarative policy language; restriction: only user to user attribute and object to object attribute assignments may be added. Elements referred to by an assignment must be added before adding an assignment that refers to them'
+        required: true
+        type: string
+      - in: query
+        name: name
+        description: optional name to associate with added elements
+        required: false
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"elements added",
+                                "respBody":"[user(u1),assign(u1,ua1)]"}
+        400:
+          description: failure (missing argument or token error)
+
+  '/paapi/delete':
+    delete:
+      tags:
+      - policy administration
+      summary: delete an element from a policy
+      description: The specified policy element is deleted from the named policy
+      operationId: delete
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: true
+        type: string
+      - in: query
+        name: policyelement
+        description:  | 
+          permits only user, object, and assignment elements as defined in the declarative policy language; 
+          
+          restriction: only user-to-user-attribute and object-to-object-attribute assignments may be deleted. Assignments must be deleted before the elements to which they refer.
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"element deleted",
+                                "respBody":"user(u3)"}
+        400:
+          description: failure (the element does not currently exist)
+
+  '/paapi/deletem':
+    delete:
+      tags:
+      - policy administration
+      summary: delete multiple elements from a policy
+      description: |
+        The specified policy elements are deleted from the named policy.
+      
+        Unlike **paapi/delete** this call does not fail for the failure of a delete of any of the individual elements. Note that this feature of **paapi/deletem** can be used instead of **paapi/delete** to issue a delete that is immune to failure by passing a list consisting of just one policy element. The user is responsible for maintaining consistency of the policy.
+      operationId: deletem
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: true
+        type: string
+      - in: query
+        name: policyelements
+        description: |
+          [ policy element , … ] only user, object, assign and associate elements as defined in the declarative policy language; restriction: only user-to-user-attribute and object-to-object-attribute assignments may be deleted. Assignments must be deleted before the elements to which they refer.
+        required: false
+        type: string
+      - in: query
+        name: name
+        description: optional name associated with elements to be deleted
+        required: false
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"elements deleted",
+                                "respBody":"[assign(u1,ua1),user(u1)]"}
+        400:
+          description: failure
+          
+  '/paapi/combinepol':
+    post:
+      tags:
+      - policy administration
+      summary: combine policies to form new policy
+      description: |
+        the new combined policy is stored in the server
+      operationId: combinepol
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: policy1
+        description: first policy identifier
+        required: true
+        type: string
+      - in: query
+        name: policy2
+        description: second policy identifier
+        required: true
+        type: string
+      - in: query
+        name: combined
+        description: combined policy identifier
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: admin-token
+        required: true
+        type: string
+        
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policies combined",
+                                "respBody":"Combined Policy"}
+        400:
+          description: failure        
+     
+            
+  '/paapi/load':
+    post:
+      tags:
+      - policy administration
+      summary: load a policy file into the server
+      description: |
+        stores the loaded policy in the server
+        
+        does NOT set the server’s current policy to the loaded policy
+      operationId: load
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policyfile
+        description: policy file name
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policy loaded",
+                                "respBody":"Signals Access Policy"}
+        400:
+          description: failure 
+          
+  '/paapi/loadi':
+    post:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: load immediate policy spec into the server
+      description: |
+        stores the specified policy in the server
+        
+        does NOT set the server’s current policy to the loaded policy
+      operationId: loadi
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policyspec
+        description: policy specification
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policy loaded immediate",
+                                "respBody":"ipolicy"}
+        400:
+          description: failure
+          
+  '/paapi/unload':
+    delete:
+      tags:
+      - policy administration
+      summary: unload a policy from the server
+      description: |
+        the named policy is unloaded from the server
+        
+        sets the server’s current policy to “none” if the unloaded policy is the current policy
+      operationId: unload
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: true
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policy unloaded",
+                                "respBody":"Policy3"}
+        400:
+          description: failure           
+          
+  '/paapi/readpol':
+    get:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: read server policy
+      description: |
+        no internal effects on server
+        
+        Sessions in the Policy Server: An active session identifier may be used as an alternative to a user identifier in an access query made to the Policy Query Interface.
+      operationId: readpol
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: part
+        description: part of policy to read, meta, metaonly, nometa
+        default: meta
+        required: false
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"read policy",
+                                "respBody":"policy(ipolicy, access, [\n user(u1),\n user_attribute(ua1),\n object(o1),\n
+object_attribute(oa1),\n policy_class(access),\n connector('PM'),\n assign(u1,ua1),\n
+assign(o1,oa1),\n assign(ua1,access),\n assign(oa1,access),\n assign(access,'PM'),\n
+associate(ua1,[r,w],oa1)\n]).\n"}
+        400:
+          description: bad input parameter
+
+  '/paapi/loadcondi':
+    post:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: load immediate condition definitions into the server
+      description: |
+        stores the specified condition elements in the server and associated name if specified
+
+        if the specified name duplicates a current name the condition elements associated with the current name are replaced by the condition elements specified in the call
+      
+        Note: Named condition sets are not yet implemented.
+      operationId: loadcondi
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: cond_elements
+        description: |
+          [cond element, ...]
+        required: true
+        type: string
+      - in: query
+        name: cond_name
+        description:  |
+          name to be associated with conditions, or _global_
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+      #    examples:
+      #      application/json: { "respStatus":"success",
+      #                          "respMessage":"policy unloaded",
+      #                          "respBody":"Policy3"}
+        400:
+          description: failure
+  '/paapi/unloadcondi':
+    delete:
+      tags:
+      - policy administration
+      summary: unload condition definitions from the server
+      description: |
+        The condition elements specified (or the named set of condition elements) are unloaded from the server
+        
+        If the condition name “global” is specified, all conditions will be unloaded, including named condition sets
+        
+        Note: Though both are optional, either condition name or condition elements must be specified or a missing parameter failure response is issued
+      operationId: unloadcondi
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: cond_elements
+        description: |
+          [cond element, ...]
+        required: false
+        type: string
+      - in: query
+        name: cond_name
+        description:  |
+          name to be associated with conditions, or _global_
+        required: false
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+            #    examples:
+            #      application/json: { "respStatus":"success",
+          #                          "respMessage":"policy unloaded",
+          #                          "respBody":"Policy3"}
+        400:
+          description: failure
+          
+  '/paapi/readcond':
+    get:
+      tags:
+      - policy administration
+      - used by the use case
+      summary: read server conditions
+      description: |
+        No internal effects on server
+        
+        The _cond_name_ argument may specify a user-defined name or one of: ‘predefined’, ‘static’, ‘dynamic’ or ‘all’. If the _cond_name_ argument is not specified the default name is ‘dynamic’. This is the name under which unnamed condition elements are added. ‘predefined’ are the built-in condition variables and predicates, ‘static’ are those defined in the conditions.pl file, ‘dynamic’ are those added through the **loadcondi** API.
+      operationId: readcond
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: cond_name
+        description: name of a condition group
+        required: false
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #    examples:
+            #      application/json: { "respStatus":"success",
+          #                          "respMessage":"policy unloaded",
+          #                          "respBody":"Policy3"}
+        400:
+          description: failure
+
+  '/paapi/reset':
+    delete:
+      tags:
+      - policy administration
+      summary: selective reset of databases
+      description: |
+        The named object or group of objects are removed from the database.
+        
+        The accepted domains are: conditions, context_mappings, policies, and event_responses,
+
+        The respBody will depend upon the selected domain.
+      operationId: reset
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: name
+        description: name of a named set such as a condition group
+        required: false
+        type: string
+      - in: query
+        name: domain
+        description: name of a domain (e.g. condition, policy)
+        required: false
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #    examples:
+            #      application/json: { "respStatus":"success",
+          #                          "respMessage":"policy unloaded",
+          #                          "respBody":"Policy3"}
+        400:
+          description: failure
+
+  '/paapi/resetcond':
+    delete:
+      tags:
+      - policy administration
+      summary: selective reset of conditions database
+      description: |
+        The named group of condition items are removed from the database.
+        
+        The accepted cond_name values are: ‘dynamic’ or a user-defined condition group name. ‘predefined’ and ‘static’ conditions can not be reset.
+
+        This is a convenience interface equivalent to **reset** for the domain ‘conditions’.
+      operationId: resetcond
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: cond_name
+        description: name of a named  condition group
+        required: false
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #    examples:
+            #      application/json: { "respStatus":"success",
+          #                          "respMessage":"policy unloaded",
+          #                          "respBody":"Policy3"}
+        400:
+          description: failure
+
+  '/paapi/initsession':
+    post:
+      tags:
+      - policy administration
+      summary: initiate a session for user on the server
+      description: |
+        the new session/user binding is stored in the server
+      operationId: initsession
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: session
+        description: session identifier
+        required: true
+        type: string
+      - in: query
+        name: user
+        description: user identifier
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                    "respMessage":"session initialized",
+                    "respBody":"ana_session"}
+        400:
+          description: failure
+
+  '/paapi/endsession':
+    delete:
+      tags:
+      - policy administration
+      summary: end a session on the server
+      description: |
+        the identified session/user binding is deleted from the server
+      operationId: endsession
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin-token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: session
+        description: session identifier
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+#           examples:
+#             application/json: { "respStatus":"success",
+# "respMessage":"session ended",
+# "respBody":"ana_session"}
+        400:
+          description: failure
+
+  '/dplp/add_dplp_policy_base':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add base elements of a dplp policy
+      description: the meta-element is expanded into DPL elements of the base policy
+      operationId: add_dplp_policy_base
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: admin_token
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: policy_class
+        description: policy class identifier
+        required: true
+        type: string
+      - in: query
+        name: definitions
+        description: policy identifier of policy to use for definitions
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+        400:
+          description: failure
+
+  '/dplp/add_data_controller':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add data_controller meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: add_data_controller
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_controller
+        description: data controller identifier
+        required: true
+        type: string
+      - in: query
+        name: privacy_policy
+        description: privacy policy of the data controller
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data controller added",
+              "respBody":"data_controller meta-element"}
+        400:
+          description: failure
+
+  '/dplp/add_data_processor':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add data_controller meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: add_data_processor
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_processor
+        description: data processor identifier
+        required: true
+        type: string
+      - in: query
+        name: data_controller
+        description: data controller identifier
+        required: true
+        type: string
+      - in: query
+        name: privacy_policy
+        description: privacy policy of the data processor
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data processor added",
+              "respBody":"data_controller meta-element"}
+        400:
+          description: failure
+
+  '/dplp/add_application':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add application meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: add_application
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: application
+        description: application identifier
+        required: true
+        type: string
+      - in: query
+        name: data_processor
+        description: data processor identifier
+        required: true
+        type: string
+      - in: query
+        name: operations
+        description: data processing operations performed by the application
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"application added",
+              "respBody":"application meta-element"}
+        400:
+          description: failure
+
+  '/dplp/add_data_subject':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add data_subject meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: add_data_subject
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_subject
+        description: data subject identifier
+        required: true
+        type: string
+      - in: query
+        name: data_items
+        description: list of data item ID and data category ID pairs
+        required: true
+        type: string
+      - in: query
+        name: privacy_preference
+        description: privacy preference of the data subject
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data subject added",
+              "respBody":"data_subject meta-element"}
+        400:
+          description: failure
+
+  '/dplp/add_data_item':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add data_item meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: add_data_item
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_item
+        description: data item identifier
+        required: true
+        type: string
+      - in: query
+        name: data_category
+        description: type of the data item
+        required: true
+        type: string
+      - in: query
+        name: data_subject
+        description: data subject that owns the data item
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data item added",
+              "respBody":"data_item meta-element"}
+        400:
+          description: failure
+
+  '/dplp/add_consent':
+    post:
+      tags:
+      - DPLP meta-element admin
+      summary: add consent meta-element to a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the consent
+      operationId: add_consent
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: consent
+        description: consent structure
+        required: false
+        type: string
+      - in: query
+        name: consent_id
+        description: consent identifier
+        required: false
+        type: string
+      - in: query
+        name: data_controller
+        description: data controller involved in the consent
+        required: false
+        type: string
+      - in: query
+        name: data_processor
+        description: data processor involved in the consent
+        required: false
+        type: string
+      - in: query
+        name: application
+        description: application involved in the consent
+        required: false
+        type: string
+      - in: query
+        name: operations
+        description: data processing operations for which consent is given
+        required: false
+        type: string
+      - in: query
+        name: purpose
+        description: purpose for data processing for which consent is given
+        required: false
+        type: string
+      - in: query
+        name: data_subject
+        description: data subject that has given consent
+        required: false
+        type: string
+      - in: query
+        name: data_item
+        description: data item for the processing of which consent is given
+        required: false
+        type: string
+      - in: query
+        name: data_category
+        description: data category of the data item
+        required: false
+        type: string
+      - in: query
+        name: constraint
+        description: additional condition under which the consent is valid
+        required: false
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"consent added",
+              "respBody":"consent meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_data_controller':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete data_controller meta-element from a DPLP policy
+      description: |
+        the DPL+ elements for the data controller and its data processors are deleted
+      operationId: delete_data_controller
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_controller
+        description: data controller identifier
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data controller deleted",
+              "respBody":"data_controller meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_data_processor':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete data_controller meta-element from a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: delete_data_processor
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_processor
+        description: data processor identifier
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data processor deleted",
+              "respBody":"data_controller meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_application':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete application meta-element from a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: delete_application
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: application
+        description: application identifier
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"application deleted",
+              "respBody":"application meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_data_subject':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete data_subject meta-element from a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: delete_data_subject
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_subject
+        description: data subject identifier
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data subject deleted",
+              "respBody":"data_subject meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_data_item':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete data_item meta-element from a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the data controller
+      operationId: delete_data_item
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: data_item
+        description: data item identifier
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"data item deleted",
+              "respBody":"data_item meta-element"}
+        400:
+          description: failure
+
+  '/dplp/delete_consent':
+    delete:
+      tags:
+      - DPLP meta-element admin
+      summary: delete consent meta-element from a DPLP policy
+      description: |
+        the meta-element is expanded into the DPL+ elements for the consent
+      operationId: delete_consent
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: token representing permission to perform admin operations
+        default: admin_token
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: policy identifier
+        required: false
+        type: string
+      - in: query
+        name: consent_id
+        description: consent identifier
+        required: false
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+              "respMessage":"consent deleted",
+              "respBody":"consent meta-element"}
+        400:
+          description: failure
+
+  '/audit/control':
+    post:
+      tags:
+      - auditing
+      summary: control auditing functions
+      description: |
+        the requested audit administration operation is performed
+      operationId: control
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: audit token
+        required: true
+        type: string
+      - in: query
+        name: audit_op
+        description: audit operation
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+#          examples:
+#            application/json: { "respStatus":"success",
+# "respMessage":"session ended",
+# "respBody":"ana_session"}
+        400:
+          description: failure
+
+
+  '/audit/select':
+    post:
+      tags:
+      - auditing
+      summary: select auditable events to log
+      description: |
+        The specified events are added to the current audit selection. If optional delete_events are specified, deletion is performed before addition of events. The resultant audit selection is returned in the response body.
+      operationId: select
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: audit token
+        required: true
+        type: string
+      - in: query
+        name: add_events
+        description: |
+          [audit event, … ]
+        required: true
+        type: string
+      - in: query
+        name: delete_events
+        description: |
+          [audit event, … ]
+        type: string
+        required: false
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #examples:
+           # application/json: { "respStatus":"success",
+#"respMessage":"session ended",
+#"respBody":"ana_session"}
+        400:
+          description: failure
+
+
+  '/audit/set_log_file':
+    post:
+      tags:
+      - auditing
+      summary: set audit log stream to new file
+      description: |
+        The specified file becomes the destination for subsequent audit records. The name of the preceding file is returned. If a new_file is not specified then the call completes successfully without having changed the log file but the current audit log file name is returned in the response body.
+      operationId: set_log_file
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: audit token
+        required: true
+        type: string
+      - in: query
+        name: new_file
+        description: audit event
+        required: false
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #examples:
+           # application/json: { "respStatus":"success",
+#"respMessage":"session ended",
+#"respBody":"ana_session"}
+        400:
+          description: failure
+
+
+  '/audit/gen':
+    post:
+      tags:
+      - auditing
+      summary: generate an audit record
+      description: |
+        The audit information is provided either as an audit information structure or as separate items for source, event, and event-specific data. An audit record is generated in the currently selected format and added to the audit log stream. A token is not necessary, but if present will cause the audit system to prioritize the preservation of the audit record over those submitted without the token in an attempt to manage audit floods when possible. The audit system will _attempt_ to return failure when it is impossible to accept the audit record.
+      operationId: gen
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: audit token
+        required: false
+        type: string
+      - in: query
+        name: audit_info
+        description: audit information
+        required: false
+        type: string
+      - in: query
+        name: audit_source
+        description: self-identified source of the audit event
+        required: true
+        type: string
+      - in: query
+        name: audit_event
+        description: auditable event
+        required: true
+        type: string
+      - in: query
+        name: audit_data
+        description: event-specific information
+        required: true
+        type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #examples:
+           # application/json: { "respStatus":"success",
+#"respMessage":"session ended",
+#"respBody":"ana_session"}
+        400:
+          description: failure
+
+
+  '/pqapi/access':
+    get:
+      tags:
+      - policy query
+      summary: test for access permission
+      description: |
+        Returns “grant” or “deny” based on the current policy 
+        Returns “no current policy” if the server does not have a current policy set
+        
+        “grant” and “deny” are both “success” responses
+      operationId: access
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: user
+        description: user identifier
+        required: true
+        type: string
+      - in: query
+        name: ar
+        description: access right
+        required: true
+        type: string
+      - in: query
+        name: object
+        description: object identifier
+        required: true
+        type: string
+      - in: query
+        name: purpose
+        description: purpose attribute identifier
+        required: false
+        type: string
+      - in: query
+        name: con
+        description: conditional predicate with actual parameters
+        required: false
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"grant",
+                                "respBody":"u1,r,o1"}
+        400:
+          description: failure
+
+  '/pqapi/caccess':
+    get:
+      tags:
+      - policy query
+      summary: conditional test for access permission
+      description: |
+        Returns “grant” or “deny” based on the current policy 
+        Returns “no current policy” if the server does not have a current policy set
+        
+        “grant” and “deny” are both “success” responses
+      operationId: caccess
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: user
+        description: user identifier
+        required: true
+        type: string
+      - in: query
+        name: ar
+        description: access right
+        required: true
+        type: string
+      - in: query
+        name: object
+        description: object identifier
+        required: true
+        type: string
+      - in: query
+        name: purpose
+        description: purpose attribute identifier
+        required: false
+        type: string
+      - in: query
+        name: con
+        description: conditional predicate with actual parameters
+        required: false
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+  
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"grant",
+                                "respBody":"u1,r,o1"}
+        400:
+          description: failure
+          
+  '/pqapi/accessm':
+    get:
+      tags:
+      - policy query
+      summary: multiple access permission queries
+      description: |
+        Returns a list ["grant" | “deny” | “malformed query”, …] of the same length as the input parameter list corresponding to each access query triple/quad in the _query list_ based on the current policy
+        Returns “no current policy” if the server does not have a current policy set
+        
+        any _result list_ (including empty list or list having a “malformed query” for any individual query) still has a “success” outcome.
+      operationId: accessm
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: access_queries
+        description: |
+          _query list_: a list (including empty list) [ query, …] of access queries, each of which may be a triple (user, ar, object), or a quad of (user, ar, object, purpose) as in **access**, or a 4 or 5-tuple (user, ar, object, purpose), (user, ar, object, cond, purpose) as in **caccess**
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"policy set",
+                                "respBody":"Policy (a)"}
+        400:
+          description: failure
+          
+  '/pqapi/getobjectinfo':
+    get:
+      tags:
+      - policy query
+      summary: get object metadata
+      description: |
+        Returns “object=_obj id_, oclass=_obj class_, inh=_t/f_, host=_host_, path=_path_, basetype=_btype_, basename=_bname_”
+        
+        An active session identifier may be used as an alternative to a user identifier in an access query made to the Policy Query Interface.
+      operationId: getobjectinfo
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: object
+        description: object identifier
+        required: true
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"objectinfo",
+                                "respBody":"object information structure"}
+        400:
+          description: bad input parameter
+          
+  '/pqapi/users':
+    get:
+      tags:
+      - policy query
+      - used by the use case
+      summary: what users can access object
+      description: |
+        Returns list of users and access rights; list of users for the optional access right
+        Returns “no current policy” if the server does not have a current policy set
+        
+        List all users that have access to the object in the given access mode.
+        
+        _condition_ is one of: _true_ | _cond pred_ | _condition var defs_
+        where: _condition pred_ is a condition predicate invocation that will be matched against condition predicates in conditional policy elements, to supply arguments to the actual invocation.
+
+        _condition var defs_ is a list of definitions of the form:
+        _cond var name_ = _value_. Condition variables must have been declared in the conditions.pl file.
+        Occurrences of condition variables in the argument list of any rule condition will be substituted according to the values in _condition var defs_, which overrides any current stored value of the condition variable.
+  
+        The form of the returned _user list_ depends upon whether the ar parameter is specified. In the case it is specified, the result is a list of users. In the case that the ar parameter is not specified, the result is a list of pairs (user, access right list).
+      operationId: users
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: object
+        description: object identifier
+        required: true
+        type: string
+      - in: query
+        name: ar
+        description: access right
+        required: false
+        type: string
+      - in: query
+        name: cond
+        description: condition
+        required: false
+        type: string
+      - in: query
+        name: policy
+        description: name of policy to be used
+        required: false
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          #examples:
+          #  application/json: { "respStatus":"success",
+          #                      "respMessage":"objectinfo",
+          #                      "respBody":"object information structure"}
+        400:
+          description: failure
+
+  '/epp/load_erf':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: load an ER package from a file into the EPP
+      description: |
+        stores the loaded ER package in the EPP
+        
+        activates the loaded ER package (subject to change)
+      operationId: load_erf
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: erpfile
+        description: erp file name
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"ER package loaded from file",
+                                "respBody":"erp file name, er package identifier"}
+        400:
+          description: failure
+
+  '/epp/loadi_erp':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: load immediate ER package into the EPP
+      description: |
+        stores the loaded ER package in the EPP
+        
+        activates the loaded ER package (subject to change)
+      operationId: loadi_erp
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: erp
+        description: erp package specification
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"ER package loaded immediate",
+                                "respBody":"er_test1"}
+        400:
+          description: failure
+
+  '/epp/unload_erp':
+    delete:
+      tags:
+      - event-response policy manipulation
+      summary: unload und ER package from the EPP
+      description: |
+        the named ER package is deactivated and unloaded from the EPP
+        
+        sets the EPP’s current ER package to “none” if the unloaded erp is the current erp
+      operationId: unload_erp
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: erpname
+        description: ER package name
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"ER package unloaded",
+                                "respBody":"er_test1"}
+        400:
+          description: failure
+
+
+  '/epp/activate_erp':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: activate an ER package in the EPP
+      description: |
+        the named ER package is made the current package in the EPP
+        
+        no change if the named ER package in not known
+      operationId: activate_erp
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: erpname
+        description: ER package name
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"ER package activated",
+                                "respBody":"er_test1"}
+        400:
+          description: failure
+
+
+  '/epp/deactivate_erp':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: deactivate an ER package in the EPP
+      description: |
+        the named ER package, if active, is deactivated and the current package set to “none”
+        
+        no change if the named ER package in not currently activated
+      operationId: deactivate_erp
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: erpname
+        description: ER package name
+        required: true
+        type: string
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"ER package deactivated",
+                                "respBody":"er_test1"}
+        400:
+          description: failure
+
+
+  '/epp/current_erp':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: get name of the current active ER package
+      description: |
+        Returns _ER package name_ or “failure” (if there is currently no active package the name returned is ‘none’)
+      operationId: current_erp
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"current ER package",
+                                "respBody":"er_test1"}
+        400:
+          description: failure
+
+
+  '/epp/report_event':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: report an event to the EPP
+      description: |
+        The event term (a named event or event structure) is compared against event patterns, and triggers a response if an event pattern is matched. The response may cause a specified sequence of administrative actions to be executed.
+        
+        no effect if the event does not cause an event pattern to be matched
+      operationId: report_event
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"event reported",
+                                "respBody":"test_event"}
+        400:
+          description: failure
+
+  '/epp/context_notify':
+    post:
+      tags:
+      - event-response policy manipulation
+      summary: notify EPP of context change
+      description: |
+        The context variable cache is updated to the values in context
+        
+        no change if the named variable are not already in the cache
+      operationId: context_notify
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: token
+        description: epp token
+        required: true
+        type: string
+      - in: query
+        name: context
+        description: |
+          [ _variable name_:_variable value_, _variable name_:_variable value_ , … ] Variable names begin with a lower case character.
+        required: true
+        type: string
+      
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Response'
+          examples:
+            application/json: { "respStatus":"success",
+                                "respMessage":"context change notification accepted",
+                                "respBody":"[weekday:true]"}
+        400:
+          description: failure
+
+tags:
+  - name: policy administration
+  - name: event-response policy manipulation
+    description: | 
+      epp (event processing point)
+  - name: auditing
+
+
+definitions:
+  Response:
+    type: object
+    properties:
+      respStatus:
+        type: string
+      respMessage:
+        type: string
+      respBody:
+        type: string
