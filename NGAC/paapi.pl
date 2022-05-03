@@ -98,14 +98,14 @@ paapi_add(Request) :-
 paapi_add(_) :- audit_gen(policy_admin, add(failure)).
 
 % add(Policy,Consent) :- compound_name_arity(Consent,consent,10), !,
-% 	% consent is intercepted here just to enable consent-specific returns
-% 	% consent is also accepted in addm
-% 	(   add_consent(Policy, Consent,_Status)
-% 	->  std_resp_MS(success,'consent added',Consent),
-% 	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
-% 	;   std_resp_MS(failure,'error adding consent', Consent),
-% 	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
-% 	).
+%	% consent is intercepted here just to enable consent-specific returns
+%	% consent is also accepted in addm
+%	(   add_consent(Policy, Consent,_Status)
+%	->  std_resp_MS(success,'consent added',Consent),
+%	    audit_gen(policy_admin, add_consent(Policy, Consent, success))
+%	;   std_resp_MS(failure,'error adding consent', Consent),
+%	    audit_gen(policy_admin, add_consent(Policy, Consent, failure))
+%	).
 
 add(Policy,PElement) :- isa_meta_element(PElement), !, policy(Policy,PC),
 	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PElement])
@@ -231,7 +231,7 @@ deletem(Policy,EltListAtom,Name) :- atom(EltListAtom), atom(Name), !,
     audit_gen(policy_admin, deletem(Policy, 'error: both name and policy_elements specified')).
 deletem(Policy,EltListAtom,Name) :- ground(EltListAtom), var(Name), !,
         ( ( read_term_from_atom(EltListAtom,EltList,[]), is_list(EltList),
-	      	%delete_named_policy_elements(Name,Policy,EltList) )
+		%delete_named_policy_elements(Name,Policy,EltList) )
 			delete_PEs(Policy:_, EltList) )
           ->  std_resp_MS(success,'elements deleted',EltList),
               audit_gen(policy_admin, deletem(Policy, 'elements deleted'))
@@ -363,20 +363,22 @@ paapi_readpol(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policy(P,[atom,default(current_policy)]),
-				     token(Token,[atom])]),
+				     token(Token,[atom]),
+				     part(Part,[atom,optional(true),default(meta)])
+				    ]),
 	    _,
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
 	(   authenticate(Token)
-	->  readpol(P), !
+	->  readpol(P,Part), !
 	;   true
 	).
 paapi_readpol(_) :- audit_gen(policy_admin, readpol(failure)).
 
-readpol(P) :-
+readpol(P,Part) :-
 	(   ( P==current_policy, param:current_policy(PN), PN\==none ; policy(P,_), PN=P )
 	->  policies:policy(PN,_PC,_PE,_PT), % PTerm = policy(PN,PC,PE,PT),
-	    with_output_to( atom(PAtom), policyio:display_policy(PN) ),
+	    with_output_to( atom(PAtom), policyio:display_policy(PN,Part) ),
 	    std_resp_BS(success,'read policy',PAtom)
 	;   std_resp_MS(failure,'unknown policy',P),
 	    audit_gen(policy_admin, readpol(P,failure))
@@ -594,7 +596,7 @@ endsession(S) :-
 %
 
 % add_dplp_policy_base
-dplp_add_dplp_policy_base(Request):- 
+dplp_add_dplp_policy_base(Request):-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -626,7 +628,7 @@ add_dplp_policy_base(Policy, PolicyClass, GlobalDefs) :-
 	).
 
 % add_data_controller
-dplp_add_data_controller(Request) :- 
+dplp_add_data_controller(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -662,7 +664,7 @@ add_data_controller(Policy, DC_ID, DC_POLICYatom) :-
 	).
 
 % delete_data_controller
-dplp_delete_data_controller(Request) :- 
+dplp_delete_data_controller(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -692,7 +694,7 @@ delete_data_controller(Policy, DC_ID) :-
 	).
 
 % add_data_processor
-dplp_add_data_processor(Request) :- 
+dplp_add_data_processor(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -729,7 +731,7 @@ add_data_processor(Policy, DP_ID, DP_POLICYatom, DC_ID) :-
 	).
 
 % delete_data_processor
-dplp_delete_data_processor(Request) :- 
+dplp_delete_data_processor(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -759,7 +761,7 @@ delete_data_processor(Policy, DP_ID) :-
 	).
 
 % add_application
-dplp_add_application(Request) :- 
+dplp_add_application(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -796,7 +798,7 @@ add_application(Policy, APP_ID, DPOatom, DP_ID) :-
 	).
 
 % delete_application
-dplp_delete_application(Request) :- 
+dplp_delete_application(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -825,12 +827,12 @@ delete_application(Policy, APP_ID) :-
 		audit_gen(dplp_admin, delete_application(Policy, APP_ID, failure))
 	).
 
-% add_data_subject	
-dplp_add_data_subject(Request) :- 
+% add_data_subject
+dplp_add_data_subject(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
-					policy(Policy,[atom,optional(true)]),	
+					policy(Policy,[atom,optional(true)]),
 					data_subject(DS_ID,[atom]),
 					data_items(DS_PDIatom,[atom]),
 					privacy_preference(DS_PREFERENCEatom,[atom]),
@@ -867,7 +869,7 @@ add_data_subject(Policy, DS_ID, DS_PDIatom, DS_PREFERENCEatom) :-
 	).
 
 % delete_data_subject
-dplp_delete_data_subject(Request) :- 
+dplp_delete_data_subject(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -878,7 +880,7 @@ dplp_delete_data_subject(Request) :-
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
 	(   authenticate(Token)
-	-> 	delete_data_subject(Policy, DS_ID), !
+	->	delete_data_subject(Policy, DS_ID), !
 	;   true
 	).
 dplp_delete_data_subject(_) :- audit_gen(dplp_admin, delete_data_subject(failure)).
@@ -897,7 +899,7 @@ delete_data_subject(Policy, DS_ID) :-
 	).
 
 % add_data_item
-dplp_add_data_item(Request) :- 
+dplp_add_data_item(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -930,7 +932,7 @@ add_data_item(Policy, PDI_ID, PDC_ID, DS_ID) :-
 	).
 
 % delete_data_item
-dplp_delete_data_item(Request) :- 
+dplp_delete_data_item(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -960,7 +962,7 @@ delete_data_item(Policy, PDI_ID) :-
 ).
 
 % add_consent
-dplp_add_consent(Request) :- 
+dplp_add_consent(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
@@ -981,7 +983,7 @@ dplp_add_consent(Request) :-
 	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
 	), !,
 	(   authenticate(Token)
-	-> 	add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDcategory,ConstraintAtom), !
+	->	add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDcategory,ConstraintAtom), !
 	;   true
 	).
 dplp_add_consent(_) :- audit_gen(dplp_admin, add_consent(failure)).
@@ -1015,7 +1017,7 @@ add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDc
 	).
 
 % delete_consent
-dplp_delete_consent(Request) :- 
+dplp_delete_consent(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[
