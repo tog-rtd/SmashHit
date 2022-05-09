@@ -122,7 +122,7 @@ semantics(aua(O)) :- !, ground(O).
 semantics(combine(P1,P2,P3)) :- !, atom(P1), atom(P2), atom(P3).
 semantics(decl2imp(Dfile,Ifile)) :- !, atom(Dfile), atom(Ifile).
 semantics(delete(P,E)) :- !, ground(P), ground(E).
-semantics(deletem(P,Es)) :- !, ground(P), ground(Es).
+%semantics(deletem(P,Es)) :- !, ground(P), ground(Es).
 semantics(delete_name(P,N)) :- !, ground(P), atom(N).
 %semantics(delete_dplp_policy_base(PB)) :- ground(PB). % DPLP
 %semantics(delete_dplp_policy_base(P,PB)) :- atom(P), ground(PB). % DPLP
@@ -315,6 +315,7 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
+do(add(P,Elt)) :- !, pap:add_named_policy_elements(_,P,[Elt]).
 do(add_dplp_policy_base(PC,Defs)) :- !, param:current_policy(P),
 	do(add_dplp_policy_base(P,PC,Defs)).
 do(add_dplp_policy_base(P, PC, Defs)) :- !,
@@ -481,7 +482,7 @@ do(policy_spec_v(V)) :- !, var(V), param:current_policy(P), do(policy_spec_v(P,V
 do(policy_spec_v(V,C)) :- var(V), !, ground(C), param:current_policy(P), do(policy_spec_v(P,V)), V==C.
 do(policy_spec_v(P,V)) :- atom(P), !, var(V), policyio:canonical_policy(P,V).
 do(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C), policyio:canonical_policy(P,V), V==C.
-do(server) :- !, server:server.
+do(server) :- !, param:setparam(sleep_after_server_start,off), server:server.
 do(server(Port)) :- !, server:server(Port).
 do(server(Port,AToken)) :- !, server:server(Port,AToken).
 do(server(Port,AToken,EToken)) :- !, server:server(Port,AToken,EToken).

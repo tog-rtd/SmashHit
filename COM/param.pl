@@ -158,7 +158,7 @@ user_level(developer). % default command user mode: basic/advanced/developer
 % no_sleep(off).
 % off/on - don't sleep after starting server from ngac/rmv
 % tool command loop
-sleep_after_server_start(off). % normally: on
+sleep_after_server_start(on). % normally: on
 
 current_policy('none').
 current_gpolicy('none').
@@ -192,9 +192,9 @@ rmv_lnapi_port(8005).
 
 localhost_ip('127.0.0.1').
 serverhost_ip('127.0.0.1').
-% context_url('http://195.201.23.72:9095/cross-cpp/'). % ATB
-context_url('http://127.0.0.1:8002/cross-cpp/'). % old local name
-% context_url('http://127.0.0.1:8002/context/'). % new local name
+% context_url('http://195.201.23.72:9095/smashhit/'). % ATB
+% context_url('http://127.0.0.1:8002/cross-cpp/'). % old local name
+context_url('http://127.0.0.1:8002/smashhit/'). % new local name
 context_sim(off). % off/on
 deny_resp(deny).
 grant_resp(grant).

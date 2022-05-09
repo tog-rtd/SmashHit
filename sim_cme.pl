@@ -10,12 +10,12 @@
 
 % CME API
 :- http_handler(root(.), use_valid_api, []).
-:- http_handler(root('cross-cpp'), root_apis('cross-cpp'), []).
-:- http_handler(root('cross-cpp/'), api_unimpl, [prefix]).
-:- http_handler(root('cross-cpp/context_notification_registration'), notification_reg, [prefix]).
-%:- http_handler(root('context'), root_apis('context'), []).
-%:- http_handler(root('context/'), api_unimpl, [prefix]).
-%:- http_handler(root('context/context_notification_registration'), notification_reg, [prefix]).
+% :- http_handler(root('cross-cpp'), root_apis('cross-cpp'), []).
+% :- http_handler(root('cross-cpp/'), api_unimpl, [prefix]).
+% :- http_handler(root('cross-cpp/context_notification_registration'), notification_reg, [prefix]).
+:- http_handler(root('smashhit'), root_apis('context'), []).
+:- http_handler(root('smashhit/'), api_unimpl, [prefix]).
+:- http_handler(root('smashhit/context_notification_registration'), notification_reg, [prefix]).
 
 ccpp([context_notification_registration]). % CME API
 
@@ -74,7 +74,8 @@ context_notification_registration_sim(VarNames,URL,Etoken) :-
 gen_context_change_notification(VarsVals,EPP,Etoken) :-
     % format('Change Notification from CME: ~q~n',[VarsVals]),
     term_to_atom(VarsVals,ContextAtom),
-    atomic_list_concat([EPP,'?context=',ContextAtom,'&token=',Etoken],Call),
+    uri_encoded(query_value,ContextAtom,EContextAtom),
+    atomic_list_concat([EPP,'?context=',EContextAtom,'&token=',Etoken],Call),
     % make the call, first show the call
     format(user_error,'  EPP call: ~q~n',[Call]), flush_output(user_error),
     http_get(Call,CallResult,[]), % call the EPP

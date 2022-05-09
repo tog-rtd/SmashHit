@@ -395,7 +395,7 @@ expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcate
         assign(COA,DS),
 		CAssoc
 	],
-	( App = app(_AppID,_AppOps,_AppPurpose) ; true ),
+	( App = app(_AppID,_AppOps,_) ; true ),
 	(	is_list(DPOs)
 	->	ADPOs = DPOs
 	;	ADPOs = [DPOs]
