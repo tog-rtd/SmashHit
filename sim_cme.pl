@@ -8,11 +8,11 @@
 :- use_module(library(http/http_header)).
 :- use_module(library(http/http_parameters)).
 
-% CME API
+% CME API - either cross-cpp or smashhit
 :- http_handler(root(.), use_valid_api, []).
-% :- http_handler(root('cross-cpp'), root_apis('cross-cpp'), []).
-% :- http_handler(root('cross-cpp/'), api_unimpl, [prefix]).
-% :- http_handler(root('cross-cpp/context_notification_registration'), notification_reg, [prefix]).
+:- http_handler(root('cross-cpp'), root_apis('cross-cpp'), []).
+:- http_handler(root('cross-cpp/'), api_unimpl, [prefix]).
+:- http_handler(root('cross-cpp/context_notification_registration'), notification_reg, [prefix]).
 :- http_handler(root('smashhit'), root_apis('context'), []).
 :- http_handler(root('smashhit/'), api_unimpl, [prefix]).
 :- http_handler(root('smashhit/context_notification_registration'), notification_reg, [prefix]).
@@ -46,7 +46,7 @@ notification_reg(Request) :-
 	    format(user_error,'Context notification registration (~w):~n  ~q ~q ~q~n',[FT,Vars,EPP,Token]),
 	    flush_output(user_error),
 	    notification_reg_response(Vars,EPP,Token),
-	    writeln(success)
+	    writeln('OK')
 	).
 
 notification_reg_response(Vars,URL,Token) :-

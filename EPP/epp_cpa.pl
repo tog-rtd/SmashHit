@@ -154,7 +154,7 @@ register_for_context_change_notification(Names,NOTIF_URL,Token) :- param:context
     %open('cme_call',write,FD), writeln(FD,Call), close(FD),
     format('Perform CME handshake: ~q~n',[Call]),
     http_get(Call,CallResult,[]), % call the CME
-    (   CallResult == 'success\n'
+    (   CallResult == 'OK\n'
     ->  format('CME handshake successful~n')
     ;   format('CME handshake unrecognized response~n')
     ),
