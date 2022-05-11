@@ -99,7 +99,7 @@ syntax(demo(demo_command),                          basic).
 syntax(developer,                                   basic).
 syntax(echo(string),                                basic).
 syntax(guitracer,						       developer).
-syntax(guiserver,			            basic).
+syntax(guiserver,			                               developer).
 syntax(halt,                                        basic).
 syntax(help,                                        basic).
 syntax(help(command),				    basic).
