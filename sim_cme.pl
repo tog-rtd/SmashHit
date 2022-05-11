@@ -46,7 +46,7 @@ notification_reg(Request) :-
 	    format(user_error,'Context notification registration (~w):~n  ~q ~q ~q~n',[FT,Vars,EPP,Token]),
 	    flush_output(user_error),
 	    notification_reg_response(Vars,EPP,Token),
-	    writeln('OK')
+	    write('OK'), flush_output
 	).
 
 notification_reg_response(Vars,URL,Token) :-

@@ -192,6 +192,7 @@ rmv_lnapi_port(8005).
 
 localhost_ip('127.0.0.1').
 serverhost_ip('127.0.0.1').
+% context_url('http://ontologies.atb-bremen.de:9095/smashhit/'). % ATB
 % context_url('http://195.201.23.72:9095/smashhit/'). % ATB
 % context_url('http://127.0.0.1:8002/cross-cpp/'). % old local name
 context_url('http://127.0.0.1:8002/smashhit/'). % new local name
