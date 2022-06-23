@@ -24,15 +24,12 @@
 :- http_handler(root(epp/activate_erp), epp_activate_er_package, [prefix]).
 :- http_handler(root(epp/deactivate_erp), epp_deactivate_er_package, [prefix]).
 :- http_handler(root(epp/current_erp), epp_current_er_package, [prefix]).
-%   event reporting API
 :- http_handler(root(epp/report_event), epp_report_event, [prefix]).
-%   context change notification API
 :- http_handler(root(epp/context_notify), epp_context_notify, [prefix]).
-%	get all current context variable values - currently an undocumented API
 :- http_handler(root(epp/context_values), epp_context_values, [prefix]).
 
-eppapi([load_erf, loadi_erp, unload_erp, activate_erp, deactivate_erp, current_erp, report_event,
-	context_notify, context_values]).
+eppapi([load_erf, loadi_erp, unload_erp, activate_erp, deactivate_erp, current_erp,
+	report_event, context_notify, context_values]).
 
 %
 % EPP API

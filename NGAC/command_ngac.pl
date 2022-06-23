@@ -54,7 +54,7 @@ syntax(getpol,				            ngac).
 syntax(import(file_spec),			    ngac).
 syntax(import_policy(policy_file),		    ngac).
 syntax(los(policy),                                                               obsolete).
-syntax(minaoa(user),				                                  obsolete).
+syntax(minaoa(user),				                                  			  obsolete).
 syntax(newpol(policyid),                            ngac).
 syntax(ngac,				 basic).
 syntax(pmcmd,                                                                     obsolete).

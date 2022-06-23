@@ -210,7 +210,7 @@ help(regtest,   'Run regression tests.').
 help(reinit,	'Re-initialize.').
 
 help(reset,     'Reset policy or condition databases.').
-help(reset,	'Arg 1 is the domain (conditions or policy) to be reset.').
+help(reset,		'Arg 1 is the domain (conditions or policy) to be reset.').
 help(reset,     'Arg 2 is the name of the group to be reset.').
 
 help(script,	'Run a NGAC command script from a file.').

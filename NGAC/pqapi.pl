@@ -27,7 +27,7 @@
 :- http_handler(root(pqapi/getobjinfo), pqapi_getobjinfo, [prefix]).
 :- http_handler(root(pqapi/paramecho), pqapi_paramecho, [prefix]).
 
-pqapi([access,accessm,caccess,users,getobjectinfo]). % POLICY QUERY API
+pqapi([access,accessm,caccess,users,policy_sat,getobjinfo]). % POLICY QUERY API
 
 % Global Policy Query API
 %:- http_handler(root(.), use_valid_api, []).

@@ -47,8 +47,9 @@
 :- http_handler(root(gpaapi/setgpol), gpaapi_setgpol, [prefix]).
 
 % POLICY ADMIN APIs
-paapi([add,delete,getpol,setpol,combinepol,load,loadi,readpol,importpol,purgepol,unload,
-       loadcondi,unloadcondi,readcond,resetcond,reset,initsession,endsession]).
+paapi([add,addm,delete,deletem,getpol,setpol,combinepol,
+		load,loadi,readpol,purgepol,unload,loadcondi,unloadcondi,
+		readcond,reset,resetcond,initsession,endsession]).
 
 :- include('paapi_dplp'). % meta-element predicates in separate file
 
