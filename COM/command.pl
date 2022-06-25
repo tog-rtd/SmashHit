@@ -89,50 +89,50 @@ defined_commands(CmdSets) :- findall(CmdSet, commands_defined(CmdSet), CmdSets).
 % e.g.: defined_commands([ngac,priv,epp,rmv,basic,advanced,developer]).
 
 %
-syntax(advanced,                                    basic).
-syntax(basic,					    basic).
-syntax(compare(x,y),                                basic).
-syntax(compare_v(x,y,result),                       basic).
+syntax(advanced,                        basic).
+syntax(basic,					        basic).
+syntax(compare(x,y),                    basic).
+syntax(compare_v(x,y,result),           basic).
 syntax(conditions,			            basic).
-syntax(conditions(name),		            basic).
-syntax(demo(demo_command),                          basic).
-syntax(developer,                                   basic).
-syntax(echo(string),                                basic).
-syntax(guitracer,						       developer).
-syntax(guiserver,			                               developer).
-syntax(halt,                                        basic).
-syntax(help,                                        basic).
+syntax(conditions(name),		        basic).
+syntax(demo(demo_command),              basic).
+syntax(developer,                       basic).
+syntax(echo(string),                    basic).
+syntax(guitracer,						                                developer).
+syntax(guiserver,			                                            developer).
+syntax(halt,                            basic).
+syntax(help,                            basic).
 syntax(help(command),				    basic).
 syntax(inspect,                                                         developer).
 syntax(inspect(item),                                                   developer).
 syntax(load_cond(cond_file),			              advanced).
-syntax(load_cond(cond_name,cond_file),			      advanced).
+syntax(load_cond(cond_file,cond_name),			      advanced).
 syntax(make,                                                            developer).
-syntax(noop,					    basic).
-syntax(nl,                                          basic).
-syntax(proc(proc_id),                               basic).
-syntax(proc(proc_id,step_or_verbose),		    basic).
-syntax(quit,                                        basic).
-syntax(regtest,								developer).
-syntax(reset,					              advanced).
-syntax(reset(domain,name),				      advanced).
+syntax(noop,					        basic).
+syntax(nl,                              basic).
+syntax(proc(proc_id),                   basic).
+syntax(proc(proc_id,step_or_verbose),	basic).
+syntax(quit,                            basic).
+syntax(regtest,								                            developer).
+syntax(reset,					                      advanced).
+syntax(reset(domain,name),				              advanced).
 syntax(reinit,                                                          developer).
-syntax(script(file),                                basic).
-syntax(script(file,step_or_verbose),		    basic).
-syntax(selftest,					      advanced).
-syntax(set,						      advanced).
-syntax(set(name),				              advanced).
-syntax(set(name,value),				              advanced).
+syntax(script(file),                    basic).
+syntax(script(file,step_or_verbose),	basic).
+syntax(selftest,					                  advanced).
+syntax(set,						                      advanced).
+syntax(set(name),				                      advanced).
+syntax(set(name,value),				                  advanced).
 syntax(status,				            basic).
-syntax(step,								developer).
-syntax(step(number_of_steps),						developer).
-syntax(time(command),                                         advanced).
+syntax(step,								                            developer).
+syntax(step(number_of_steps),						                    developer).
+syntax(time(command),                                 advanced).
 syntax(time(command,repeat),			              advanced).
-syntax(traceoff,					                developer).
-syntax(traceon,					                        developer).
-syntax(traceone,					                developer).
+syntax(traceoff,					                                    developer).
+syntax(traceon,					                                        developer).
+syntax(traceone,					                                    developer).
 syntax(version,				            basic).
-syntax(versions,				    basic).
+syntax(versions,				        basic).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NGAC tool command semantics
@@ -149,7 +149,7 @@ semantics(import_model(M)) :- atom(M).
 semantics(import_pm(PM)) :- atom(PM).
 semantics(inspect(I)) :- nonvar(I).
 semantics(load_cond(CondF)) :- atom(CondF).
-semantics(load_cond(CondN,CondF)) :- atom(CondN), atom(CondF).
+semantics(load_cond(CondF,CondN)) :- atom(CondN), atom(CondF).
 semantics(proc(P)) :- !, atom(P).
 semantics(proc(P,Opt)) :- !, atom(P), (Opt==step;Opt==s;Opt==verbose;Opt==v). % other opts can be added
 semantics(reset(Dom,Name)) :- !, atom(Dom), atom(Name).

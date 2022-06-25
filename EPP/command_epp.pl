@@ -4,7 +4,7 @@
 %
 syntax(activate_erp(erp_name),                                  epp).
 syntax(current_erp,                                             epp).
-syntax(deactivate_erp(erp_name),		                epp).
+syntax(deactivate_erp(erp_name),		                        epp).
 syntax(epp,                            basic).
 syntax(epp_server,                                              epp).
 syntax(epp_server(port),                                        epp).

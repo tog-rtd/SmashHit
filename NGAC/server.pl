@@ -31,7 +31,7 @@
 server_opt_spec([
         [opt(deny), type(boolean), default(false), shortflags([d]), longflags(['deny']),
          help( 'respond to all access requests with deny' )],
-	[opt(grant), type(boolean), default(false), shortflags([g]), longflags(['permit','grant']),
+		[opt(grant), type(boolean), default(false), shortflags([g]), longflags(['permit','grant']),
          help( 'respond to all access requests with grant' )],
         [opt(pqportnumber), meta('QP'), type(integer), shortflags([p]), longflags(['port','portnumber','pqport']),
          help( 'server listens for policy queries on port QP' )],

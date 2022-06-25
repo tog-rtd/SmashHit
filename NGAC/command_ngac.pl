@@ -483,9 +483,9 @@ do(policy_spec_v(V,C)) :- var(V), !, ground(C), param:current_policy(P), do(poli
 do(policy_spec_v(P,V)) :- atom(P), !, var(V), policyio:canonical_policy(P,V).
 do(policy_spec_v(P,V,C)) :- !, atom(P), var(V), ground(C), policyio:canonical_policy(P,V), V==C.
 do(server) :- !, param:setparam(sleep_after_server_start,off), server:server.
-do(server(Port)) :- !, server:server(Port).
-do(server(Port,AToken)) :- !, server:server(Port,AToken).
-do(server(Port,AToken,EToken)) :- !, server:server(Port,AToken,EToken).
+do(server(Port)) :- !, param:setparam(sleep_after_server_start,off), server:server(Port).
+do(server(Port,AToken)) :- !, param:setparam(sleep_after_server_start,off), server:server(Port,AToken).
+do(server(Port,AToken,EToken)) :- !, param:setparam(sleep_after_server_start,off), server:server(Port,AToken,EToken).
 do(setpol(P)) :- !, pap:set_current_policy(P).
 do(userlos(P,U)) :- pdp:user_los(P,U,V,E),
 	write('V='), ui:display_list(V,''), write('E='), ui:display_list(E,'').
