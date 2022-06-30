@@ -17,7 +17,7 @@ fi
 echo registering $cvars
 
 curl -s --globoff "http://127.0.0.1:$1/cross-cpp/context_notification_registration?context_variables=$cvars&epp_url=http://localhost:8001/epp/context_notify&epp_token=epp_token"
-
+echo
 # curl -s --globoff -G
 # "http://127.0.0.1:8002/cross-cpp/context_notification_registration"
 # --data-urlencode "context_variables=[weekday,business]"
