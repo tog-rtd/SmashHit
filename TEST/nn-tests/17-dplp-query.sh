@@ -1,3 +1,6 @@
+#!/bin/sh
+# this script tests dplp extensions to access and the policy_sat API
+#
 echo 'set policy to priv1'
 curl -s -G "http://127.0.0.1:8001/paapi/setpol" --data-urlencode "policy=priv1" --data-urlencode "token=admin_token"
 echo 'run test cases for priv1, expect grant grant deny deny grant deny'

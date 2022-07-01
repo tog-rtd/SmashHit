@@ -1,3 +1,6 @@
+#!/bin/sh
+# this script tests add and delete of consent meta-element
+#
 echo 'set policy to consent1'
 curl -s -G "http://127.0.0.1:8001/paapi/setpol" --data-urlencode "policy=consent1" --data-urlencode "token=admin_token"
 

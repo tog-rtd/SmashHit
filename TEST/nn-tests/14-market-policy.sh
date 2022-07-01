@@ -105,7 +105,7 @@ curl -s -G "http://127.0.0.1:8001/pqapi/users" --data-urlencode "ar=r" --data-ur
 
 #########################################################################
 # now extend the esample with
-# another contract based on an off useing a different aeon channel
+# another contract based on an offer using a different aeon channel
 # with the same service provider
 #########################################################################
 
