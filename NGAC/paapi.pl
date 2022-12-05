@@ -81,10 +81,11 @@ paapi_add(_) :- audit_gen(policy_admin, add(failure)).
 %	).
 
 add(Policy,PElement) :- isa_meta_element(PElement), !, policy(Policy,PC),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PElement])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PElement],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'meta-element added',PElement),
 		audit_gen(policy_admin, add(Policy, PElement, success))
-	;   std_resp_MS(failure,'error adding meta-element',PElement),
+	;   std_resp_MS(failure,'error adding meta-element',PElement:Errors),
 		audit_gen(policy_admin, add(Policy, PElement, failure))
 	).
 

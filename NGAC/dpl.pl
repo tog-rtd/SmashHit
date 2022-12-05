@@ -261,8 +261,10 @@ elt_member(E,[_|Elts]) :- elt_member(E,Elts).
 expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, ContextElts, PolicyElts ) :- !,
 	 ContextElts = [
         purpose('Purpose'),
-        operation('DataProcessing'),
-        object_attribute('PersonalDataCategory') % data_type('PersonalDataCategory')
+        operation('Processing'),
+        %operation('DataProcessing'),
+        %object_attribute('PersonalDataCategory')
+		data_type('Personal Data Category')
     ],
 	 CoreElts1 = [
 		connector('PM'),
@@ -273,8 +275,10 @@ expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, Cont
         assign(data_controllers,PolicyClass),
         assign(data_subjects,PolicyClass),
         assign('Purpose',PolicyClass),
-        assign('DataProcessing',PolicyClass),
-        assign('PersonalDataCategory',PolicyClass)
+        %assign('DataProcessing',PolicyClass),
+        %assign('PersonalDataCategory',PolicyClass)
+        assign('Processing',PolicyClass),
+        assign('Personal Data Category',PolicyClass)
 	],
 	(	atom(GlobalDefs), policy(GlobalDefs,_)
 	->	CoreElts = [include(GlobalDefs)|CoreElts1]
@@ -356,7 +360,8 @@ expand_meta_element( _, data_subject(DS_ID, DS_PDIs, DS_PREFERENCE), CoreElts, C
 %
 expand_meta_element( _, data_item(PDI_ID, PDC_ID, DS_ID), CoreElts, ContextElts, PolicyElts ) :- !,
 	ContextElts = [
-		object_attribute(PDC_ID), % should already exist if the categories are pre-defined
+		%object_attribute(PDC_ID), % should already exist if the categories are pre-defined
+		data_type(PDC_ID), % should already exist if the categories are pre-defined
 		object_attribute(DS_ID)
 	],
 	CoreElts = [
@@ -382,7 +387,8 @@ expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcate
         assign(DS,data_subjects),
 
         object(PDitem),
-        object_attribute(PDcategory),
+        %object_attribute(PDcategory),
+        data_type(PDcategory),
         assign(PDitem,PDcategory),
         assign(PDitem,DS)
 	],
@@ -401,29 +407,50 @@ expand_meta_element(_, consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcate
 	;	ADPOs = [DPOs]
 	),
 	append(ContextElts,CoreElts,PolicyElts),
+% new version
+	(	atom_concat(cID_,ID,ConsentID)
+	->	true
+	;	ID = ConsentID
+	),
+    atom_concat(cUA_,ID,CUA),
+    atom_concat(cOA_,ID,COA),
+    % atom_concat(cPred_,ID,CPred),
+
+/*
     atom_concat(cID_,IDnum,ConsentID),
     atom_concat(cUA_,IDnum,CUA),
     atom_concat(cOA_,IDnum,COA),
     atom_concat(cPred_,IDnum,CPred),
 	CPred == CPred,
+*/
 	%ConsentCond =.. [CPred,Constraint],
 	%ConsentCond == ConsentCond,
-	ConsentCond = Constraint,
+	%ConsentCond = Constraint,
 	% TODO - can add here to emit associate without cond when Constraint == true
-	CAssoc = cond( ConsentCond,	associate(CUA,ADPOs,Purpose,COA) ),
+% new version
+	% emit associate without cond when Constraint == true
+	(	Constraint == true
+	->	CAssoc = associate(CUA,ADPOs,Purpose,COA)
+	;	CAssoc = cond( Constraint,	associate(CUA,ADPOs,Purpose,COA) )
+	),
+
+	% CAssoc = cond( ConsentCond,	associate(CUA,ADPOs,Purpose,COA) ),
 	!.
 
 %%%%%
 
-% expand_meta_elements/3
+% expand_meta_elements/3 SAVED
+/*
 expand_meta_elements(_,[],[]) :- !.
 expand_meta_elements(P:PC,[ME|MEs],EMEs) :-
 	expand_meta_element(P:PC,ME,EME,_,_),
 	append(EME,EMEs1,EMEs),
 	expand_meta_elements(P:PC,MEs,EMEs1).
+*/
 
-% expand_meta_elements/2
-expand_meta_elements(P:PC,Elements) :-
+% expand_meta_elements/2 SAVED
+/*
+expand_meta_elements_saved(P:PC,Elements) :-
 	findall( PBEs,
 		(	% element(P:PC,dplp_policy_base(PC, REFS)),
 			melement(P:PC,dplp_policy_base(PC, REFS),false), % META same for following MEs
@@ -517,6 +544,111 @@ expand_meta_elements(P:PC,Elements) :-
 		),
 		CEss),
 	append( [DCEss,DPEss,APPEss,DSEss,PDIEss,CEss], Elements1 ), flatten(Elements1,Elements).
+*/
+
+:- dynamic exist_errors/1.
+exist_errors([]).
+add_exist_errors(Err) :- \+ is_list(Err), !, add_exist_errors([Err]).
+add_exist_errors(Errs) :- is_list(Errs), !,
+	exist_errors(E), append(E,Errs,NewE), retractall( exist_errors(_) ), assert( exist_errors(NewE)).
+clear_exist_errors :- retractall( exist_errors(_) ), assert( exist_errors([])).
+
+% expand_meta_elements/3 (+P:PC, -Elements, -NonExist)
+expand_meta_elements(P:PC,Elements,NonExist) :- clear_exist_errors,
+	findall( PBEs,
+		(	% element(P:PC,dplp_policy_base(PC, REFS)),
+			melement(P:PC,dplp_policy_base(PC, REFS),false), % META same for following MEs
+			p_retract(melement(P:PC,dplp_policy_base(PC, REFS),false)),
+			expand_meta_element(P:PC,dplp_policy_base(PC, REFS),PBEs,CXs,_),
+			expand_includes(P:PC,PBEs,PBEsNoIncludes), % for elements that ensure_existence depends upon
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(PC,P,_) ),
+			assert( named_policy_elements(PC,P,[dplp_policy_base(PC, REFS)|PBEs]) ),
+			unpack_policy_elements(P:PC,PBEsNoIncludes),
+			p_assert(melement(P:PC,dplp_policy_base(PC, REFS),true))
+		),
+		PBEss),
+	(	length(PBEss,PBcount), PBcount > 1
+	->	true % TODO there shouldn't be more than one dplp policy base
+	;	true
+	),
+	findall( DCEs,
+		(	% element(P:PC,data_controller(DC_ID, DC_POLICY)),
+			melement(P:PC,data_controller(DC_ID, DC_POLICY),false),
+			p_retract(melement(P:PC,data_controller(DC_ID, DC_POLICY),false)),
+			expand_meta_element(P:PC,data_controller(DC_ID,DC_POLICY),DCEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(DC_ID,P,_) ),
+			assert( named_policy_elements(DC_ID,P,[data_controller(DC_ID,DC_POLICY)|DCEs]) ),
+			unpack_policy_elements(P:PC,DCEs),
+			p_assert(melement(P:PC,data_controller(DC_ID, DC_POLICY),true))
+		),
+		DCEss),
+	findall( DPEs,
+		(	% element(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID)),
+			melement(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID),false),
+			p_retract(melement(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID),false)),
+			expand_meta_element(P:PC,data_processor(DP_ID,DP_POLICY,DC_ID),DPEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(DP_ID,P,_) ),
+			assert( named_policy_elements(DP_ID,P,[data_processor(DP_ID,DP_POLICY,DC_ID)|DPEs]) ),
+			unpack_policy_elements(P:PC,DPEs),
+			p_assert(melement(P:PC,data_processor(DP_ID, DP_POLICY, DC_ID),true))
+		),
+		DPEss),
+	findall( APPEs,
+		(	% element(P:PC,application(APP_ID, DPOs, DP_ID)),
+			melement(P:PC,application(APP_ID, DPOs, DP_ID),false),
+			p_retract(melement(P:PC,application(APP_ID, DPOs, DP_ID),false)),
+			expand_meta_element(P:PC,application(APP_ID, DPOs, DP_ID),APPEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(APP_ID,P,_) ),
+			assert( named_policy_elements(APP_ID,P,[application(APP_ID, DPOs, DP_ID)|APPEs]) ),
+			unpack_policy_elements(P:PC,APPEs),
+			p_assert(melement(P:PC,application(APP_ID, DPOs, DP_ID),true))
+		),
+		APPEss),
+	findall( DSEs,
+		(	% element(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)),
+			melement(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE),false),
+			p_retract(melement(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE),false)),
+			expand_meta_element(P:PC,data_subject(DS_ID,DS_PDIs,DS_PREFERENCE),DSEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(DS_ID,P,_) ),
+			assert( named_policy_elements(DS_ID,P,[data_subject(DS_ID,DS_PDIs,DS_PREFERENCE)|DSEs]) ),
+			unpack_policy_elements(P:PC,DSEs),
+			p_assert(melement(P:PC,data_subject(DS_ID, DS_PDIs, DS_PREFERENCE),true))
+		),
+		DSEss),
+	findall( PDIEs,
+		(	% element(P:PC,data_item(PDI_ID, PDC_ID, DS_ID)),
+			melement(P:PC,data_item(PDI_ID, PDC_ID, DS_ID),false),
+			p_retract(melement(P:PC,data_item(PDI_ID, PDC_ID, DS_ID),false)),
+			expand_meta_element(P:PC,data_item(PDI_ID,PDC_ID,DS_ID),PDIEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs), ( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(PDI_ID,P,_) ),
+			assert( named_policy_elements(PDI_ID,P,[data_item(PDI_ID,PDC_ID,DS_ID)|PDIEs]) ),
+			unpack_policy_elements(P:PC,PDIEs),
+			p_assert(melement(P:PC,data_item(PDI_ID, PDC_ID, DS_ID),true))
+		),
+		PDIEss),
+	findall( CEs,
+		(	% element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)),
+			melement(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),false),
+			p_retract(melement(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),false)),
+			expand_meta_element(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),CEs,CXs,_),
+			ensure_existence(P:PC,CXs,NEs),	( NEs == [] -> true ; add_exist_errors(NEs), fail ),
+			retractall( named_policy_elements(ConsentID,P,_) ),
+			assert(	named_policy_elements(ConsentID, P,
+					       [consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)|CEs]
+					)
+			),
+			unpack_policy_elements(P:PC,CEs),
+			p_assert(melement(P:PC,consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint),true))
+		),
+		CEss),
+	append( [DCEss,DPEss,APPEss,DSEss,PDIEss,CEss], Elements1 ), flatten(Elements1,Elements),
+	exist_errors(NonExist).
 
 
 % ensure_existence/2 - ensure_existence(P:PC, RequiredElts)
@@ -537,7 +669,7 @@ ensure_existence(_,[],[]) :- !.
 ensure_existence(P,[E|Es],M) :- !,
 	(	ensure_existence(P,E)
 	->	ensure_existence(P,Es,M)
-	;	ensure_existence(P,Es,Ms), M=[E|Ms]
+	;	ensure_existence(P,Es,Ms), M=[nonexistent(E)|Ms]
 	).
 
 expand_includes(_,[],[]).
@@ -695,7 +827,7 @@ unpack_policy(policy(PolicyName,PolicyRoot,PolicyElements)) :- !,
 unpack_policy(policy(PolicyName,PolicyRoot,PolicyElements,PolicyType)) :-
 	purge_policy(PolicyName,PolicyType), % TODO - consider making second arg _ (global policy names)
 	assertz( policy(PolicyName,PolicyRoot,PolicyType) ),
-	unpack_policy_elements_with_meta_expansion(PolicyName:PolicyRoot,PolicyElements), !,
+	unpack_policy_elements_with_meta_expansion(PolicyName:PolicyRoot,PolicyElements,_Errors), !, % TODO Errors
 	%unpack_policy_elements(PolicyName:PolicyRoot,PolicyElements), !,
 	perform_static_policy_checks(PolicyName:PolicyRoot,PolicyType).
 
@@ -713,10 +845,10 @@ unpack_policy( cc_policy(CCpolicyName,CCpolicyElements) ) :-
 
 % note that PName (or PPC) below is shorthand for P:PC
 
-% unpack_policy_elements_with_meta_expansion/2
-unpack_policy_elements_with_meta_expansion(PName,PolicyElements) :-
+% unpack_policy_elements_with_meta_expansion/3
+unpack_policy_elements_with_meta_expansion(PName,PolicyElements,Errors) :-
 	unpack_policy_elements(PName,PolicyElements),
-	expand_meta_elements(PName,_ExpandedElements),
+	expand_meta_elements(PName,_ExpandedElements,Errors),
 	%unpack_policy_elements(PName,ExpandedElements),
 	true.
 

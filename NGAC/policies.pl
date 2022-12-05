@@ -1076,7 +1076,104 @@ policy(priv2,priv_pol2,[
 	connector('PM')
         ],dplp).
 
-% general privacy definitions
+% smashHit Core Ontology 202210
+policy(smashHitCore202210, smashHitCore202210, [
+  data_type('Information Entity'),
+
+    data_type('Personal Data Category'), assign('Personal Data Category','Information Entity'),
+
+      data_type('External'), assign('External','Personal Data Category'),
+        data_type('Identifying'), assign('Identifying','External'),
+          data_type('Birth Date'), assign('Birth Date','Identifying'),
+          data_type('Official ID'), assign('Official ID','Identifying'),
+          data_type('UID'), assign('UID','Identifying'),
+          data_type('Username'), assign('Username','Identifying'),
+
+        data_type('Financial'), assign('Financial','Personal Data Category'),
+          data_type('Ownership'), assign('Ownership','Financial'),
+
+        data_type('Internal'), assign('Internal','Personal Data Category'),
+          data_type('Authenticating'), assign('Authenticating','Internal'),
+            data_type('Password'), assign('Password','Authenticating'),
+          data_type('Preference'), assign('Preference','Internal'),
+            data_type('Privacy Preference'), assign('Privacy Preference','Preference'),
+
+        data_type('Tracking'), assign('Tracking','Personal Data Category'),
+          data_type('Contact'), assign('Contact','Tracking'),
+            data_type('Email Address'), assign('Email Address','Contact'),
+            data_type('Telephone Number'), assign('Telephone Number','Contact'),
+
+  operation('Processing'),
+  
+    operation('Adapt'), assign('Adapt','Processing'),
+    operation('Align'), assign('Align','Processing'),
+    operation('Alter'), assign('Alter','Processing'),
+    operation('Attack'), assign('Attack','Processing'),
+    operation('Collect'), assign('Collect','Processing'),
+    operation('Combine'), assign('Combine','Processing'),
+    operation('Consult'), assign('Consult','Processing'),
+    operation('Destruct'), assign('Destruct','Processing'),
+    operation('Disclose by Transmission'), assign('Disclose by Transmission','Processing'),
+    operation('Disseminate'), assign('Disseminate','Processing'),
+    operation('Erase'), assign('Erase','Processing'),
+    operation('Fingerprint'), assign('Fingerprint','Processing'),
+    operation('Hash'), assign('Hash','Processing'),
+    operation('Organise'), assign('Organise','Processing'),
+    operation('Receive'), assign('Receive','Processing'),
+    operation('Record'), assign('Record','Processing'),
+    operation('Register'), assign('Register','Processing'),
+    operation('Reidentificate'), assign('Reidentificate','Processing'),
+    operation('Restrict'), assign('Restrict','Processing'),
+    operation('Retrieve'), assign('Retrieve','Processing'),
+    operation('Send'), assign('Send','Processing'),
+    operation('Share'), assign('Share','Processing'),
+    operation('Store'), assign('Store','Processing'),
+    operation('Structure'), assign('Structure','Processing'),
+    operation('Trace'), assign('Trace','Processing'),
+    operation('Use'), assign('Use','Processing'),
+    operation('Watermark'), assign('Watermark','Processing'),
+
+  purpose('Purpose'),
+
+    purpose('Commercial Interest'), assign('Commercial Interest','Purpose'),
+      purpose('Sell Data To Third Parties'), assign('Sell Data To Third Parties','Commercial Interest'),
+      purpose('Sell Insights From Data'), assign('Sell Insights From Data','Commercial Interest'),
+      purpose('Sell Products To Data Subject'), assign('Sell Products To Data Subject','Commercial Interest'),
+      purpose('Sell Targetted Advertisements'), assign('Sell Targetted Advertisements','Commercial Interest'),
+
+    purpose('Research And Development'), assign('Research And Development','Purpose'),
+      purpose('Academic Research'), assign('Academic Research','Research And Development'),
+      purpose('Commercial Research'), assign('Commercial Research','Research And Development'),
+      purpose('Non-Commercial Research'), assign('Non-Commercial Research','Research And Development'),
+
+    purpose('Security'), assign('Security','Purpose'),
+      purpose('Access Control'), assign('Access Control','Security'),
+      purpose('Fraud Prevention And Detection'), assign('Fraud Prevention And Detection','Security'),
+      purpose('Identity Verification'), assign('Identity Verification','Security'),
+
+    purpose('Service Optimization'), assign('Service Optimization','Purpose'),
+      purpose('Optimisation For Consumer'), assign('Optimisation For Consumer','Service Optimization'),
+        purpose('Optimise User Interface'), assign('Optimise User Interface','Optimisation For Consumer'),
+      purpose('Optimisation For Controller'), assign('OptimisationForController','ServiceOptimization'),
+        purpose('Improve Existing Products and Services'), assign('Improve Existing Product and Services','Optimisation For Controller'),
+        purpose('Improve Internal CRM Processes'), assign('Improve Internal CRM Processes','Optimisation For Controller'),
+        purpose('Increase Service Robustness'), assign('Increase Service Robustness','Optimisation For Controller'),
+        purpose('Internal Resource Optimisation'), assign('Internal Resource Optimisation','Optimisation For Controller'),
+
+    purpose('Service Personalization'), assign('Service Personalization','Purpose'),
+      purpose('Create Personalized Recommendations'), assign('Create Personalized Recommendations','Service Personalization'),
+        purpose('Create Event Recommendations'), assign('Create Event Recommendations','Create Personalized Recommendations'),
+        purpose('Create Product Recommendations'), assign('Create Product Recommendations','Create Personalized Recommendations'),
+      purpose('Personalised Benefits'), assign('Personalised Benefits','Service Personalization'),
+      purpose('User Interface Personalisation'), assign('User Interface Personalisation','Service Personalization'),
+
+    purpose('Service Provision'), assign('Service Provision','Purpose'),
+      purpose('Customer Care'), assign('Customer Care','Service Provision'),
+      purpose('Delivery of Goods'), assign('Deliver of Goods','Service Provision')
+
+  ], dplp).
+
+% previous ontology definitions
 policy(core_ontology, core_ontology, [
         data_type('PersonalDataCategory'),
           data_type('External'), assign('External','PersonalDataCategory'),
@@ -1096,11 +1193,11 @@ policy(core_ontology, core_ontology, [
             data_type('Authenticating'), assign('Authenticating','Internal'),
               data_type('Password'), assign('Password','Authenticating'),
             data_type('Preference'), assign('Preference','Internal'),
-              data_type('PrivacyPreference'), assign('PrivacyPreference','Preference'),
+              data_type('Privacy Preference'), assign('Privacy Preference','Preference'),
           data_type('Tracking'), assign('Tracking','PersonalDataCategory'),
             data_type('Contact'), assign('Contact','Tracking'),
-              data_type('TelephoneNumber'), assign('TelephoneNumber','Contact'),
-              data_type('EmailAddress'), assign('EmailAddress','Contact'),
+              data_type('Email Address'), assign('Email Address','Contact'),
+              data_type('Telephone Number'), assign('Telephone Number','Contact'),
             data_type('Location'), assign('Location','Tracking'),
 
         operation('DataProcessing'),

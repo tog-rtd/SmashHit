@@ -1,5 +1,6 @@
 :- module(apiresp,[std_resp_prefix/0,
-		    std_resp_MS/3,
+			std_resp_MBS/3,
+			std_resp_MS/3,
 		    std_resp_BS/3,
 		    std_resp_M/3,
 		    api_unimpl/1,root_apis/2,
@@ -14,6 +15,12 @@ std_resp_prefix :-
 	(   param:jsonresp(on)
 	->  format('Content-type: application/json~n~n')
 	;   format('Content-type: text/plain~n~n')
+	).
+
+std_resp_MBS(Status, M, B) :-
+	(   param:jsonresp(on)
+	->  json_resp(Status, M, B)
+	;   writeln(M), writeln(B), writeln(Status)
 	).
 
 std_resp_MS(Status, M, B) :-

@@ -57,11 +57,12 @@ add_dplp_policy_base(Policy, PolicyClass, GlobalDefs) :-
 	),
 	policy(Policy,PC,dplp),
 	PolicyBase = dplp_policy_base(PolicyClass, GlobalDefs),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PolicyBase])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[PolicyBase],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'policy base added',PolicyBase),
 		audit_gen(dplp_admin, add_dplp_policy_base(Policy, PolicyBase, success))
-	;   std_resp_MS(failure,'error adding policy base',PolicyBase),
-		audit_gen(dplp_admin, add_dplp_policy_base(Policy, PolicyBase, failure))
+	;   std_resp_MBS(failure,'error adding policy base',PolicyBase:Errors),
+		audit_gen(dplp_admin, add_dplp_policy_base(Policy, PolicyBase:Errors, failure))
 	).
 
 % add_data_controller
@@ -93,11 +94,12 @@ add_data_controller(Policy, DC_ID, DC_POLICYatom) :-
 	;	DC_POLICY = DC_POLICYatom
 	),
 	DataController = data_controller(DC_ID, DC_POLICY),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataController])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataController],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'data controller added',DataController),
 		audit_gen(dplp_admin, add_data_controller(Policy, DataController, success))
-	;   std_resp_MS(failure,'error adding data controller',DataController),
-		audit_gen(dplp_admin, add_data_controller(Policy, DataController, failure))
+	;   std_resp_MBS(failure,'error adding data controller',DataController:Errors),
+		audit_gen(dplp_admin, add_data_controller(Policy, DataController:Errors, failure))
 	).
 
 % delete_data_controller
@@ -160,11 +162,12 @@ add_data_processor(Policy, DP_ID, DP_POLICYatom, DC_ID) :-
 	;	DP_POLICY = DP_POLICYatom
 	),
 	DataProcessor = data_processor(DP_ID, DP_POLICY, DC_ID),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataProcessor])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataProcessor],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'data processor added',DataProcessor),
 		audit_gen(dplp_admin, add_data_processor(Policy, DataProcessor, success))
-	;   std_resp_MS(failure,'error adding data processor',DataProcessor),
-		audit_gen(dplp_admin, add_data_processor(Policy, DataProcessor, failure))
+	;   std_resp_MBS(failure,'error adding data processor',DataProcessor:Errors),
+		audit_gen(dplp_admin, add_data_processor(Policy, DataProcessor:Errors, failure))
 	).
 
 % delete_data_processor
@@ -227,11 +230,12 @@ add_application(Policy, APP_ID, DPOatom, DP_ID) :-
 	;	DPOs = DPOatom
 	),
 	Application = application(APP_ID, DPOs, DP_ID),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[Application])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[Application],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'application added',Application),
 		audit_gen(dplp_admin, add_application(Policy, Application, success))
-	;   std_resp_MS(failure,'error adding application',Application),
-		audit_gen(dplp_admin, add_application(Policy, Application, failure))
+	;   std_resp_MBS(failure,'error adding application',Application:Errors),
+		audit_gen(dplp_admin, add_application(Policy, Application:Errors, failure))
 	).
 
 % delete_application
@@ -298,11 +302,12 @@ add_data_subject(Policy, DS_ID, DS_PDIatom, DS_PREFERENCEatom) :-
 	;	DS_PREFERENCE = DS_PREFERENCEatom
 	),
 	DataSubject = data_subject(DS_ID, DS_PDIs, DS_PREFERENCE),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataSubject])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataSubject],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'data subject added',DataSubject),
 		audit_gen(dplp_admin, add_data_subject(Policy, DataSubject, success))
-	;   std_resp_MS(failure,'error adding data subject',DataSubject),
-		audit_gen(dplp_admin, add_data_subject(Policy, DataSubject, failure))
+	;   std_resp_MBS(failure,'error adding data subject',DataSubject:Errors),
+		audit_gen(dplp_admin, add_data_subject(Policy, DataSubject:Errors, failure))
 	).
 
 % delete_data_subject
@@ -361,11 +366,12 @@ add_data_item(Policy, PDI_ID, PDC_ID, DS_ID) :-
 	),
 	policy(Policy,PC,dplp),
 	DataItem = data_item(PDI_ID, PDC_ID, DS_ID),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataItem])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[DataItem],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'data item added',DataItem),
 		audit_gen(dplp_admin, add_data_item(Policy, DataItem, success))
-	;   std_resp_MS(failure,'error adding data item',DataItem),
-		audit_gen(dplp_admin, add_data_item(Policy, DataItem, failure))
+	;   std_resp_MBS(failure,'error adding data item',DataItem:Errors),
+		audit_gen(dplp_admin, add_data_item(Policy, DataItem:Errors, failure))
 	).
 
 % delete_data_item
@@ -414,6 +420,7 @@ dplp_add_consent(Request) :-
 					data_subject(DS,[atom,optional(true)]),
 					data_item(PDitem,[atom,optional(true)]),
 					data_category(PDcategory,[atom,optional(true)]),
+					% constraint(ConstraintAtom,[atom,default(true)]),
 					constraint(ConstraintAtom,[atom,optional(true)]),
 				    token(Token,[atom])]),
 	    _,
@@ -446,11 +453,12 @@ add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDc
 	;	read_term_from_atom(ConsentAtom,Consent,[]),
 		functor(Consent,consent,10)
 	),
-	(	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[Consent])
+	dpl:unpack_policy_elements_with_meta_expansion(Policy:PC,[Consent],Errors),
+	(	Errors == []
 	->	std_resp_MS(success,'consent added',Consent),
 		audit_gen(dplp_admin, add_consent(Policy, Consent, success))
-	;   std_resp_MS(failure,'error adding consent',Consent),
-		audit_gen(dplp_admin, add_consent(Policy, Consent, failure))
+	;   std_resp_MBS(failure,'error adding consent',Consent:Errors),
+		audit_gen(dplp_admin, add_consent(Policy, Consent:Errors, failure))
 	).
 
 % delete_consent

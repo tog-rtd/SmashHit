@@ -7,6 +7,7 @@
 syntax(access(policy,(user,mode,object)),           ngac).
 syntax(access(policy,(user,mode,object),condition), ngac).
 syntax(access(policy,(user,mode,purpose,object)),   ngac). % DPLP
+syntax(add(element),                                ngac).
 syntax(add(policy,element),                         ngac).
 syntax(add_dplp_policy_base(policy_class,definitions),ngac). % DPLP
 syntax(add_dplp_policy_base(policy,policy_class,definitions),    ngac). % DPLP
@@ -18,8 +19,8 @@ syntax(add_data_subject(ds_id, ds_pdis, ds_preference), ngac). % DPLP
 syntax(add_data_subject(policy, ds_id, ds_pdis, ds_preference),ngac). % DPLP
 syntax(add_data_item(pdi_id,pdc_id,ds_id),       ngac). % DPLP
 syntax(add_data_item(policy,pdi_id,pdc_id,ds_id),ngac). % DPLP
-syntax(add_application(app_id, dpos),   ngac). % DPLP
-syntax(add_application(policy, app_id, dpos),ngac). % DPLP
+syntax(add_application(app_id, dpos, dp_id),   ngac). % DPLP
+syntax(add_application(policy, app_id, dpos, dp_id),ngac). % DPLP
 syntax(add_consent(consent_id,dc_id,dp_id,app_id,dpos,purpose,ds_id,pdi_id,pdc_id,constraint),ngac). % DPLP
 syntax(add_consent(policy,consent_id,dc_id,dp_id,app_id,dpos,purpose,ds_id,pdi_id,pdc_id,constraint),ngac). % DPLP
 syntax(addm(policy,elements),                       ngac).
@@ -96,6 +97,7 @@ semantics(access(P,(U,M,O))) :- !, ground(P), ground(U), ground(M), ground(O).
 semantics(access(P,(U,M,Pur,O))) :- !, ground(P), ground(U), ground(M), ground(O), ground(Pur). % DPLP
 semantics(access(P,(U,M,O),C)) :- !, ground(P), ground(U), ground(M), ground(O),
 	(   C==true ; compound(C) ; is_list(C) ), !.
+semantics(add(E)) :- !, ground(E).
 semantics(add(P,E)) :- !, ground(P), ground(E).
 semantics(add_dplp_policy_base(PC,Defs)) :- atom(PC), atom(Defs). % DPLP
 semantics(add_dplp_policy_base(P,PC,Defs)) :- atom(P), atom(PC), atom(Defs). % DPLP
@@ -107,8 +109,8 @@ semantics(add_data_subject(DS_ID, DS_PDIs, DS_PREFERENCE)) :- atom(DS_ID), is_li
 semantics(add_data_subject(P, DS_ID, DS_PDIs, DS_PREFERENCE)) :- atom(P), atom(DS_ID), is_list(DS_PDIs), is_list(DS_PREFERENCE). % DPLP
 semantics(add_data_item(PDI_ID, PDC_ID, DS_ID)) :- atom(PDI_ID), atom(PDC_ID), atom(DS_ID). % DPLP
 semantics(add_data_item(P,PDI_ID, PDC_ID, DS_ID)) :- atom(P), atom(PDI_ID), atom(PDC_ID), atom(DS_ID). % DPLP
-semantics(add_application(APP_ID,DPOs)) :-  atom(APP_ID), is_list(DPOs). % DPLP
-semantics(add_application(P,APP_ID,DPOs)) :- atom(P), atom(APP_ID), is_list(DPOs). % DPLP
+semantics(add_application(APP_ID,DPOs,DP_ID)) :-  atom(APP_ID), is_list(DPOs), atom(DP_ID). % DPLP
+semantics(add_application(P,APP_ID,DPOs,DP_ID)) :- atom(P), atom(APP_ID), is_list(DPOs), atom(DP_ID). % DPLP
 semantics(add_consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
 	atom(ConsentID),atom(DC),atom(DP),atom(App),is_list(DPOs),atom(Purpose),atom(DS),
 	atom(PDitem),atom(PDcategory),ground(Constraint).
@@ -187,7 +189,7 @@ help(access,    'Optionally, Arg2 is an access 4-tuple, "(User, Mode, Purpose, O
 help(access,    'Arg3 (opt) a condition predicate for conditional rules.').
 
 help(add,       'add element to policy.').
-help(add,	'Arg1 is a policy name.').
+help(add,	'Arg1 (opt) is a policy name. Default is current policy.').
 help(add,	'Arg2 is a policy element.').
 
 help(add_consent,'add consent meta-element').
@@ -315,6 +317,7 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
+do(add(Elt)) :- !, param:current_policy(P), pap:add_named_policy_elements(_,P,[Elt]).
 do(add(P,Elt)) :- !, pap:add_named_policy_elements(_,P,[Elt]).
 do(add_dplp_policy_base(PC,Defs)) :- !, param:current_policy(P),
 	do(add_dplp_policy_base(P,PC,Defs)).

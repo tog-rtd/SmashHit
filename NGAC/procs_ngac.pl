@@ -2,6 +2,56 @@
 
 %%	NGAC Command Procs
 
+proc(consent_ex1, [ % Tek's example with previous core_ontology
+	reset,
+	reset(policy,dplp_min),
+	setpol(dplp_min),
+	add_dplp_policy_base(pc,core_ontology),
+	add_data_subject('ds[123BVC112]',['pdi(123BVC112)[123BVC112]':'Address'],[]),
+	add_data_controller('dc[tTEK1235121]',[]),
+	add_data_processor('dp[tEST123411][tTEK1235121]',[],'dc[tTEK1235121]'),
+	add_application(dplp_min,'dp[tEST123411][tTEK1235121]_appl',['Collect','Use'], 'dp[tEST123411][tTEK1235121]'),
+	add_consent(cID_33313,'dc[tTEK1235121]','dp[tEST123411][tTEK1235121]','dp[tEST123411][tTEK1235121]_appl',['dp[tEST123411][tTEK1235121]_appl'],'CommercialInterest','ds[123BVC112]','pdi(123BVC112)[123BVC112]','Address',true),
+	policy_spec,
+	access(dplp_min,('dp[tEST123411][tTEK1235121]','Use','SellProductsToDataSubject','pdi(123BVC112)[123BVC112]')),
+	delete_consent(cID_33313),
+	access(dplp_min,('dp[tEST123411][tTEK1235121]','Use','SellProductsToDataSubject','pdi(123BVC112)[123BVC112]'))
+	]).
+
+proc(consent_ex2, [ % use new ontology definitions policy smashHitCore202210
+	reset,
+	reset(policy,dplp_min),
+	setpol(dplp_min),
+	add_dplp_policy_base(pc,smashHitCore202210),
+	add_data_subject('ds[123BVC112]',['pdi(123BVC112)[123BVC112]':'Birth Date'],[]),
+	add_data_controller('dc[tTEK1235121]',[]),
+	add_data_processor('dp[tEST123411][tTEK1235121]',[],'dc[tTEK1235121]'),
+	add_application(dplp_min,'dp[tEST123411][tTEK1235121]_appl',['Collect','Store','Use'], 'dp[tEST123411][tTEK1235121]'),
+	add_consent('C33313','dc[tTEK1235121]','dp[tEST123411][tTEK1235121]','dp[tEST123411][tTEK1235121]_appl',['dp[tEST123411][tTEK1235121]_appl'],'Commercial Interest','ds[123BVC112]','pdi(123BVC112)[123BVC112]','Birth Date',true),
+	policy_spec,
+	access(dplp_min,('dp[tEST123411][tTEK1235121]','Use','Sell Products To Data Subject','pdi(123BVC112)[123BVC112]')),
+	delete_consent('C33313'),
+	access(dplp_min,('dp[tEST123411][tTEK1235121]','Use','Sell Products To Data Subject','pdi(123BVC112)[123BVC112]'))
+	]).
+
+proc(consent_example_full, [
+	reset,
+	reset(policy,dplp_min),
+	setpol(dplp_min),
+	add_dplp_policy_base(pc,testdefs2),
+	add_data_controller('dc[x]',[]),
+	add_data_processor('dp[y][x]',[],'dc[x]'),
+	add_data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[]),
+	add_data_item('pdi(2)[1]','pdc{2}','ds[1]'),
+	add_application('dp[y][x]_app1',['dpo(w)','dpo(z)'],'dp[y][x]'),
+	add_consent(cID_234,'dc[x]','dp[y][x]','dp[y][x]_app1',['dp[y][x]_app1'],'p(v)','ds[1]','pdi(1)[1]','pdc{1}',true),
+	policy_spec,
+	access(dplp_min,('dp[y][x]','dpo(z)','p(v)','pdi(1)[1]')),
+	delete_consent(cID_234),
+	access(dplp_min,('dp[y][x]','dpo(z)','p(v)','pdi(1)[1]')),
+	echo(done)
+	]).
+
 proc(meta_delete, [ % check policy consistency after deleting meta-elements
 	% Start with a policy that has many meta-elements (dplp3).
 	% First, perform a sequence of meta-element bottom-up deletes

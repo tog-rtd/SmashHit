@@ -100,11 +100,11 @@ add_named_policy_elements(Name,Policy,Elements) :- ground(Name), \+ named_policy
 	assert( named_policy_elements(Name,Policy,Elements) ),
 	add_policy_elements(Policy,Elements).
 
-% add_policy_elements/2
+% add_policy_elements/2   TODO - return Errors
 add_policy_elements(P:PC,Elements) :- !, atom(P), atom(PC),
-	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements). %add_policy_elements(P,PC,Elements).
+	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements,Errors), Errors == [].
 add_policy_elements(P,Elements) :- atom(P), policy(P,PC),
-	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements). %add_policy_elements(P,PC,Elements).
+	dpl:unpack_policy_elements_with_meta_expansion(P:PC,Elements,Errors), Errors == [].
 
 % add_policy_elements/3
 add_policy_elements(_,_,[]).
