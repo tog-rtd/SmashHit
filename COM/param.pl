@@ -69,9 +69,10 @@ build_version(ngac,'0.4.4', 'enhanced date and time conditions' ).
 build_version(ngac,'0.4.5', 'conditional queries').
 build_version(ngac,'0.4.6', 'pqapi/users who can access an object; conditional query variable substitutions').
 build_version(ngac,'0.4.7', 'resets; early prototype of DPLP' ).
+build_version(ngac,'0.4.8', 'added DPLP and privacy features; runtime monitoring accommodations' ).
 
-build_version(ngac,'0.4.8' /* ongoing development */ ).
-build_current_version_description(ngac,'ongoing development of DPLP and privacy features; runtime monitoring').
+build_version(ngac,'0.4.9' /* ongoing development */ ).
+build_current_version_description(ngac,'refinements to meta-element handling; new ontology smashHitCore202210').
 %
 build_version(priv,'0.1','initial structure setup').
 build_version(priv,'0.1.1','initial development' ).
