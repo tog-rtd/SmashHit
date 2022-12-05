@@ -305,6 +305,8 @@ add_meta_element(P,Element,Status) :- atom(P), policy(P,PC), add_meta_element(P,
 % add_meta_element(P,PC,ME,Status) :-
 % 	true.
 
+/* THE FOLLOWING COMMENTED-OUT PENDING REMOVAL
+
 % Instantiation of a Consent meta-element DPLP
 %
 
@@ -347,6 +349,8 @@ delete_consent(P,_PC,ConsentShort) :-
 	delete_named_policy_elements(ConsentID,P,_),
 	true.
 %delete_consent(_,_,_). % fail silently
+
+COMMENTED-OUT PENDING REMOVAL */
 
 /*
 
@@ -399,6 +403,7 @@ delete_data_item(P:PC, PDI_ID) :-
 
 */
 
+/* THE FOLLOWING COMMENTED-OUT PENDING REMOVAL
 
 % ensure_existence/2 - ensure_existence(P:PC, RequiredElts)
 %
@@ -419,4 +424,5 @@ ensure_existence(P,[E|Es],M) :- !,
 	->	ensure_existence(P,Es,M)
 	;	ensure_existence(P,Es,Ms), M=[E|Ms]
 	).
-	
+
+COMMENTED-OUT PENDING REMOVAL */
