@@ -110,7 +110,7 @@ proc(meta_delete, [ % check policy consistency after deleting meta-elements
 
 proc(meta_add, [
 		reset,
-		reset(policies,dplp3),
+		reset(policy,dplp3),
 		addm(dplp3,[data_controller('dc[x]',[])]),
 		addm(dplp3,[data_processor('dp[y][x]', [], 'dc[x]')]),
 		addm(dplp3,[data_subject('ds[1]',['pdi(1)[1]':'pdc{1}'],[])]),
@@ -131,6 +131,9 @@ proc(meta_add, [
 		delete_consent(cID_567),
 		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
 		access(dplp3, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[2]') )
+	]).
+
+proc(build_consent_ex, [
 	]).
 
 proc(consent_ex, [
@@ -170,7 +173,7 @@ proc(consent_ex, [
 	% 	connector('PM')
 	% 	], dplp).
 		reset,
-		reset(policies,consent_ex),
+		reset(policy,consent_ex),
 		policy_spec(consent_ex),
 		deletem(consent2,[],cID_234),
 		policy_spec(consent_ex),
@@ -195,7 +198,7 @@ proc(vartest3, [policy_spec_v('Policy (a)',X), echo(X),
 				policy_spec_v('Policy (b)',Y), echo(Y), compare_v(X,Y,R), echo(R)]).
 
 proc(meta_demo, [
-	reset(policies,consent2),
+	reset(policy,consent2),
 	setpol(consent2),
 	policy_spec,
 	access(consent2, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
@@ -211,7 +214,7 @@ proc(meta_demo, [
 ]).
 
 proc(consent_me_demo, [
-		reset(policies,consent1),
+		reset(policy,consent1),
 		setpol(consent1),
 		policy_spec,
 		access(consent1, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') ),
@@ -222,6 +225,22 @@ proc(consent_me_demo, [
 		delete_consent(consent1, cID_234),
 		policy_spec,
 		access(consent1, ('dp[y][x]', 'dpo(z)', 'p(v)', 'pdi(1)[1]') )
+	]).
+
+proc(policy_sat_demo, [
+		reset(policy,dplp_sat_test),
+		setpol(dplp_sat_test),
+		echo('Expect: sat unsat sat unsat sat unsat sat sat unsat unsat'),
+		policy_sat(dp3,ds3),
+		policy_sat(dp4,ds4),
+		policy_sat(dp5,ds5),
+		policy_sat(dp6,ds6),
+		policy_sat(dp7,ds7),
+		policy_sat(dp8,ds8),
+		policy_sat(dp9,ds9),
+		policy_sat(dp10,ds10),
+		policy_sat(dp11,ds11),
+		policy_sat(dp12,ds12)
 	]).
 
 proc(guiserver, [

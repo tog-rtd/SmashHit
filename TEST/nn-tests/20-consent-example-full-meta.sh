@@ -8,18 +8,7 @@ curl -s -G "http://127.0.0.1:8001/paapi/resetcond" --data-urlencode "token=admin
 
 Echo 'set up the consent_ex policy root elements'
 curl -s -G "http://127.0.0.1:8001/paapi/loadi" --data-urlencode "policyspec=policy(consent_ex,cpol_ex,[
-    purpose('Purpose'), % these 3 are to satisfy prerequisites of dplp_policy meta-element
-    operation('DataProcessing'),
-    object_attribute('PersonalDataCategory'),
     dplp_policy_base(cpol_ex, testdefs2)
-
-    %Policy_class(cpol_ex),
-    %assign(cpol_ex,'PM'),
-    %user_attribute(data_controllers),
-    %object_attribute(data_subjects),
-    %assign(data_controllers,cpol_ex),
-    %assign(data_subjects,cpol_ex),
-    %connector('PM')
     ], dplp)" --data-urlencode "token=admin_token"
 
 echo 'set current policy to consent_ex'

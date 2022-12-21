@@ -16,7 +16,7 @@ echo 'fetch the policy'
 curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=dplp_min" --data-urlencode "token=admin_token"
 
 echo 'add a Data Controller (DC)'
-curl -s -G "http://127.0.0.1:8001/dplp/add_data_controller" --data-urlencode "policy=dplp_min" --data-urlencode "data_controller=dc[x]" --Data-urlencode "privacy_policy=[]" --data-urlencode "token=admin_token"
+curl -s -G "http://127.0.0.1:8001/dplp/add_data_controller" --data-urlencode "policy=dplp_min" --data-urlencode "data_controller=dc[x]" --data-urlencode "privacy_policy=[]" --data-urlencode "token=admin_token"
 
 echo 'fetch the policy'
 curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=dplp_min" --data-urlencode "token=admin_token"
@@ -61,7 +61,7 @@ echo 'fetch the policy'
 curl -s -G "http://127.0.0.1:8001/paapi/readpol" --data-urlencode "policy=dplp_min" --data-urlencode "token=admin_token"
 
 echo 'query the policy for an access - expect deny'
-curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=dplp_min" --data-urlencode "user=dp[y][x]" --data-urlencode "ar=dpo(z)" --Data-urlencode "purpose=p(v)" --data-urlencode "object=pdi(1)[1]"
+curl -s "http://127.0.0.1:8001/pqapi/access" --data-urlencode "policy=dplp_min" --data-urlencode "user=dp[y][x]" --data-urlencode "ar=dpo(z)" --data-urlencode "purpose=p(v)" --data-urlencode "object=pdi(1)[1]"
 
 echo 'now add back the first consent to the policy'
 curl -s -G "http://127.0.0.1:8001/dplp/add_consent" --data-urlencode "policy=dplp_min" --data-urlencode "consent_id=cID_234" --data-urlencode "data_controller=dc[x]" --data-urlencode "data_processor=dp[y][x]" --data-urlencode "application=dp[y][x]_app1" --data-urlencode "operations=['dp[y][x]_app1']" --data-urlencode "purpose=p(v)" --data-urlencode "data_item=pdi(1)[1]" --data-urlencode "data_subject=ds[1]"  --data-urlencode "data_category=pdc{1}" --data-urlencode "constraint=true"  --data-urlencode "token=admin_token"

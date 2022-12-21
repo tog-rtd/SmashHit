@@ -1239,6 +1239,6 @@ operation(P,Op) :- element(P,operation(Op)) ; element(P,operation(Op,_)).
 
 application(P,App) :- element(P,application(App,_,_)).
 
-data_type(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
+data_type(P,T) :- element(P,data_type(T)) ; element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
 
-object_class(P,T) :- element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).
+object_class(P,T) :- element(P,data_type(T)) ; element(P,data_type(T,_)) ; element(P,object_class(T,_)) ; element(P,object_attribute(T)).

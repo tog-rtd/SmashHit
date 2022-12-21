@@ -67,7 +67,8 @@ pqapi_access(Request) :-
 				cond(CondAtom,[atom,optional(true)]),
 				policy(Policy,[atom,optional(true)])
 				]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   var(Policy)
 	->  param:current_policy(Policy)
@@ -150,7 +151,8 @@ pqapi_caccess(Request) :- % added optional cond to access obsoleting this
 				 cond(CondAtom,[atom]),
 				 policy(Policy,[atom,optional(true)])
 				]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   var(Policy)
 	->  param:current_policy(Policy)
@@ -173,7 +175,8 @@ pqapi_accessm(Request) :-
 	    http_parameters(Request,[access_queries(QueryListAtom,[atom]),
 				 policy(Policy,[atom,optional(true)])
 				]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   var(Policy)
 	->  param:current_policy(Policy)
@@ -241,7 +244,8 @@ pqapi_users(Request) :-
 				     cond(CondAtom,[atom,optional(true)]),
 				     policy(Policy,[atom,optional(true)])
 				    ]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   var(Policy)
 	->  param:current_policy(Policy)
@@ -301,7 +305,8 @@ pqapi_policy_sat(Request) :-
 				    privacy_preference(PrefAtom,[atom]),
 	                definitions(Defs,[atom])
 				    ]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	policy_sat(Defs,PPolicyAtom,PrefAtom).
 pqapi_policy_sat(_) :- audit_gen(policy_query, policy_sat(failure)).
@@ -317,8 +322,9 @@ policy_sat(Defs,PolicyAtom,PrefAtom) :-
 	->  std_resp_BS(success, policy_sat, satisfied)
 	;   std_resp_BS(success, policy_sat, unsatisfied:Tau:UnSatPs)
 	).
-policy_sat(_,_,_) :-
-	std_resp_MS(failure, policy_sat, 'parameter error').
+%policy_sat(_,_,_) :-
+policy_sat(Defs,PolicyAtom,PrefAtom) :-
+	std_resp_MS(failure, policy_sat(Defs,PolicyAtom,PrefAtom), 'parameter error').
 
 is_cond_pred(CP) :- % CP =.. [_C|_Cargs],
 	dpl_conditions:validate_condition_predicate(CP,_). % HERE more to do
@@ -337,7 +343,8 @@ pqapi_getobjinfo(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[object(O,[atom])]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	param:current_policy(P),
 	getobjinfo(P,O),
@@ -359,7 +366,8 @@ pqapi_paramecho(Request) :- % for testing
 	format('Request=~q~n',[Request]),
 	catch(
 	    http_parameters(Request,[],[form_data(Params)]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	std_resp_BS(success,paramecho,Params),
 	audit_gen(policy_query, paramecho(Params,success)), !.
@@ -382,7 +390,8 @@ gpqapi_gaccess(Request) :-
 				 op(Op,[atom]),
 				 dst(Dst,[atom])
 				]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	gaccess_response(Src,Op,Dst), !.
 gpqapi_gaccess(_) :- audit_gen(policy_query, gaccess(failure)).
@@ -426,7 +435,8 @@ gpqapi_ggetinfo(Request) :-
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[]),
-	    _, ( std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	% not yet implemented
 	audit_gen(gpolicy_query, ggetinfo(unimplemented)),

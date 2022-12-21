@@ -39,6 +39,7 @@
 :- http_handler(root(paapi/resetcond), paapi_resetcond, [prefix]).
 :- http_handler(root(paapi/initsession), paapi_initsession, [prefix]).
 :- http_handler(root(paapi/endsession), paapi_endsession, [prefix]).
+:- http_handler(root(paapi/getstatus), paapi_getstatus, [prefix]).
 
 % Global Policy Admin API
 :- http_handler(root(gpaapi), root_apis(gpaapi), []).
@@ -134,8 +135,8 @@ parse_add_delete_arguments(Request, Policy, PElement, Token) :-
 				     policyelement(PE,[atom,optional(true)]),
 				     token(Token,[atom])
 				   ]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   ( ( var(P_E), var(PE) ) ; ( nonvar(P_E), nonvar(PE) ) )
 	->  std_resp_MS(failure,'error parsing request arguments',PElement),
@@ -162,8 +163,8 @@ paapi_addm(Request) :-
 				     policy_elements(EltListAtom,[atom]),
 				     name(Name,[atom,optional(true)]),
 				     token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  addm(Policy,EltListAtom,Name), !
@@ -191,8 +192,8 @@ paapi_deletem(Request) :-
 				    token(Token,[atom])]),
 	        ( var(EltListAtom) ; var(Name) ) % one must be specified but not both
 	    ),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  deletem(Policy,EltListAtom,Name), !
@@ -226,8 +227,8 @@ paapi_getpol(Request) :- % set current policy
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  getpol, !
@@ -245,8 +246,8 @@ paapi_setpol(Request) :- % set current policy
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policy(P,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  setpol(P), !
@@ -268,8 +269,8 @@ paapi_loadpol(Request) :- % load policy from a file
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policyfile(Pfile,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  loadpol(Pfile), !
@@ -291,8 +292,8 @@ paapi_loadpoli(Request) :- % load policy immediate
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policyspec(Pspec,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  loadpoli(Pspec), !
@@ -313,8 +314,8 @@ paapi_unloadpol(Request) :- % unload policy
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policy(P,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  unloadpol(P), !
@@ -340,8 +341,8 @@ paapi_readpol(Request) :-
 				     token(Token,[atom]),
 				     part(Part,[atom,optional(true),default(meta)])
 				    ]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  readpol(P,Part), !
@@ -367,8 +368,8 @@ paapi_combinepol(Request) :-
 				     combined(Pc,[atom]),
 				     token(Token,[atom])
 				    ]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  combinepol(P1,P2,Pc), !
@@ -391,8 +392,8 @@ paapi_loadcondi(Request) :-
 	    http_parameters(Request,[cond_name(Cname,[atom,default(dynamic)]),
 				     cond_elements(EltListAtom,[atom]),
 				     token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  loadcondi(Cname,EltListAtom), !
@@ -418,8 +419,8 @@ paapi_unloadcondi(Request) :-
 				     token(Token,[atom])]),
 		( ground(Cname) ; ground(EltListAtom) ) % at least one must be specified
 	    ),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  unloadcondi(Cname,EltListAtom), !
@@ -443,8 +444,8 @@ paapi_readcond(Request) :-
 	catch(
 	    http_parameters(Request,[cond_name(CN,[atom,default(dynamic)]),
 				     token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  readcond(CN), !
@@ -469,8 +470,8 @@ paapi_reset(Request) :-
 					domain(Dom,[atom,default(conditions)]),
 				    name(Name,[atom,default('dynamic')]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  reset(Dom,Name), !
@@ -508,8 +509,8 @@ paapi_resetcond(Request) :-
 	catch(
 	    http_parameters(Request,[cond_name(CN,[atom,default(all)]),
 				     token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  reset(conditions,CN), !
@@ -523,8 +524,8 @@ paapi_initsession(Request) :-
 	catch(
 	    http_parameters(Request,[session(S,[atom]),
 				    user(U,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  initsession(S,U), !
@@ -547,8 +548,8 @@ paapi_endsession(Request) :-
 	catch(
 	    http_parameters(Request,[session(S,[atom]),
 				     token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  endsession(S), !
@@ -565,6 +566,43 @@ endsession(S) :-
 	    audit_gen(policy_admin, endsession(S,failure))
 	).
 
+% getstatus
+paapi_getstatus(Request) :-
+	std_resp_prefix,
+	catch(
+	    http_parameters(Request,[token(_Token,[atom,optional(true)])]),
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
+	), !,
+	getstatus(_),
+   audit_gen(policy_admin, getstatus(success)), !.
+paapi_getstatus(_) :- audit_gen(policy_query, getstatus(failure)).
+
+getstatus(Status) :-
+	param:build_version(ngac, CurrentVer),
+	param:build_current_version_description(ngac, CurrentDesc),
+	pap:get_current_policy(P),
+	findall(policy(PN:PC, elements(Nelts), meta(Nmeta), assign(Nassign), assoc(Nassoc), cond(Ncond) ),
+		(
+			policy(PN,PC),
+			aggregate_all(count, element(PN:PC,_), Nelts),
+			aggregate_all(count, melement(PN:PC,_,true), Nmeta),
+			aggregate_all(count, assign(PN:PC,_,_), Nassign),
+			aggregate_all(count, associate(PN:PC,_,_,_), Nassoc),
+			aggregate_all(count, cond(PN:PC,_,_), Ncond)
+		),
+		PolicyInfo),
+
+	Status = status(
+		current_version(CurrentVer,CurrentDesc),
+		current_policy(P),
+		PolicyInfo
+	),
+	std_resp_BS(success,getstatus,Status), !.
+getstatus(_) :-
+	    std_resp_MS(failure,'failure getting status',''),
+	    audit_gen(policy_admin, getstatus(failure)).
+
 %
 % GLOBAL POLICY ADMIN
 %
@@ -573,8 +611,8 @@ gpaapi_getgpol(Request) :- % set current policy
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  getgpol, !
@@ -591,8 +629,8 @@ gpaapi_setgpol(Request) :- % set current policy
 	std_resp_prefix,
 	catch(
 	    http_parameters(Request,[policy(GP,[atom]),token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  setgpol(GP), !

@@ -257,8 +257,8 @@ policy_dps(P:Pr,DPS) :-
 %
 % This implementation depends only on a definitions policy but may be a full policy
 
-privacy_sat(Defs, Ppol, Pprf,(DCid,DSid):NonSatPs) :-
-	privacy_policy(Defs, Ppol, DCid, DPOpls),
+privacy_sat(Defs, Ppol, Pprf,(DCDPid,DSid):NonSatPs) :-
+	privacy_policy(Defs, Ppol, DCDPid, DPOpls),
 	privacy_preference(Defs, Pprf, DSid, DPOprs), !,
 	findall( P, ( member(P, DPOpls), \+ exists_pref(Defs, P, DPOprs) ), NonSatPs ).
 
@@ -279,19 +279,40 @@ exists_pref(Defs, P, Prefs) :-
 	!. % only one solution needed for each call
 
 % check/lookup privacy policy/preference
-
-privacy_policy(Policy, DCid, DCid, DPOpls) :- atom(DCid), !, % lookup DC/DP policy for id
-	element(Policy:_, privacy_policy(DCid, DPOpls)).
-privacy_policy(Defs, privacy_policy(DCid,DPOpls), DCid, DPOpls) :- !,
-	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
-privacy_policy(Defs, privacy_policy(DCid,Apps,DPOpls), DCid, DPOpls) :- !,
+%   privacy_policy(+Definitions,+PPolIndicator,-DCDPid,-DPOpolicies)
+%
+privacy_policy(Defs, DCDPid, DCDPid, DPOpls) :- atom(DCDPid), !, % lookup DC/DP policy for id
+   valid_definitions(Defs),
+	element(Defs:_, privacy_policy(DCDPid, DPOpls)),
+   valid_policy_list(Defs,DPOpls).
+privacy_policy(Defs, DPOpls, '-', DPOpls) :- is_list(DPOpls), !,
+   valid_definitions(Defs),
+   valid_policy_list(Defs,DPOpls).
+% in the following 2 clauses the DCDPid is not checked because the query is hypothetical
+privacy_policy(Defs, privacy_policy(DCDPid,DPOpls), DCDPid, DPOpls) :- !,
+   valid_definitions(Defs),
+	% data_controller_or_processor(Defs, DCDPid),
+   valid_policy_list(Defs, DPOpls).
+privacy_policy(Defs, privacy_policy(DCDPid,Apps,DPOpls), DCDPid, DPOpls) :- !,
+   valid_definitions(Defs),
 	valid_app_list(Apps),
-	data_controller(Defs, DCid), valid_policy_list(Defs, DPOpls).
+	% data_controller_or_processor(Defs, DCDPid),
+   valid_policy_list(Defs, DPOpls).
 
-privacy_preference(Policy, DSid, DSid, DPOprs) :- atom(DSid), !, % lookup DS pref for id
-	element(Policy:_, privacy_preference(DSid, DPOprs)).
+privacy_preference(Defs, DSid, DSid, DPOprs) :- atom(DSid), !, % lookup DS pref for id
+   valid_definitions(Defs),
+	element(Defs:_, privacy_preference(DSid, DPOprs)),
+   valid_preference_list(Defs,DPOprs).
+privacy_preference(Defs, DPOprs, '-', DPOprs) :- is_list(DPOprs), !,
+   valid_definitions(Defs),
+   valid_preference_list(Defs,DPOprs).
+% in the following clause the DSid is not checked because the query is hypothetical
 privacy_preference(Defs, privacy_preference(DSid,DPOprs), DSid, DPOprs) :- !,
-	data_subject(Defs, DSid), valid_preference_list(Defs, DPOprs).
+   valid_definitions(Defs),
+	% data_subject(Defs, DSid),
+   valid_preference_list(Defs, DPOprs).
+
+valid_definitions(Defs) :- policy(Defs,_). % possibly could do more checking
 
 valid_policy_list(Defs, PLs) :- is_list(PLs),
 	forall( member(PL,PLs),
@@ -317,8 +338,8 @@ valid_app_list(Apps) :- is_list(Apps),
 data_subject(Defs, DS) :- atom(DS), % Defs:subjects
 	object_attribute(Defs:_, DS).
 
-data_controller(Defs, DC) :- atom(DC), % Defs:controllers
-	user_attribute(Defs:_, DC).
+data_controller_or_processor(Defs, DC) :- atom(DC), % Defs:controllers
+	user_uattribute(Defs:_, DC).
 
 % from module dpl:
 %

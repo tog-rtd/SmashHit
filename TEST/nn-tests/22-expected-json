@@ -19,7 +19,7 @@ fetch the policy
 {
   "respStatus":"success",
   "respMessage":"read policy",
-  "respBody":"policy(dplp_min, pc, [\n  purpose(p12),\n  purpose(p112),\n  purpose(p111),\n  purpose(p11),\n  purpose(p1),\n  purpose(p221),\n  purpose(p22),\n  purpose(p21),\n  purpose(p2),\n  purpose(all_purposes),\n  operation(dpo12),\n  operation(dpo11),\n  operation(dpo1),\n  operation(dpo22),\n  operation(dpo21),\n  operation(dpo2),\n  operation(all_operations),\n  user_attribute(dc1),\n  user_attribute(dc2),\n  object_attribute(ds1),\n  assign(dpo1,all_operations),\n  assign(dpo11,dpo1),\n  assign(dpo12,dpo1),\n  assign(dpo2,all_operations),\n  assign(dpo21,dpo2),\n  assign(dpo22,dpo2),\n  assign(p1,all_purposes),\n  assign(p11,p1),\n  assign(p12,p1),\n  assign(p111,p11),\n  assign(p112,p11),\n  assign(p2,all_purposes),\n  assign(p21,p2),\n  assign(p22,p2),\n  assign(p221,p22),\n  dplp_policy_base(pc,testdefs),\n  connector('PM')\n], dplp).\n"
+  "respBody":"policy(dplp_min, pc, [\n  purpose(p12),\n  purpose(p112),\n  purpose(p111),\n  purpose(p11),\n  purpose(p1),\n  purpose(p221),\n  purpose(p22),\n  purpose(p21),\n  purpose(p2),\n  purpose('Purpose'),\n  data_type(dt1),\n  data_type(dt2),\n  data_type('Personal Data Category'),\n  operation(dpo12),\n  operation(dpo11),\n  operation(dpo1),\n  operation(dpo22),\n  operation(dpo21),\n  operation(dpo2),\n  operation('Processing'),\n  user_attribute(data_controllers),\n  object_attribute(data_subjects),\n  assign(dt1,'Personal Data Category'),\n  assign(dt2,'Personal Data Category'),\n  assign(dpo1,'Processing'),\n  assign(dpo11,dpo1),\n  assign(dpo12,dpo1),\n  assign(dpo2,'Processing'),\n  assign(dpo21,dpo2),\n  assign(dpo22,dpo2),\n  assign(p1,'Purpose'),\n  assign(p11,p1),\n  assign(p12,p1),\n  assign(p111,p11),\n  assign(p112,p11),\n  assign(p2,'Purpose'),\n  assign(p21,p2),\n  assign(p22,p2),\n  assign(p221,p22),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('Processing',pc),\n  assign('Personal Data Category',pc),\n  dplp_policy_base(pc,testdefs),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
 }
 policy_sat tests, expect: 1 sat 2 unsat 3 sat 4 unsat 5 sat 6 unsat 7 sat 8 sat 9 unsat 10 unsat
 case 1
@@ -82,54 +82,17 @@ case 10
   "respMessage":"policy_sat",
   "respBody":"unsatisfied:(dc1,ds1):[(p112,dpo21,dt1),(p111,dpo12,dt1)]"
 }
-reset policy and re-build scenario using meta-elements - dplp_min:pc + testdefs1, add policy/preference to each DC, DP and DS
+tun the test cases using the policy dplp_sat_test built from meta-elements
+{
+  "respStatus":"success",
+  "respMessage":"policy set",
+  "respBody":"dplp_sat_test"
+}
 {
   "respStatus":"success",
   "respMessage":"reset policy",
-  "respBody":"dplp_min"
+  "respBody":"dplp_sat_test"
 }
-{
-  "respStatus":"success",
-  "respMessage":"policy base added",
-  "respBody":"dplp_policy_base(pc,testdefs1)"
-}
-{
-  "respStatus":"success",
-  "respMessage":"data controller added",
-  "respBody":"data_controller(dc1,[])"
-}
-{
-  "respStatus":"success",
-  "respMessage":"data processor added",
-  "respBody":"data_processor(dp1,[(p112,dpo1,dt1),(p112,dpo21,dt1)],dc1)"
-}
-{
-  "respStatus":"success",
-  "respMessage":"data processor added",
-  "respBody":"data_processor(dp2,[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)],dc1)"
-}
-{
-  "respStatus":"success",
-  "respMessage":"data subject added",
-  "respBody":"data_subject(ds1,[di1:dt1,di2:dt2],[(p11,dpo2,di1),(p112,dpo1,di1)])"
-}
-{
-  "respStatus":"success",
-  "respMessage":"data subject added",
-  "respBody":"data_subject(ds2,[di3:dt1,di4:dt2],[(p11,dpo2,di3),(p112,dpo1,di3)])"
-}
-{
-  "respStatus":"success",
-  "respMessage":"application added",
-  "respBody":"application(app1,[dpo21,dpo22],dp1)"
-}
-fetch the policy
-{
-  "respStatus":"success",
-  "respMessage":"read policy",
-  "respBody":"policy(dplp_min, pc, [\n  purpose(p12),\n  purpose(p112),\n  purpose(p111),\n  purpose(p11),\n  purpose(p1),\n  purpose(p221),\n  purpose(p22),\n  purpose(p21),\n  purpose(p2),\n  purpose('Purpose'),\n  operation(dpo12),\n  operation(dpo11),\n  operation(dpo1),\n  operation(dpo22),\n  operation(dpo21),\n  operation(dpo2),\n  operation('DataProcessing'),\n  opset(app1,[dpo21,dpo22]),\n  user(dp1),\n  user(dp2),\n  user_attribute(data_controllers),\n  user_attribute(dc1),\n  object(di1),\n  object(di2),\n  object(di3),\n  object(di4),\n  object_attribute(data_subjects),\n  object_attribute('PersonalDataCategory'),\n  object_attribute(dt1),\n  object_attribute(dt2),\n  object_attribute(ds1),\n  object_attribute(ds2),\n  assign(dt1,'PersonalDataCategory'),\n  assign(dt2,'PersonalDataCategory'),\n  assign(dpo1,'DataProcessing'),\n  assign(dpo11,dpo1),\n  assign(dpo12,dpo1),\n  assign(dpo2,'DataProcessing'),\n  assign(dpo21,dpo2),\n  assign(dpo22,dpo2),\n  assign(p1,'Purpose'),\n  assign(p11,p1),\n  assign(p12,p1),\n  assign(p111,p11),\n  assign(p112,p11),\n  assign(p2,'Purpose'),\n  assign(p21,p2),\n  assign(p22,p2),\n  assign(p221,p22),\n  assign(pc,'PM'),\n  assign(data_controllers,pc),\n  assign(data_subjects,pc),\n  assign('Purpose',pc),\n  assign('DataProcessing',pc),\n  assign('PersonalDataCategory',pc),\n  assign(dc1,data_controllers),\n  assign(dp1,dc1),\n  assign(dp2,dc1),\n  assign(ds1,data_subjects),\n  assign(di1,ds1),\n  assign(di1,dt1),\n  assign(di2,ds1),\n  assign(di2,dt2),\n  assign(ds2,data_subjects),\n  assign(di3,ds2),\n  assign(di3,dt1),\n  assign(di4,ds2),\n  assign(di4,dt2),\n  assign(app1,dp1),\n  privacy_policy(dc1,[]),\n  privacy_policy(dp1,[(p112,dpo1,dt1),(p112,dpo21,dt1)]),\n  privacy_policy(dp2,[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)]),\n  privacy_preference(ds1,[(p11,dpo2,di1),(p112,dpo1,di1)]),\n  privacy_preference(ds2,[(p11,dpo2,di3),(p112,dpo1,di3)]),\n  dplp_policy_base(pc,testdefs1),\n  data_controller(dc1,[]),\n  data_processor(dp1,[(p112,dpo1,dt1),(p112,dpo21,dt1)],dc1),\n  data_processor(dp2,[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)],dc1),\n  application(app1,[dpo21,dpo22],dp1),\n  data_subject(ds1,[di1:dt1,di2:dt2],[(p11,dpo2,di1),(p112,dpo1,di1)]),\n  data_subject(ds2,[di3:dt1,di4:dt2],[(p11,dpo2,di3),(p112,dpo1,di3)]),\n  data_item(di1,dt1,ds1),\n  data_item(di2,dt2,ds1),\n  data_item(di3,dt1,ds2),\n  data_item(di4,dt2,ds2),\n  policy_class(pc),\n  connector('PM')\n], dplp).\n"
-}
-re-run policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat unsat
 {
   "respStatus":"success",
   "respMessage":"policy_sat",
@@ -138,5 +101,45 @@ re-run policy_sat tests, expect: sat unsat sat unsat sat unsat sat sat unsat uns
 {
   "respStatus":"success",
   "respMessage":"policy_sat",
-  "respBody":"unsatisfied:(dp2,ds2):[(p111,dpo12,dt1)]"
+  "respBody":"unsatisfied:(dp4,ds4):[(p1,dpo22,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dp6,ds6):[(p112,dpo1,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dp8,ds8):[(p1,dpo22,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"satisfied"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dp11,ds11):[(p111,dpo12,dt1)]"
+}
+{
+  "respStatus":"success",
+  "respMessage":"policy_sat",
+  "respBody":"unsatisfied:(dp12,ds12):[(p112,dpo21,dt1),(p111,dpo12,dt1)]"
 }

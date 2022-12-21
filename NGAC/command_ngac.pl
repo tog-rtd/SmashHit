@@ -52,6 +52,7 @@ syntax(dpl_reinit,                                  ngac).
 syntax(dps(policy),                                                               obsolete).
 syntax(export_commands(imp_file),                                                 obsolete).
 syntax(getpol,				            ngac).
+syntax(getstatus,                    ngac).
 syntax(import(file_spec),			    ngac).
 syntax(import_policy(policy_file),		    ngac).
 syntax(los(policy),                                                               obsolete).
@@ -156,9 +157,12 @@ semantics(policy_graph(P)) :- !, atom(P).
 semantics(policy_graph(P,F)) :- !, atom(P), atom(F).
 semantics(policy_graph(P,F,G)) :- !, atom(P), atom(F), (G==pdf;G==png).
 semantics(policy_graph(P,F,G,R)) :- !, atom(P), atom(F), (G==pdf;G==png), integer(R).
+% semantics(policy_sat(PP,PR)) :- !,
+% 	(atom(PP) ; PP=privacy_policy(DP,DPEs),atom(DP),is_list(DPEs)),
+% 	(atom(PR) ; PR=privacy_preference(DS,DSEs),atom(DS),is_list(DSEs)).
 semantics(policy_sat(PP,PR)) :- !,
-	(atom(PP) ; PP=privacy_policy(DP,DPEs),atom(DP),is_list(DPEs)),
-	(atom(PR) ; PR=privacy_preference(DS,DSEs),atom(DS),is_list(DSEs)).
+	(atom(PP) ; is_list(PP) ; (PP=privacy_policy(DP,PPL), atom(DP), is_list(PPL))),
+	(atom(PR) ; is_list(PR) ; (PR=privacy_preference(DS,PRL), atom(DS), is_list(PRL))).
 semantics(policy_spec(P)) :- !, (atom(P) ; compound_name_arity(P,policy,4)).
 semantics(policy_spec(P,F)) :- !, atom(P), atom(F).
 semantics(policy_spec(P,F,S)) :- !, atom(P), atom(F), S == silent.
@@ -245,6 +249,8 @@ help(export_commands, '"export" a policy in PM commands').
 help(getpol,    'Show the name of the current policy.').
 help(getpol_v,  'Return the name of the current policy in the variable given as Arg1.').
 
+help(getstatus, 'Show the server and policy information status.').
+
 help(import,    'import a specified policy policy(file), pm(file), erp(file).').
 
 help(import_policy, '"import" a declarative policy from a file.').
@@ -317,7 +323,9 @@ do(access(P,(U,M,O),C)) :- !,
 	->  writeln(grant)
 	;   writeln(deny)
 	).
+do(add(Elts)) :- is_list(Elts), !, do(addm(Elts)).
 do(add(Elt)) :- !, param:current_policy(P), pap:add_named_policy_elements(_,P,[Elt]).
+do(add(P,Elts)) :- is_list(Elts), !, do(addm(P,Elts)).
 do(add(P,Elt)) :- !, pap:add_named_policy_elements(_,P,[Elt]).
 do(add_dplp_policy_base(PC,Defs)) :- !, param:current_policy(P),
 	do(add_dplp_policy_base(P,PC,Defs)).
@@ -348,6 +356,7 @@ do(add_consent(ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)
 	do(add_consent(P,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)).
 do(add_consent(P,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint)) :- !,
 	paapi:add_consent(P,_,ConsentID,DC,DP,App,DPOs,Purpose,DS,PDitem,PDcategory,Constraint).
+doo(addm(Elts)) :- !, param:current_policy(P), pap:add_named_policy_elements(_,P,Elts).
 do(addm(P,Elts)) :- !, pap:add_named_policy_elements(_,P,Elts).
 do(addm(P,Elts,Name)) :- !, pap:add_named_policy_elements(Name,P,Elts).
 do(aoa(U)) :- !, param:current_policy(P), dpl:policy(P,PC),
@@ -390,6 +399,22 @@ do(export_commands(PolicyName,CmdFile)) :-
 	dpl:save_as_cmds(PolicyName,CmdFile).
 do(getpol) :- !, param:current_policy(P), writeq(P), nl.
 do(getpol_v(P)) :- !, param:current_policy(P).
+do(getstatus) :- !, paapi:getstatus(Status),
+        Status = status(
+                current_version(CurrentVer,CurrentDesc),
+                current_policy(CurrP),
+                PolicyInfo
+        ),
+	format('Version: ~a, ~q~n',[CurrentVer,CurrentDesc]),
+	format('Current policy: ~q~n',CurrP),
+	forall(member(P,PolicyInfo), 
+		( P = policy(PN:PC,elements(Nelt),meta(Nmeta),assign(Nassign),assoc(Nassoc),cond(Ncond)),
+		  format('~q:~q  elts:~d   meta:~d  assigns:~d  assocs:~d  cond:~d',
+			[PN,PC,Nelt,Nmeta, Nassign,Nassoc,Ncond]),
+		  nl
+		)
+	),
+	true.
 do(import(pm(PM))) :- do(import_pm(PM)).
 do(import(policy(P))) :- do(import_policy(P)).
 do(import_pm(PM)) :- % import a PM imperative command file
@@ -453,7 +478,12 @@ do(policy_graph(P,Fileroot,Gfiletype,Res)) :- !, dpl:policy(P,_), % must specify
 	).
 do(policy_sat(PPol,PPref)) :- !, do(policy_sat(current_policy,PPol,PPref)).
 do(policy_sat(current_policy,PPol,PPref)) :- !, param:current_policy(P), do(policy_sat(P,PPol,PPref)).
-do(policy_sat(P,PPol,PPref)) :- !, pdp:privacy_sat(P,PPol,PPref,NonSat), format('Non-satisfying: ~q~n',[NonSat]).
+do(policy_sat(P,PPol,PPref)) :- !,
+	pdp:privacy_sat(P,PPol,PPref,NonSat),
+	(	NonSat = (_,_):[]
+	->	writeln('Satisfied')
+	;	format('Non-satisfying: ~q~n',[NonSat])
+	).
 do(policy_spec) :- !, do(policy_spec(current_policy)).
 do(policy_spec(current_policy)) :- !, param:current_policy(P), do(policy_spec(P,no_file_output,false)).
 do(policy_spec(current_policy,Fileroot)) :- !, param:current_policy(P), do(policy_spec(P,Fileroot,false)).

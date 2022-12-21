@@ -17,21 +17,90 @@
 
 % Do not modify the following policies down to the % test policies marker
 
+policy(dplp_sat_test, pc, [
+	purpose(p12),
+	purpose(p112),
+	purpose(p111),
+	purpose(p11),
+	purpose(p1),
+	purpose(p221),
+	purpose(p22),
+	purpose(p21),
+	purpose(p2),
+	purpose('Purpose'),
+	operation(dpo12),
+	operation(dpo11),
+	operation(dpo1),
+	operation(dpo22),
+	operation(dpo21),
+	operation(dpo2),
+	operation('Processing'),
+	user_attribute(data_controllers),
+	object_attribute(data_subjects),
+	data_type('Personal Data Category'),
+	data_type(dt1),
+	data_type(dt2),
+	assign(dt1,'Personal Data Category'),
+	assign(dt2,'Personal Data Category'),
+	assign(dpo1,'Processing'),
+	assign(dpo11,dpo1),
+	assign(dpo12,dpo1),
+	assign(dpo2,'Processing'),
+	assign(dpo21,dpo2),
+	assign(dpo22,dpo2),
+	assign(p1,'Purpose'),
+	assign(p11,p1),
+	assign(p12,p1),
+	assign(p111,p11),
+	assign(p112,p11),
+	assign(p2,'Purpose'),
+	assign(p21,p2),
+	assign(p22,p2),
+	assign(p221,p22),
+	assign(data_subjects,pc),
+	assign(data_controllers,pc),
+	data_controller(dc1,[]),
+  data_processor(dp3,[(p112,dpo22,dt1)],dc1),
+  data_processor(dp4,[(p1,dpo22,dt1)],dc1),
+  data_processor(dp5,[(p112,dpo2,dt1)],dc1),
+  data_processor(dp6,[(p112,dpo1,dt1)],dc1),
+  data_processor(dp7,[(p11,dpo22,dt1),(p112,dpo21,dt1)],dc1),
+  data_processor(dp8,[(p1,dpo22,dt1),(p112,dpo21,dt1)],dc1),
+  data_processor(dp9,[(p1,dpo22,dt1),(p112,dpo21,dt1)],dc1),
+  data_processor(dp10,[(p112,dpo1,dt1),(p112,dpo21,dt1)],dc1),
+  data_processor(dp11,[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)],dc1),
+  data_processor(dp12,[(p112,dpo1,dt1),(p112,dpo21,dt1),(p111,dpo12,dt1)],dc1),
+  data_subject(ds3,[di3_1:dt1],[(p11,dpo2,di3_1)]),
+  data_subject(ds4,[di4_1:dt1],[(p11,dpo2,di4_1)]),
+  data_subject(ds5,[di5_1:dt1],[(p11,dpo2,di5_1)]),
+  data_subject(ds6,[di6_1:dt1],[(p11,dpo2,di6_1)]),
+  data_subject(ds7,[di7_1:dt1],[(p1,dpo2,di7_1)]),
+  data_subject(ds8,[di8_1:dt1],[(p11,dpo2,di8_1)]),
+  data_subject(ds9,[di9_1:dt1],[(p1,dpo2,di9_1),(p1,dpo2,di9_1)]),
+  data_subject(ds10,[di10_1:dt1],[(p11,dpo2,di10_1),(p112,dpo1,di10_1)]),
+  data_subject(ds11,[di11_1:dt1],[(p11,dpo2,di11_1),(p112,dpo1,di11_1)]),
+  data_subject(ds12,[di12_1:dt1],[(p11,dpo22,di12_1),(p112,dpo1,di12_1)]),
+  application(app1,[dpo21,dpo22],dp1),
+  consent(cID_01,dc1,dp1,none,[dpo1],p1,ds1,di1_1,dt1,true),
+	policy_class(pc),
+	assign(pc,'PM'),
+	connector('PM')], dplp).
+
 policy(testdefs2, testdefs2, [
-  object_attribute('pdc{1}'), % data_type('pdc{1}'),
-  object_attribute('pdc{2}'), % data_type('pdc{2}'),
-  object_attribute('PersonalDataCategory'), % data_type('PersonalDataCategory'),
+  data_type('pdc{1}'), % object_attribute('pdc{1}'), 
+  data_type('pdc{2}'), % object_attribute('pdc{2}'), 
+  data_type('Personal Data Category'), %  object_attribute('PersonalDataCategory'),
   
-  assign('pdc{1}','PersonalDataCategory'),
-  assign('pdc{2}','PersonalDataCategory'),
+  assign('pdc{1}','Personal Data Category'),
+  assign('pdc{2}','Personal Data Category'),
 
   operation('dpo(u)'),
   operation('dpo(w)'),
   operation('dpo(z)'),
-  operation('DataProcessing'),
-  assign('dpo(u)','DataProcessing'),
-  assign('dpo(w)','DataProcessing'),
-  assign('dpo(z)','DataProcessing'),
+  operation('Processing'),
+  assign('dpo(u)','Processing'),
+  assign('dpo(w)','Processing'),
+  assign('dpo(z)','Processing'),
 
   purpose('p(v)'),
   purpose('p(r)'),
@@ -46,13 +115,13 @@ policy(testdefs2, testdefs2, [
 policy(testdefs1, testdefs1, [
   user_attribute(data_controllers),
   object_attribute(data_subjects),
-  object_attribute('PersonalDataCategory'), % data_type('PersonalDataCategory'),
+  data_type('Personal Data Category'),
 
-  object_attribute(dt1), data_type(dt1,[]),
-  object_attribute(dt2), data_type(dt2,[]),
+  data_type(dt1),
+  data_type(dt2),
 
-  assign(dt1,'PersonalDataCategory'),
-  assign(dt2,'PersonalDataCategory'),
+  assign(dt1,'Personal Data Category'),
+  assign(dt2,'Personal Data Category'),
 
   % object(di1,dt1), % data item
   % object(di2,dt2),
@@ -75,12 +144,12 @@ policy(testdefs1, testdefs1, [
   operation(dpo22),
   operation(dpo21),
   operation(dpo2),
-  operation('DataProcessing'),
+  operation('Processing'),
 
-  assign(dpo1,'DataProcessing'),
+  assign(dpo1,'Processing'),
   assign(dpo11,dpo1),
   assign(dpo12,dpo1),
-  assign(dpo2,'DataProcessing'),
+  assign(dpo2,'Processing'),
   assign(dpo21,dpo2),
   assign(dpo22,dpo2),
 
@@ -172,8 +241,11 @@ policy(testdefs1a, testdefs1a, [
   ], dplp).
 
 policy(testdefs, testdefs, [
-  data_type(dt1,[]),
-  data_type(dt2,[]),
+  data_type(dt1),
+  data_type(dt2),
+  data_type('Personal Data Category'),
+  assign(dt1,'Personal Data Category'),
+  assign(dt2,'Personal Data Category'),
 
   object(di1,dt1), % data item
   object(di2,dt2),
@@ -183,9 +255,9 @@ policy(testdefs, testdefs, [
   % assign(di2,dt2),
   % assign(di3,dt2),
 
-  object_attribute(ds1), % data subject
-  user_attribute(dc1), % data controller
-  user_attribute(dc2), % data controller
+  %object_attribute(ds1), % data subject
+  %user_attribute(dc1), % data controller
+  %user_attribute(dc2), % data controller
 
   operation(dpo12),
   operation(dpo11),
@@ -193,12 +265,12 @@ policy(testdefs, testdefs, [
   operation(dpo22),
   operation(dpo21),
   operation(dpo2),
-  operation(all_operations),
+  operation('Processing'),
 
-  assign(dpo1,all_operations),
+  assign(dpo1,'Processing'),
   assign(dpo11,dpo1),
   assign(dpo12,dpo1),
-  assign(dpo2,all_operations),
+  assign(dpo2,'Processing'),
   assign(dpo21,dpo2),
   assign(dpo22,dpo2),
 
@@ -211,14 +283,14 @@ policy(testdefs, testdefs, [
   purpose(p22),
   purpose(p21),
   purpose(p2),
-  purpose(all_purposes),
+  purpose('Purpose'),
 
-  assign(p1,all_purposes),
+  assign(p1,'Purpose'),
   assign(p11,p1),
   assign(p12,p1),
   assign(p111,p11),
   assign(p112,p11),
-  assign(p2,all_purposes),
+  assign(p2,'Purpose'),
   assign(p21,p2),
   assign(p22,p2),
   assign(p221,p22)
@@ -336,7 +408,8 @@ policy(consent1,cpol1,[
   assign('ds[1]',data_subjects),
 
   object('pdi(1)[1]'),
-  object_attribute('pdc{1}'),
+  %object_attribute('pdc{1}'),
+  data_type('pdc{1}'),
   assign('pdc{1}',cpol1),
   assign('pdi(1)[1]','pdc{1}'),
   assign('pdi(1)[1]','ds[1]'),

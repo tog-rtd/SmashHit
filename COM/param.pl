@@ -70,9 +70,10 @@ build_version(ngac,'0.4.5', 'conditional queries').
 build_version(ngac,'0.4.6', 'pqapi/users who can access an object; conditional query variable substitutions').
 build_version(ngac,'0.4.7', 'resets; early prototype of DPLP' ).
 build_version(ngac,'0.4.8', 'added DPLP and privacy features; runtime monitoring accommodations' ).
+build_version(ngac,'0.4.9', 'improved pqapi/paapi/dplp error reporting; smashHitCore202210 ontology' ).
 
-build_version(ngac,'0.4.9' /* ongoing development */ ).
-build_current_version_description(ngac,'refinements to meta-element handling; new ontology smashHitCore202210').
+build_version(ngac,'0.4.10' /* ongoing development */ ).
+build_current_version_description(ngac,'report missing params; new getstatus command/API; enhanced policy_sat; regression tests').
 %
 build_version(priv,'0.1','initial structure setup').
 build_version(priv,'0.1.1','initial development' ).

@@ -79,7 +79,7 @@ echo 'add a personal data item (PDI)'
 curl -s -G "http://127.0.0.1:8001/paapi/addm" --data-urlencode "policy=consent_ex" --data-urlencode "policy_elements=[
     object('pdi_(1)[1]'),
 
-    object_attribute('pdc_{1}'), 
+    data_type('pdc_{1}'), 
     assign('pdc_{1}',cpol_ex),
 
     assign('pdi_(1)[1]', 'ds_[1]'),

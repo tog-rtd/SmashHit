@@ -41,8 +41,8 @@ dplp_add_dplp_policy_base(Request):-
 					policy_class(PolicyClass,[atom]),
 					definitions(Definitions,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_dplp_policy_base(Policy, PolicyClass, Definitions), !
@@ -74,8 +74,8 @@ dplp_add_data_controller(Request) :-
 					data_controller(DC_ID,[atom]),
 					privacy_policy(DC_POLICYatom,[atom,default('[]')]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_data_controller(Policy, DC_ID, DC_POLICYatom), !
@@ -110,8 +110,8 @@ dplp_delete_data_controller(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					data_controller(DC_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  delete_data_controller(Policy, DC_ID), !
@@ -142,8 +142,8 @@ dplp_add_data_processor(Request) :-
 					privacy_policy(DP_POLICYatom,[atom]),
 					data_controller(DC_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_data_processor(Policy, DP_ID, DP_POLICYatom, DC_ID), !
@@ -178,8 +178,8 @@ dplp_delete_data_processor(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					data_processor(DP_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  delete_data_processor(Policy, DP_ID), !
@@ -210,8 +210,8 @@ dplp_add_application(Request) :-
 					operations(DPOatom,[atom]),
 					data_processor(DP_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_application(Policy, APP_ID, DPOatom, DP_ID), !
@@ -246,8 +246,8 @@ dplp_delete_application(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					application(APP_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  delete_application(Policy, APP_ID), !
@@ -278,8 +278,8 @@ dplp_add_data_subject(Request) :-
 					data_items(DS_PDIatom,[atom]),
 					privacy_preference(DS_PREFERENCEatom,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_data_subject(Policy, DS_ID, DS_PDIatom, DS_PREFERENCEatom), !
@@ -318,8 +318,8 @@ dplp_delete_data_subject(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					data_subject(DS_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->	delete_data_subject(Policy, DS_ID), !
@@ -350,8 +350,8 @@ dplp_add_data_item(Request) :-
 					data_category(PDC_ID,[atom]),
 					data_subject(DS_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  add_data_item(Policy, PDI_ID, PDC_ID, DS_ID), !
@@ -382,8 +382,8 @@ dplp_delete_data_item(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					data_item(PDI_ID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  delete_data_item(Policy, PDI_ID), !
@@ -420,11 +420,11 @@ dplp_add_consent(Request) :-
 					data_subject(DS,[atom,optional(true)]),
 					data_item(PDitem,[atom,optional(true)]),
 					data_category(PDcategory,[atom,optional(true)]),
-					% constraint(ConstraintAtom,[atom,default(true)]),
-					constraint(ConstraintAtom,[atom,optional(true)]),
+					constraint(ConstraintAtom,[atom,default(true)]),
+					%constraint(ConstraintAtom,[atom,optional(true)]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->	add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDcategory,ConstraintAtom), !
@@ -439,8 +439,12 @@ add_consent(Policy,ConsentAtom,ConsentID,DC,DP,App,DPOAtom,Purpose,DS,PDitem,PDc
 	),
 	policy(Policy,PC,dplp),
 	(	var(ConsentAtom)
-	->	atom(ConsentID),atom(DC),atom(DP),atom(App),ground(DPOAtom),atom(Purpose),
+	->	atom(ConsentID),atom(DC),atom(DP),/*atom(App),*/ground(DPOAtom),atom(Purpose),
 		atom(DS),atom(PDitem),atom(PDcategory),ground(ConstraintAtom),
+		(	var(App) % will be ignored for now
+		->	App=none
+		;	true
+		),
 		(	atom(DPOAtom)
 		->	read_term_from_atom(DPOAtom,DPOs,[])
 		;	DPOs = DPOAtom
@@ -469,8 +473,8 @@ dplp_delete_consent(Request) :-
 					policy(Policy,[atom,optional(true)]),
 					consent_id(ConsentID,[atom]),
 				    token(Token,[atom])]),
-	    _,
-	    (	std_resp_MS(failure,'missing parameter',''), !, fail )
+	    Err,
+	    (	( Err = error(E,_) ; Err = E ), std_resp_MS(failure,'missing parameter',E), !, fail )
 	), !,
 	(   authenticate(Token)
 	->  delete_consent(Policy,ConsentID), !
