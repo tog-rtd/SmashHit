@@ -1151,6 +1151,10 @@ policy(priv2,priv_pol2,[
 
 % smashHit Core Ontology 202210
 policy(smashHitCore202210, smashHitCore202210, [
+  % user_attribute('Role'),  % add Roles in future version of smashHitCore
+  % user_attribute('Data Controller'), assign('Data Controller','Role'),
+  % user_attribute('Data Processor'), assign('Data Processor','Role'),
+  % object_attribute('Data Subject'), assign('Data Subject','Role'), % check this will not be a problem
   data_type('Information Entity'),
 
     data_type('Personal Data Category'), assign('Personal Data Category','Information Entity'),

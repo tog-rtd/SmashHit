@@ -260,10 +260,9 @@ elt_member(E,[_|Elts]) :- elt_member(E,Elts).
 %
 expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, ContextElts, PolicyElts ) :- !,
 	 ContextElts = [
+		% user_attribute('Role'), % for future version of smashHitCore
         purpose('Purpose'),
         operation('Processing'),
-        %operation('DataProcessing'),
-        %object_attribute('PersonalDataCategory')
 		data_type('Personal Data Category')
     ],
 	 CoreElts1 = [
@@ -274,9 +273,8 @@ expand_meta_element(_, dplp_policy_base(PolicyClass, GlobalDefs), CoreElts, Cont
         object_attribute(data_subjects),
         assign(data_controllers,PolicyClass),
         assign(data_subjects,PolicyClass),
+		% assign('Role',PolicyClass), % for future version of smashHitCore
         assign('Purpose',PolicyClass),
-        %assign('DataProcessing',PolicyClass),
-        %assign('PersonalDataCategory',PolicyClass)
         assign('Processing',PolicyClass),
         assign('Personal Data Category',PolicyClass)
 	],
